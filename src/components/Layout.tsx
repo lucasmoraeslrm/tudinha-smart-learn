@@ -10,6 +10,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import collegeImage from '@/assets/colegio-almeida-garrett.png';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -45,12 +46,16 @@ const Layout: React.FC<LayoutProps> = ({
         {/* Logo/Header */}
         <div className="p-6 border-b">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center">
-              <MessageCircle className="w-6 h-6 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden">
+              <img 
+                src={collegeImage} 
+                alt="Colégio Almeida Garrett" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
-              <h2 className="font-bold text-foreground">Tudinha</h2>
-              <p className="text-sm text-muted-foreground">IA Tutora</p>
+              <h2 className="font-bold text-foreground">Colégio Almeida Garrett</h2>
+              <p className="text-sm text-muted-foreground">Plataforma de Estudos</p>
             </div>
           </div>
         </div>
@@ -110,10 +115,14 @@ const Layout: React.FC<LayoutProps> = ({
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b shadow-soft">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img 
+                src={collegeImage} 
+                alt="Colégio Almeida Garrett" 
+                className="w-full h-full object-cover"
+              />
             </div>
-            <h2 className="font-bold text-foreground">Tudinha</h2>
+            <h2 className="font-bold text-foreground">Colégio A.G.</h2>
           </div>
           
           <Button 

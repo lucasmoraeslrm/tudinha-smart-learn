@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { BookOpen, Sparkles, Target } from 'lucide-react';
-import mascotImage from '@/assets/tudinha-mascot.png';
+import collegeImage from '@/assets/colegio-almeida-garrett.png';
 
 interface WelcomeScreenProps {
   onUserSetup: (name: string) => void;
@@ -27,8 +27,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onUserSetup }) => {
           <div className="flex justify-center">
             <div className="w-32 h-32 rounded-full bg-gradient-primary p-4 animate-float">
               <img 
-                src={mascotImage} 
-                alt="Tudinha - IA Tutora" 
+                src={collegeImage} 
+                alt="Colégio Almeida Garrett" 
                 className="w-full h-full object-contain"
               />
             </div>
@@ -38,10 +38,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onUserSetup }) => {
           <div className="space-y-3">
             <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-2">
               <Sparkles className="w-8 h-8 text-primary" />
-              Tudinha
+              Colégio Almeida Garrett
             </h1>
             <p className="text-lg text-muted-foreground">
-              Sua IA tutora personalizada
+              Sua plataforma de estudos personalizada
             </p>
             <p className="text-sm text-muted-foreground">
               Vou te ajudar com seus estudos, exercícios e a alcançar seus objetivos acadêmicos!
@@ -92,7 +92,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onUserSetup }) => {
               className="w-full h-12"
               disabled={!name.trim()}
             >
-              Começar a estudar com a Tudinha! 🚀
+              Começar a estudar! 🚀
             </Button>
           </form>
         </div>
