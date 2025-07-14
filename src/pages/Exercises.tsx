@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, BookOpen, ArrowLeft, Trophy } from 'lucide-react';
+import { CheckCircle, XCircle, BookOpen, ArrowLeft, Trophy, List, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
 
 interface Exercise {
   id: string;
@@ -18,12 +17,25 @@ interface Exercise {
   difficulty: string;
 }
 
+interface ExerciseList {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  difficulty: string;
+  exercise_ids: string[];
+  created_at: string;
+}
+
 interface StudentAnswer {
   exercise_id: string;
   is_correct: boolean;
+  list_id?: string;
 }
 
 const Exercises = () => {
+  const [exerciseLists, setExerciseLists] = useState<ExerciseList[]>([]);
+  const [selectedList, setSelectedList] = useState<ExerciseList | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
@@ -34,15 +46,37 @@ const Exercises = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    loadExercises();
+    loadExerciseLists();
     loadStudentAnswers();
   }, []);
 
-  const loadExercises = async () => {
+  const loadExerciseLists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exercise_lists')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      if (data) setExerciseLists(data);
+    } catch (error) {
+      console.error('Error loading exercise lists:', error);
+      toast({
+        title: "Erro ao carregar listas",
+        description: "Não foi possível carregar as listas de exercícios.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadExercisesFromList = async (listId: string, exerciseIds: string[]) => {
     try {
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
+        .in('id', exerciseIds)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -61,8 +95,6 @@ const Exercises = () => {
         description: "Não foi possível carregar os exercícios.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -73,7 +105,7 @@ const Exercises = () => {
 
       const { data, error } = await supabase
         .from('student_answers')
-        .select('exercise_id, is_correct')
+        .select('exercise_id, is_correct, list_id')
         .eq('student_id', studentId);
 
       if (error) throw error;
@@ -83,6 +115,11 @@ const Exercises = () => {
     }
   };
 
+  const selectList = (list: ExerciseList) => {
+    setSelectedList(list);
+    loadExercisesFromList(list.id, list.exercise_ids);
+  };
+
   const selectExercise = (exercise: Exercise) => {
     setCurrentExercise(exercise);
     setSelectedAnswer('');
@@ -90,7 +127,7 @@ const Exercises = () => {
   };
 
   const submitAnswer = async () => {
-    if (!selectedAnswer || !currentExercise) return;
+    if (!selectedAnswer || !currentExercise || !selectedList) return;
 
     const correct = selectedAnswer === currentExercise.correct_answer;
     setIsCorrect(correct);
@@ -121,7 +158,8 @@ const Exercises = () => {
           student_id: studentId,
           exercise_id: currentExercise.id,
           user_answer: selectedAnswer,
-          is_correct: correct
+          is_correct: correct,
+          list_id: selectedList.id
         });
 
       if (error) throw error;
@@ -129,7 +167,7 @@ const Exercises = () => {
       // Update local answers
       setStudentAnswers(prev => [
         ...prev.filter(a => a.exercise_id !== currentExercise.id),
-        { exercise_id: currentExercise.id, is_correct: correct }
+        { exercise_id: currentExercise.id, is_correct: correct, list_id: selectedList.id }
       ]);
 
       toast({
@@ -143,14 +181,31 @@ const Exercises = () => {
     }
   };
 
-  const goBack = () => {
+  const goBackToExercises = () => {
     setCurrentExercise(null);
     setShowResult(false);
+  };
+
+  const goBackToLists = () => {
+    setSelectedList(null);
+    setExercises([]);
+    setCurrentExercise(null);
   };
 
   const getExerciseStatus = (exerciseId: string) => {
     const answer = studentAnswers.find(a => a.exercise_id === exerciseId);
     return answer ? (answer.is_correct ? 'correct' : 'incorrect') : 'unanswered';
+  };
+
+  const getListProgress = (listId: string, exerciseIds: string[]) => {
+    const listAnswers = studentAnswers.filter(a => a.list_id === listId);
+    const correctAnswers = listAnswers.filter(a => a.is_correct).length;
+    return {
+      answered: listAnswers.length,
+      correct: correctAnswers,
+      total: exerciseIds.length,
+      percentage: listAnswers.length > 0 ? Math.round((correctAnswers / listAnswers.length) * 100) : 0
+    };
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -182,6 +237,7 @@ const Exercises = () => {
     );
   }
 
+  // Exercise view
   if (currentExercise) {
     const status = getExerciseStatus(currentExercise.id);
     
@@ -191,7 +247,7 @@ const Exercises = () => {
           <div className="mb-6 flex items-center gap-4">
             <Button 
               variant="ghost" 
-              onClick={goBack}
+              onClick={goBackToExercises}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -282,9 +338,11 @@ const Exercises = () => {
                   <p className="text-sm text-gray-700 mb-3">
                     <strong>Resposta correta:</strong> {currentExercise.correct_answer}
                   </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Explicação:</strong> {currentExercise.explanation}
-                  </p>
+                  {currentExercise.explanation && (
+                    <p className="text-sm text-gray-600">
+                      <strong>Explicação:</strong> {currentExercise.explanation}
+                    </p>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -294,69 +352,136 @@ const Exercises = () => {
     );
   }
 
-  const correctAnswers = studentAnswers.filter(a => a.is_correct).length;
-  const totalAnswered = studentAnswers.length;
+  // Exercise list view
+  if (selectedList) {
+    const progress = getListProgress(selectedList.id, selectedList.exercise_ids);
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-4">
+              <Button 
+                variant="ghost" 
+                onClick={goBackToLists}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar às Listas
+              </Button>
+              <Badge className={getDifficultyColor(selectedList.difficulty)}>
+                {getDifficultyLabel(selectedList.difficulty)}
+              </Badge>
+            </div>
+            
+            <h1 className="text-3xl font-bold mb-2">{selectedList.title}</h1>
+            <p className="text-muted-foreground mb-4">{selectedList.description}</p>
+            
+            {progress.answered > 0 && (
+              <Card className="mb-6">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                    <Trophy className="w-8 h-8 text-primary" />
+                    <div>
+                      <p className="font-semibold">Progresso nesta Lista</p>
+                      <p className="text-sm text-muted-foreground">
+                        {progress.correct} de {progress.answered} exercícios corretos 
+                        ({progress.percentage}%)
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
 
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {exercises.map((exercise) => {
+              const status = getExerciseStatus(exercise.id);
+              
+              return (
+                <Card 
+                  key={exercise.id}
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => selectExercise(exercise)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{exercise.title}</CardTitle>
+                        <CardDescription>{exercise.subject}</CardDescription>
+                      </div>
+                      {status === 'correct' && (
+                        <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                      )}
+                      {status === 'incorrect' && (
+                        <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
+                      )}
+                    </div>
+                    <Badge className={getDifficultyColor(exercise.difficulty)} variant="secondary">
+                      {getDifficultyLabel(exercise.difficulty)}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {exercise.question}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Lists overview
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold">Exercícios</h1>
-            <Link to="/">
-              <Button variant="outline">Voltar ao Chat</Button>
-            </Link>
-          </div>
-          
-          {totalAnswered > 0 && (
-            <Card className="mb-6">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <Trophy className="w-8 h-8 text-primary" />
-                  <div>
-                    <p className="font-semibold">Seu Progresso</p>
-                    <p className="text-sm text-muted-foreground">
-                      {correctAnswers} de {totalAnswered} exercícios corretos 
-                      ({totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0}%)
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <h1 className="text-3xl font-bold mb-2">Listas de Exercícios</h1>
+          <p className="text-muted-foreground">Escolha uma lista para começar a praticar</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {exercises.map((exercise) => {
-            const status = getExerciseStatus(exercise.id);
+          {exerciseLists.map((list) => {
+            const progress = getListProgress(list.id, list.exercise_ids);
             
             return (
               <Card 
-                key={exercise.id}
+                key={list.id}
                 className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => selectExercise(exercise)}
+                onClick={() => selectList(list)}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">{exercise.title}</CardTitle>
-                      <CardDescription>{exercise.subject}</CardDescription>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <List className="w-5 h-5" />
+                        {list.title}
+                      </CardTitle>
+                      <CardDescription>{list.subject}</CardDescription>
                     </div>
-                    {status === 'correct' && (
-                      <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
-                    )}
-                    {status === 'incorrect' && (
-                      <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
-                    )}
+                    <Play className="w-6 h-6 text-primary flex-shrink-0" />
                   </div>
-                  <Badge className={getDifficultyColor(exercise.difficulty)} variant="secondary">
-                    {getDifficultyLabel(exercise.difficulty)}
+                  <Badge className={getDifficultyColor(list.difficulty)} variant="secondary">
+                    {getDifficultyLabel(list.difficulty)}
                   </Badge>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {exercise.question}
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                    {list.description}
                   </p>
+                  <div className="text-sm">
+                    <p className="font-medium">{list.exercise_ids.length} exercícios</p>
+                    {progress.answered > 0 && (
+                      <p className="text-muted-foreground">
+                        {progress.correct}/{progress.answered} corretos ({progress.percentage}%)
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             );

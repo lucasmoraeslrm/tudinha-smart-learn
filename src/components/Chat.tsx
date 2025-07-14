@@ -22,8 +22,9 @@ const Chat: React.FC<ChatProps> = ({ userName }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [userId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
-  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  // Use consistent user and session IDs based on userName to maintain chat history
+  const [userId] = useState(() => `user_${userName.toLowerCase().replace(/\s+/g, '_')}`);
+  const [sessionId] = useState(() => `session_${userName.toLowerCase().replace(/\s+/g, '_')}`);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
