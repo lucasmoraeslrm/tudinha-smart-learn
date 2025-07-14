@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_chat_logs: {
+        Row: {
+          admin_message: string
+          ai_response: string
+          created_at: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          admin_message: string
+          ai_response: string
+          created_at?: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          admin_message?: string
+          ai_response?: string
+          created_at?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_chat_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercise_lists: {
         Row: {
           created_at: string
