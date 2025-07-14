@@ -1,13 +1,60 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState, useEffect } from 'react';
+import WelcomeScreen from '@/components/WelcomeScreen';
+import Dashboard from '@/components/Dashboard';
+import Chat from '@/components/Chat';
+import Layout from '@/components/Layout';
+
+type AppState = 'welcome' | 'app';
+type AppView = 'dashboard' | 'chat';
 
 const Index = () => {
+  const [appState, setAppState] = useState<AppState>('welcome');
+  const [activeView, setActiveView] = useState<AppView>('dashboard');
+  const [userName, setUserName] = useState<string>('');
+
+  useEffect(() => {
+    // Check if user has already set up their name
+    const savedUserName = localStorage.getItem('tudinha_user_name');
+    if (savedUserName) {
+      setUserName(savedUserName);
+      setAppState('app');
+    }
+  }, []);
+
+  const handleUserSetup = (name: string) => {
+    setUserName(name);
+    localStorage.setItem('tudinha_user_name', name);
+    setAppState('app');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('tudinha_user_name');
+    setUserName('');
+    setAppState('welcome');
+    setActiveView('dashboard');
+  };
+
+  const handleStartChat = () => {
+    setActiveView('chat');
+  };
+
+  if (appState === 'welcome') {
+    return <WelcomeScreen onUserSetup={handleUserSetup} />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <Layout 
+      userName={userName}
+      activeView={activeView}
+      onViewChange={setActiveView}
+      onLogout={handleLogout}
+    >
+      {activeView === 'dashboard' ? (
+        <Dashboard userName={userName} onStartChat={handleStartChat} />
+      ) : (
+        <Chat userName={userName} />
+      )}
+    </Layout>
   );
 };
 
