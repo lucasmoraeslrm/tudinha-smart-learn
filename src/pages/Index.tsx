@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import WelcomeScreen from '@/components/WelcomeScreen';
 import Dashboard from '@/components/Dashboard';
 import Chat from '@/components/Chat';
+import Exercises from '@/pages/Exercises';
 import Layout from '@/components/Layout';
 
 type AppState = 'welcome' | 'app';
-type AppView = 'dashboard' | 'chat';
+type AppView = 'dashboard' | 'chat' | 'exercises';
 
 const Index = () => {
   const [appState, setAppState] = useState<AppState>('welcome');
@@ -38,6 +39,10 @@ const Index = () => {
     setActiveView('chat');
   };
 
+  const handleViewExercises = () => {
+    setActiveView('exercises');
+  };
+
   if (appState === 'welcome') {
     return <WelcomeScreen onUserSetup={handleUserSetup} />;
   }
@@ -49,10 +54,14 @@ const Index = () => {
       onViewChange={setActiveView}
       onLogout={handleLogout}
     >
-      {activeView === 'dashboard' ? (
-        <Dashboard userName={userName} onStartChat={handleStartChat} />
-      ) : (
+      {activeView === 'dashboard' && (
+        <Dashboard userName={userName} onStartChat={handleStartChat} onViewExercises={handleViewExercises} />
+      )}
+      {activeView === 'chat' && (
         <Chat userName={userName} />
+      )}
+      {activeView === 'exercises' && (
+        <Exercises />
       )}
     </Layout>
   );

@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { 
   Home, 
   MessageCircle, 
-  BarChart3, 
+  BookOpen,
   Settings, 
   LogOut,
   Menu,
@@ -14,8 +14,8 @@ import {
 interface LayoutProps {
   children: React.ReactNode;
   userName: string;
-  activeView: 'dashboard' | 'chat';
-  onViewChange: (view: 'dashboard' | 'chat') => void;
+  activeView: 'dashboard' | 'chat' | 'exercises';
+  onViewChange: (view: 'dashboard' | 'chat' | 'exercises') => void;
   onLogout: () => void;
 }
 
@@ -31,6 +31,7 @@ const Layout: React.FC<LayoutProps> = ({
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'chat', label: 'Chat', icon: MessageCircle },
+    { id: 'exercises', label: 'Exercícios', icon: BookOpen },
   ];
 
   const toggleMobileMenu = () => {
@@ -78,7 +79,7 @@ const Layout: React.FC<LayoutProps> = ({
                       ? 'bg-gradient-primary text-primary-foreground shadow-soft' 
                       : 'hover:bg-primary/5'
                   }`}
-                  onClick={() => onViewChange(item.id as 'dashboard' | 'chat')}
+                  onClick={() => onViewChange(item.id as 'dashboard' | 'chat' | 'exercises')}
                 >
                   <Icon className="w-5 h-5 mr-3" />
                   {item.label}
@@ -154,7 +155,7 @@ const Layout: React.FC<LayoutProps> = ({
                         : 'hover:bg-primary/5'
                     }`}
                     onClick={() => {
-                      onViewChange(item.id as 'dashboard' | 'chat');
+                      onViewChange(item.id as 'dashboard' | 'chat' | 'exercises');
                       setIsMobileMenuOpen(false);
                     }}
                   >

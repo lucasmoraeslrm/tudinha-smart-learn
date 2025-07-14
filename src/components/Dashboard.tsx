@@ -16,9 +16,10 @@ import {
 interface DashboardProps {
   userName: string;
   onStartChat: () => void;
+  onViewExercises?: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ userName, onStartChat }) => {
+const Dashboard: React.FC<DashboardProps> = ({ userName, onStartChat, onViewExercises }) => {
   // Mock data - In real app, this would come from backend
   const stats = {
     totalMessages: 47,
@@ -114,7 +115,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userName, onStartChat }) => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <Card className="p-6 hover:shadow-soft transition-all duration-300 cursor-pointer" onClick={() => window.open('/exercises', '_blank')}>
+          <Card className="p-6 hover:shadow-soft transition-all duration-300 cursor-pointer" onClick={onViewExercises}>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
                 <BookOpen className="w-6 h-6 text-primary-foreground" />
