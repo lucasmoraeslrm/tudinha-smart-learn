@@ -8,8 +8,10 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  Shield
 } from 'lucide-react';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 
 interface LayoutProps {
@@ -28,6 +30,7 @@ const Layout: React.FC<LayoutProps> = ({
   onLogout 
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAdmin, setAdminMode } = useIsAdmin();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -96,6 +99,28 @@ const Layout: React.FC<LayoutProps> = ({
 
         {/* Footer Actions */}
         <div className="p-4 border-t space-y-2">
+          {/* Admin Toggle */}
+          <Button 
+            variant={isAdmin ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setAdminMode(!isAdmin)}
+          >
+            <Shield className="w-5 h-5 mr-3" />
+            {isAdmin ? 'Modo Admin Ativo' : 'Ativar Modo Admin'}
+          </Button>
+          
+          {/* Admin Chat Access */}
+          {isAdmin && (
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => window.open('/admin/chat', '_blank')}
+            >
+              <MessageCircle className="w-5 h-5 mr-3" />
+              Chat Admin
+            </Button>
+          )}
+          
           <Button variant="ghost" className="w-full justify-start">
             <Settings className="w-5 h-5 mr-3" />
             Configurações

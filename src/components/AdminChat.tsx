@@ -4,14 +4,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, MessageCircle, User, Bot } from 'lucide-react';
+import { Loader2, MessageCircle, User, Bot, TrendingUp, TrendingDown, Clock, Eye } from 'lucide-react';
 
 interface Student {
   id: string;
   name: string;
   email?: string;
+  age?: number;
 }
 
 interface ChatLog {
@@ -22,6 +24,13 @@ interface ChatLog {
   student?: Student;
 }
 
+interface StudentStats {
+  totalAnswers: number;
+  correctAnswers: number;
+  accuracyPercentage: number;
+  lastActivity: string | null;
+}
+
 export function AdminChat() {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<string>('');
@@ -29,6 +38,8 @@ export function AdminChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatLog[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
+  const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
+  const [showFullHistory, setShowFullHistory] = useState(false);
   const { toast } = useToast();
 
   // Carregar lista de alunos
@@ -40,8 +51,10 @@ export function AdminChat() {
   useEffect(() => {
     if (selectedStudent) {
       loadChatHistory(selectedStudent);
+      loadStudentStats(selectedStudent);
     } else {
       setChatHistory([]);
+      setStudentStats(null);
     }
   }, [selectedStudent]);
 
@@ -49,7 +62,7 @@ export function AdminChat() {
     try {
       const { data, error } = await supabase
         .from('students')
-        .select('id, name, email')
+        .select('id, name, email, age')
         .order('name');
 
       if (error) throw error;
@@ -66,9 +79,9 @@ export function AdminChat() {
     }
   };
 
-  const loadChatHistory = async (studentId: string) => {
+  const loadChatHistory = async (studentId: string, loadAll = false) => {
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from('admin_chat_logs')
         .select(`
           id,
@@ -82,13 +95,45 @@ export function AdminChat() {
           )
         `)
         .eq('student_id', studentId)
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .order('created_at', { ascending: false });
+
+      if (!loadAll) {
+        query.limit(10);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setChatHistory(data || []);
     } catch (error) {
       console.error('Erro ao carregar histórico:', error);
+    }
+  };
+
+  const loadStudentStats = async (studentId: string) => {
+    try {
+      const { data: answers, error } = await supabase
+        .from('student_answers')
+        .select('is_correct, answered_at')
+        .eq('student_id', studentId);
+
+      if (error) throw error;
+
+      const totalAnswers = answers?.length || 0;
+      const correctAnswers = answers?.filter(a => a.is_correct).length || 0;
+      const accuracyPercentage = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+      const lastActivity = answers && answers.length > 0 
+        ? answers.sort((a, b) => new Date(b.answered_at).getTime() - new Date(a.answered_at).getTime())[0].answered_at
+        : null;
+
+      setStudentStats({
+        totalAnswers,
+        correctAnswers,
+        accuracyPercentage,
+        lastActivity
+      });
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
     }
   };
 
@@ -276,11 +321,69 @@ export function AdminChat() {
         </CardContent>
       </Card>
 
+      {/* Estatísticas do aluno selecionado */}
+      {selectedStudent && studentStats && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Estatísticas do Aluno
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{studentStats.totalAnswers}</div>
+                <div className="text-sm text-muted-foreground">Total de Respostas</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{studentStats.correctAnswers}</div>
+                <div className="text-sm text-muted-foreground">Acertos</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">{studentStats.accuracyPercentage}%</div>
+                <div className="text-sm text-muted-foreground">Taxa de Acerto</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm font-medium flex items-center justify-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {studentStats.lastActivity 
+                    ? new Date(studentStats.lastActivity).toLocaleDateString('pt-BR')
+                    : 'Sem atividade'
+                  }
+                </div>
+                <div className="text-sm text-muted-foreground">Última Atividade</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Histórico de conversas */}
       {selectedStudent && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Histórico de Conversas</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Histórico de Conversas</CardTitle>
+              {chatHistory.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowFullHistory(!showFullHistory);
+                    if (!showFullHistory) {
+                      loadChatHistory(selectedStudent, true);
+                    } else {
+                      loadChatHistory(selectedStudent, false);
+                    }
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  {showFullHistory ? 'Ver Resumo' : 'Ver Histórico Completo'}
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {chatHistory.length === 0 ? (
@@ -289,6 +392,15 @@ export function AdminChat() {
               </p>
             ) : (
               <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Badge variant="secondary">
+                    {chatHistory.length} conversa{chatHistory.length !== 1 ? 's' : ''}
+                  </Badge>
+                  {showFullHistory && (
+                    <Badge variant="outline">Histórico completo</Badge>
+                  )}
+                </div>
+                
                 {chatHistory.map((chat) => (
                   <div key={chat.id} className="border rounded-lg p-4 space-y-3">
                     <div className="text-xs text-muted-foreground">
