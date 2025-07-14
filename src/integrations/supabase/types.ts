@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      exercise_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          exercise_ids: string[]
+          id: string
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          exercise_ids: string[]
+          id?: string
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          exercise_ids?: string[]
+          id?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       exercises: {
         Row: {
           correct_answer: string
@@ -83,6 +116,7 @@ export type Database = {
           exercise_id: string | null
           id: string
           is_correct: boolean
+          list_id: string | null
           student_id: string | null
           user_answer: string
         }
@@ -91,6 +125,7 @@ export type Database = {
           exercise_id?: string | null
           id?: string
           is_correct: boolean
+          list_id?: string | null
           student_id?: string | null
           user_answer: string
         }
@@ -99,6 +134,7 @@ export type Database = {
           exercise_id?: string | null
           id?: string
           is_correct?: boolean
+          list_id?: string | null
           student_id?: string | null
           user_answer?: string
         }
@@ -108,6 +144,13 @@ export type Database = {
             columns: ["exercise_id"]
             isOneToOne: false
             referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_answers_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_lists"
             referencedColumns: ["id"]
           },
           {
