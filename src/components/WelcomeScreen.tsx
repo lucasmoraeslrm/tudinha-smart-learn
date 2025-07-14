@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { BookOpen, Sparkles, Target } from 'lucide-react';
-import collegeImage from '@/assets/colegio-almeida-garrett.png';
+
 
 interface WelcomeScreenProps {
   onUserSetup: (name: string) => void;
@@ -27,7 +27,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onUserSetup }) => {
           <div className="flex justify-center">
             <div className="w-32 h-32 rounded-full bg-gradient-primary p-4 animate-float">
               <img 
-                src={collegeImage} 
+                src="https://storange.tudinha.com.br/colag.png" 
                 alt="Colégio Almeida Garrett" 
                 className="w-full h-full object-contain"
               />

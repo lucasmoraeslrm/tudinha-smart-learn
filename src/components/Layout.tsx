@@ -10,7 +10,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import collegeImage from '@/assets/colegio-almeida-garrett.png';
+
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -48,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden">
               <img 
-                src={collegeImage} 
+                src="https://storange.tudinha.com.br/colag.png" 
                 alt="Colégio Almeida Garrett" 
                 className="w-full h-full object-cover"
               />
@@ -117,7 +117,7 @@ const Layout: React.FC<LayoutProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg overflow-hidden">
               <img 
-                src={collegeImage} 
+                src="https://storange.tudinha.com.br/colag.png" 
                 alt="Colégio Almeida Garrett" 
                 className="w-full h-full object-cover"
               />
