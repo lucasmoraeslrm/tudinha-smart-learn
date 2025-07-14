@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -18,21 +19,21 @@ interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({ userName }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: `Oi ${userName}! 👋 Sou a Tudinha, sua tutora de IA! Estou aqui para te ajudar com seus estudos. Sobre qual matéria você gostaria de conversar hoje?`,
-      sender: 'tudinha',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [userId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Load messages from Supabase on component mount
   useEffect(() => {
-    // Scroll to bottom when new messages arrive
+    loadMessages();
+  }, []);
+
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
     if (scrollAreaRef.current) {
       const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollElement) {
@@ -40,6 +41,61 @@ const Chat: React.FC<ChatProps> = ({ userName }) => {
       }
     }
   }, [messages]);
+
+  const loadMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const loadedMessages = data.map(msg => ({
+          id: msg.id,
+          text: msg.message,
+          sender: msg.sender as 'user' | 'tudinha',
+          timestamp: new Date(msg.created_at)
+        }));
+        setMessages(loadedMessages);
+      } else {
+        // Add welcome message if no previous messages
+        const welcomeMessage: Message = {
+          id: '1',
+          text: `Oi ${userName}! 👋 Sou a Tudinha, sua tutora de IA! Estou aqui para te ajudar com seus estudos. Sobre qual matéria você gostaria de conversar hoje?`,
+          sender: 'tudinha',
+          timestamp: new Date()
+        };
+        setMessages([welcomeMessage]);
+        
+        // Save welcome message to database
+        await supabase.from('messages').insert({
+          user_id: userId,
+          session_id: sessionId,
+          message: welcomeMessage.text,
+          sender: welcomeMessage.sender
+        });
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  const saveMessage = async (message: Message) => {
+    try {
+      await supabase.from('messages').insert({
+        user_id: userId,
+        session_id: sessionId,
+        message: message.text,
+        sender: message.sender
+      });
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+  };
 
   const sendMessage = async () => {
     if (!newMessage.trim() || isLoading) return;
@@ -55,18 +111,20 @@ const Chat: React.FC<ChatProps> = ({ userName }) => {
     setNewMessage('');
     setIsLoading(true);
 
+    // Save user message to database
+    await saveMessage(userMessage);
+
     try {
-      // Call n8n webhook
+      // Call n8n webhook with new format
       const response = await fetch('https://tudinha.app.n8n.cloud/webhook/tudinha-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          user_id: userId,
           message: newMessage,
-          userName: userName,
-          timestamp: new Date().toISOString(),
-          messageHistory: messages.slice(-5) // Send last 5 messages for context
+          session_id: sessionId
         }),
       });
 
@@ -74,7 +132,12 @@ const Chat: React.FC<ChatProps> = ({ userName }) => {
       
       if (response.ok) {
         const data = await response.json();
-        botResponse = data.response || data.message || 'Desculpe, não entendi. Pode reformular sua pergunta?';
+        // Handle array response format
+        if (Array.isArray(data) && data.length > 0) {
+          botResponse = data[0].resposta || 'Desculpe, não entendi. Pode reformular sua pergunta?';
+        } else {
+          botResponse = data.resposta || data.response || data.message || 'Desculpe, não entendi. Pode reformular sua pergunta?';
+        }
       } else {
         throw new Error('Falha na comunicação');
       }
@@ -88,6 +151,9 @@ const Chat: React.FC<ChatProps> = ({ userName }) => {
       };
 
       setMessages(prev => [...prev, botMessage]);
+      
+      // Save bot message to database
+      await saveMessage(botMessage);
 
     } catch (error) {
       console.error('Error sending message:', error);
