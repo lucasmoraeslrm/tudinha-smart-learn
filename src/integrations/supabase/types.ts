@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      exercises: {
+        Row: {
+          correct_answer: string
+          created_at: string
+          difficulty: string | null
+          explanation: string | null
+          id: string
+          options: Json | null
+          question: string
+          subject: string
+          title: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          options?: Json | null
+          question: string
+          subject: string
+          title: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          options?: Json | null
+          question?: string
+          subject?: string
+          title?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
@@ -38,6 +74,75 @@ export type Database = {
           sender?: string
           session_id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      student_answers: {
+        Row: {
+          answered_at: string
+          exercise_id: string | null
+          id: string
+          is_correct: boolean
+          student_id: string | null
+          user_answer: string
+        }
+        Insert: {
+          answered_at?: string
+          exercise_id?: string | null
+          id?: string
+          is_correct: boolean
+          student_id?: string | null
+          user_answer: string
+        }
+        Update: {
+          answered_at?: string
+          exercise_id?: string | null
+          id?: string
+          is_correct?: boolean
+          student_id?: string | null
+          user_answer?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_answers_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_answers_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          age: number | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }

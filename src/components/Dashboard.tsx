@@ -112,6 +112,33 @@ const Dashboard: React.FC<DashboardProps> = ({ userName, onStartChat }) => {
           </Card>
         </div>
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Card className="p-6 hover:shadow-soft transition-all duration-300 cursor-pointer" onClick={() => window.open('/exercises', '_blank')}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Exercícios</h3>
+                <p className="text-sm text-muted-foreground">Pratique com exercícios interativos</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 hover:shadow-soft transition-all duration-300 cursor-pointer" onClick={onStartChat}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-success rounded-xl flex items-center justify-center">
+                <MessageCircle className="w-6 h-6 text-success-foreground" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Chat com Tudinha</h3>
+                <p className="text-sm text-muted-foreground">Tire suas dúvidas em tempo real</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
         {/* Progress and Goals */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Weekly Progress */}
