@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { BookOpen, Sparkles, Target } from 'lucide-react';
+import { BookOpen, Sparkles, Target, User, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 
 interface WelcomeScreenProps {
@@ -11,6 +12,7 @@ interface WelcomeScreenProps {
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onUserSetup }) => {
   const [name, setName] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,9 +94,33 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onUserSetup }) => {
               className="w-full h-12"
               disabled={!name.trim()}
             >
-              Começar a estudar! 🚀
+              Continuar como visitante 🚀
             </Button>
           </form>
+
+          <div className="mt-8 pt-6 border-t">
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Já tem uma conta? Faça login para acessar recursos completos
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/login')}
+                className="flex items-center gap-2 flex-1"
+              >
+                <User className="h-4 w-4" />
+                Login Aluno
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/admin/login')}
+                className="flex items-center gap-2 flex-1"
+              >
+                <Shield className="h-4 w-4" />
+                Acesso Admin
+              </Button>
+            </div>
+          </div>
         </div>
       </Card>
     </div>
