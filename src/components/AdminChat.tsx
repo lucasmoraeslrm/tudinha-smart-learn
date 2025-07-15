@@ -229,20 +229,16 @@ export function AdminChat() {
         user_id: user.id
       };
 
-      // Enviar para o webhook
-      const webhookResponse = await fetch('https://tudinha.app.n8n.cloud/webhook/5e3882be-55ac-4266-bc42-64dbab399c41', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+      // Enviar para nossa edge function
+      const { data: aiData, error: functionError } = await supabase.functions.invoke('admin-chat', {
+        body: payload
       });
 
-      if (!webhookResponse.ok) {
-        throw new Error('Falha na comunicação com a IA');
+      if (functionError) {
+        throw new Error(functionError.message || 'Falha na comunicação com a IA');
       }
 
-      const aiResponse = await webhookResponse.text();
+      const aiResponse = aiData?.response || 'Resposta não disponível';
 
       // Salvar no banco de dados
       const { error: saveError } = await supabase

@@ -2,3 +2,6 @@ project_id = "pwdkfekouyyujfwmgqls"
 
 [functions.student-auth]
 verify_jwt = false
+
+[functions.admin-chat]
+verify_jwt = false
