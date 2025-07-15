@@ -203,6 +203,49 @@ export function AdminChat() {
       // Tentar fazer parse do JSON
       const parsed = JSON.parse(response);
       
+      // Verificar se é resposta do n8n no novo formato
+      if (Array.isArray(parsed) && parsed[0] && parsed[0].resposta) {
+        const n8nResponse = parsed[0];
+        try {
+          const respostaData = JSON.parse(n8nResponse.resposta);
+          
+          return (
+            <div className="space-y-4">
+              {/* Resumo Geral */}
+              {respostaData.resumo_geral && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-2">📊 Resumo Geral</h4>
+                  <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {respostaData.resumo_geral}
+                  </div>
+                </div>
+              )}
+
+              {/* Recomendações */}
+              {respostaData.recomendacoes && respostaData.recomendacoes.length > 0 && (
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h5 className="font-medium text-green-800 mb-2 flex items-center gap-2">
+                    💡 Recomendações
+                  </h5>
+                  <div className="space-y-2">
+                    {respostaData.recomendacoes.map((recomendacao: string, index: number) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="text-sm text-green-700">{recomendacao}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        } catch (parseError) {
+          // Se não conseguir fazer parse da resposta interna, mostrar como string
+          return <div className="text-sm whitespace-pre-wrap">{n8nResponse.resposta}</div>;
+        }
+      }
+      
+      // Formato antigo do relatório
       if (parsed.relatorio && parsed.relatorio.nome) {
         const { relatorio } = parsed;
         
@@ -351,13 +394,20 @@ export function AdminChat() {
       const responseText = await response.text();
       console.log('Texto da resposta:', responseText);
       
-      let aiData;
       let aiResponse = 'Mensagem enviada com sucesso para o webhook';
       
       if (responseText && responseText.trim()) {
         try {
-          aiData = JSON.parse(responseText);
-          aiResponse = aiData?.response || aiData?.mensagem || aiResponse;
+          // Tentar fazer parse da resposta JSON
+          const aiData = JSON.parse(responseText);
+          
+          // Se for array com resposta do n8n, usar o JSON completo
+          if (Array.isArray(aiData) && aiData[0] && aiData[0].resposta) {
+            aiResponse = responseText; // Salvar o JSON completo para formatação posterior
+          } else {
+            // Formato antigo ou outro formato
+            aiResponse = aiData?.response || aiData?.mensagem || responseText;
+          }
         } catch (jsonError) {
           console.log('Resposta não é JSON válido, usando resposta como texto:', responseText);
           aiResponse = responseText;
