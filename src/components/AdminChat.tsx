@@ -204,34 +204,69 @@ export function AdminChat() {
       const parsed = JSON.parse(response);
       
       // Verificar se é resposta do n8n no novo formato
-      if (Array.isArray(parsed) && parsed[0] && parsed[0].resposta) {
-        const n8nResponse = parsed[0];
+      if (parsed && typeof parsed === 'object' && parsed.resposta) {
         try {
-          const respostaData = JSON.parse(n8nResponse.resposta);
+          const respostaData = JSON.parse(parsed.resposta);
           
           return (
-            <div className="space-y-4">
+            <div className="space-y-4 animate-fade-in">
               {/* Resumo Geral */}
               {respostaData.resumo_geral && (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-900 mb-2">📊 Resumo Geral</h4>
-                  <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+                  <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                    <span className="text-lg">📊</span>
+                    Resumo Geral
+                  </h4>
+                  <div className="text-sm text-gray-700 leading-relaxed">
                     {respostaData.resumo_geral}
+                  </div>
+                </div>
+              )}
+
+              {/* Erros (se houver) */}
+              {respostaData.erros && respostaData.erros.length > 0 && (
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200 shadow-sm">
+                  <h5 className="font-medium text-orange-800 mb-3 flex items-center gap-2">
+                    <span className="text-lg">⚠️</span>
+                    Questões que Precisam de Atenção
+                  </h5>
+                  <div className="space-y-3">
+                    {respostaData.erros.map((erro: any, index: number) => (
+                      <div key={index} className="bg-white/50 p-4 rounded-lg border border-orange-100">
+                        <div className="mb-2">
+                          <span className="font-medium text-orange-900">Pergunta:</span>
+                          <div className="text-sm text-orange-800 mt-1">{erro.pergunta}</div>
+                        </div>
+                        {erro.resposta_errada && (
+                          <div className="mb-2">
+                            <span className="font-medium text-orange-900">Resposta dada:</span>
+                            <div className="text-sm text-orange-700 mt-1">{erro.resposta_errada}</div>
+                          </div>
+                        )}
+                        {erro.explicacao && (
+                          <div>
+                            <span className="font-medium text-orange-900">Explicação:</span>
+                            <div className="text-sm text-orange-700 mt-1">{erro.explicacao}</div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
               {/* Recomendações */}
               {respostaData.recomendacoes && respostaData.recomendacoes.length > 0 && (
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <h5 className="font-medium text-green-800 mb-2 flex items-center gap-2">
-                    💡 Recomendações
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
+                  <h5 className="font-medium text-green-800 mb-3 flex items-center gap-2">
+                    <span className="text-lg">💡</span>
+                    Recomendações para o Estudante
                   </h5>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {respostaData.recomendacoes.map((recomendacao: string, index: number) => (
-                      <div key={index} className="flex items-start gap-2">
+                      <div key={index} className="flex items-start gap-3 bg-white/30 p-3 rounded-lg">
                         <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div className="text-sm text-green-700">{recomendacao}</div>
+                        <div className="text-sm text-green-700 leading-relaxed">{recomendacao}</div>
                       </div>
                     ))}
                   </div>
@@ -241,7 +276,53 @@ export function AdminChat() {
           );
         } catch (parseError) {
           // Se não conseguir fazer parse da resposta interna, mostrar como string
-          return <div className="text-sm whitespace-pre-wrap">{n8nResponse.resposta}</div>;
+          return <div className="text-sm whitespace-pre-wrap bg-gray-50 p-3 rounded-lg">{parsed.resposta}</div>;
+        }
+      }
+      
+      // Verificar se é array (formato n8n antigo)
+      if (Array.isArray(parsed) && parsed[0] && parsed[0].resposta) {
+        const n8nResponse = parsed[0];
+        try {
+          const respostaData = JSON.parse(n8nResponse.resposta);
+          
+          return (
+            <div className="space-y-4 animate-fade-in">
+              {/* Resumo Geral */}
+              {respostaData.resumo_geral && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+                  <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                    <span className="text-lg">📊</span>
+                    Resumo Geral
+                  </h4>
+                  <div className="text-sm text-gray-700 leading-relaxed">
+                    {respostaData.resumo_geral}
+                  </div>
+                </div>
+              )}
+
+              {/* Recomendações */}
+              {respostaData.recomendacoes && respostaData.recomendacoes.length > 0 && (
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
+                  <h5 className="font-medium text-green-800 mb-3 flex items-center gap-2">
+                    <span className="text-lg">💡</span>
+                    Recomendações para o Estudante
+                  </h5>
+                  <div className="space-y-3">
+                    {respostaData.recomendacoes.map((recomendacao: string, index: number) => (
+                      <div key={index} className="flex items-start gap-3 bg-white/30 p-3 rounded-lg">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="text-sm text-green-700 leading-relaxed">{recomendacao}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        } catch (parseError) {
+          // Se não conseguir fazer parse da resposta interna, mostrar como string
+          return <div className="text-sm whitespace-pre-wrap bg-gray-50 p-3 rounded-lg">{n8nResponse.resposta}</div>;
         }
       }
       
@@ -320,15 +401,21 @@ export function AdminChat() {
         );
       }
       
-      // Se não for o formato esperado, mostrar JSON formatado
+      // Se não for o formato esperado, mostrar JSON formatado (mas limpo)
+      const cleanData = { ...parsed };
+      // Remover campos técnicos se existirem
+      delete cleanData.success;
+      delete cleanData.user_id;
+      delete cleanData.timestamp;
+      
       return (
         <pre className="text-xs bg-gray-50 p-3 rounded border overflow-x-auto whitespace-pre-wrap">
-          {JSON.stringify(parsed, null, 2)}
+          {JSON.stringify(cleanData, null, 2)}
         </pre>
       );
     } catch (error) {
       // Se não for JSON válido, mostrar como texto
-      return <div className="text-sm whitespace-pre-wrap">{response}</div>;
+      return <div className="text-sm whitespace-pre-wrap bg-gray-50 p-3 rounded-lg">{response}</div>;
     }
   };
 
