@@ -1,45 +1,83 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Target, Clock, Trophy } from 'lucide-react';
+import { BookOpen, Target, Clock, Trophy, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ExerciciosPage() {
-  const exerciseSets = [
-    {
-      title: 'Matemática Básica',
-      description: 'Operações fundamentais e resolução de problemas',
-      exercises: 15,
-      difficulty: 'Fácil',
-      completed: 0,
-      subject: 'Matemática'
-    },
-    {
-      title: 'Português - Gramática',
-      description: 'Classes de palavras e análise sintática',
-      exercises: 12,
-      difficulty: 'Médio',
-      completed: 0,
-      subject: 'Português'
-    },
-    {
-      title: 'História do Brasil',
-      description: 'Período colonial e imperial',
-      exercises: 18,
-      difficulty: 'Médio',
-      completed: 0,
-      subject: 'História'
-    }
-  ];
+  const [exerciseLists, setExerciseLists] = useState<any[]>([]);
+  const [exercises, setExercises] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Fácil': return 'bg-green-100 text-green-700';
-      case 'Médio': return 'bg-yellow-100 text-yellow-700';
-      case 'Difícil': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+
+      // Carregar listas de exercícios
+      const { data: listsData, error: listsError } = await supabase
+        .from('exercise_lists')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (listsError) throw listsError;
+
+      // Carregar exercícios individuais
+      const { data: exercisesData, error: exercisesError } = await supabase
+        .from('exercises')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (exercisesError) throw exercisesError;
+
+      setExerciseLists(listsData || []);
+      setExercises(exercisesData || []);
+    } catch (error: any) {
+      console.error('Erro ao carregar dados:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os exercícios.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty?.toLowerCase()) {
+      case 'fácil':
+      case 'facil':
+      case 'easy': 
+        return 'bg-green-100 text-green-700';
+      case 'médio':
+      case 'medio':
+      case 'medium': 
+        return 'bg-yellow-100 text-yellow-700';
+      case 'difícil':
+      case 'dificil':
+      case 'hard': 
+        return 'bg-red-100 text-red-700';
+      default: 
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const totalExercises = exercises.length + exerciseLists.reduce((acc, list) => acc + (list.exercise_ids?.length || 0), 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -64,7 +102,7 @@ export default function ExerciciosPage() {
                 <BookOpen className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-lg font-semibold">45</p>
+                <p className="text-lg font-semibold">{totalExercises}</p>
                 <p className="text-sm text-muted-foreground">Exercícios Disponíveis</p>
               </div>
             </div>
@@ -100,59 +138,99 @@ export default function ExerciciosPage() {
         </Card>
       </div>
 
-      {/* Exercise Sets */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {exerciseSets.map((set, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-lg">{set.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">{set.description}</p>
-                </div>
-                <Badge variant="secondary" className={getDifficultyColor(set.difficulty)}>
-                  {set.difficulty}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Progresso</span>
-                  <span>{set.completed}/{set.exercises} exercícios</span>
-                </div>
-                
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${(set.completed / set.exercises) * 100}%` }}
-                  ></div>
-                </div>
+      {/* Exercise Lists */}
+      {exerciseLists.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Listas de Exercícios</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {exerciseLists.map((list) => (
+              <Card key={list.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{list.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">{list.description}</p>
+                    </div>
+                    <Badge variant="secondary" className={getDifficultyColor(list.difficulty)}>
+                      {list.difficulty || 'Médio'}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Progresso</span>
+                      <span>0/{list.exercise_ids?.length || 0} exercícios</span>
+                    </div>
+                    
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full transition-all duration-300" style={{ width: '0%' }}></div>
+                    </div>
 
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline">{set.subject}</Badge>
-                  <span className="text-sm text-muted-foreground">{set.exercises} exercícios</span>
-                </div>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline">{list.subject}</Badge>
+                      <span className="text-sm text-muted-foreground">{list.exercise_ids?.length || 0} exercícios</span>
+                    </div>
 
-                <Button className="w-full" variant={set.completed > 0 ? "secondary" : "default"}>
-                  {set.completed > 0 ? 'Continuar' : 'Iniciar'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                    <Button className="w-full">
+                      Iniciar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* Coming Soon */}
-      <Card>
-        <CardContent className="p-8 text-center">
-          <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Mais Exercícios em Breve</h3>
-          <p className="text-muted-foreground">
-            Estamos preparando mais conteúdos personalizados para você. Continue estudando!
-          </p>
-        </CardContent>
-      </Card>
+      {/* Individual Exercises */}
+      {exercises.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Exercícios Individuais</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {exercises.map((exercise) => (
+              <Card key={exercise.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{exercise.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{exercise.question}</p>
+                    </div>
+                    <Badge variant="secondary" className={getDifficultyColor(exercise.difficulty)}>
+                      {exercise.difficulty || 'Médio'}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline">{exercise.subject}</Badge>
+                      <span className="text-sm text-muted-foreground">1 exercício</span>
+                    </div>
+
+                    <Button className="w-full">
+                      Resolver
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {exerciseLists.length === 0 && exercises.length === 0 && (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Nenhum Exercício Disponível</h3>
+            <p className="text-muted-foreground">
+              Os exercícios serão adicionados pelos professores. Aguarde novas atividades!
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
