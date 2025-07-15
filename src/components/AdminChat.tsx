@@ -324,19 +324,28 @@ export function AdminChat() {
       // Enviar para o webhook do n8n
       const webhookUrl = 'https://tudinha.app.n8n.cloud/webhook/5e3882be-55ac-4266-bc42-64dbab399c41';
       
+      console.log('Enviando dados para webhook:', payload);
+      
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        mode: 'cors', // Permitir CORS
         body: JSON.stringify(payload)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error('Falha na comunicação com o webhook');
+        const errorText = await response.text();
+        console.error('Erro na resposta do webhook:', errorText);
+        throw new Error(`Erro ${response.status}: ${errorText}`);
       }
 
       const aiData = await response.json();
+      console.log('Resposta do webhook:', aiData);
       const aiResponse = aiData?.response || aiData?.mensagem || 'Resposta não disponível';
 
       // Salvar no banco de dados
