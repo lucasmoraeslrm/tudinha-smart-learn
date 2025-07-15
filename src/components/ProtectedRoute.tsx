@@ -13,24 +13,20 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        // Se não está logado, redireciona para o login apropriado
-        navigate(requireAdmin ? '/admin' : '/');
-        return;
-      }
-
-      if (requireAdmin && profile?.role !== 'admin') {
-        // Se precisa ser admin mas não é, redireciona
+    if (!loading && user && profile) {
+      if (requireAdmin && profile.role !== 'admin') {
         navigate('/');
         return;
       }
 
-      if (!requireAdmin && profile?.role === 'admin') {
-        // Se é admin tentando acessar área de aluno, redireciona
+      if (!requireAdmin && profile.role === 'admin') {
         navigate('/admin/dashboard');
         return;
       }
+    }
+
+    if (!loading && !user) {
+      navigate(requireAdmin ? '/admin' : '/');
     }
   }, [user, profile, loading, navigate, requireAdmin]);
 

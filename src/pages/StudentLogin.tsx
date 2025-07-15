@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,9 +12,16 @@ export default function StudentLogin() {
   const [codigo, setCodigo] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Redireciona admin logado para dashboard admin
+  useEffect(() => {
+    if (user && profile?.role === 'admin') {
+      navigate('/admin/dashboard');
+    }
+  }, [user, profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
