@@ -13,7 +13,7 @@ import {
 
 const sidebarItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Chat', url: '/chat', icon: MessageCircle },
+  { title: 'Tudinha', url: '/chat', icon: MessageCircle },
   { title: 'Exercícios', url: '/exercicios', icon: BookOpen },
 ];
 
