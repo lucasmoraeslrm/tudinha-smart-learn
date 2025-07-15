@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,41 +11,257 @@ import {
   Calendar,
   Trophy,
   Star,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardPage() {
-  const { studentSession } = useAuth();
+  const { studentSession, getStudentId, getStudentName } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const [stats, setStats] = useState({
+    messages: 0,
+    exercises: 0,
+    correctAnswers: 0,
+    totalAnswers: 0,
+    lists: 0
+  });
+  
+  const [weeklyProgress, setWeeklyProgress] = useState({
+    completed: 0,
+    goal: 10
+  });
+  
+  const [favoriteSubjects, setFavoriteSubjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const studentName = studentSession?.name || studentSession?.full_name || 'Estudante';
+  const studentName = studentSession?.name || studentSession?.full_name || getStudentName() || 'Estudante';
 
-  const stats = [
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const studentId = getStudentId();
+      
+      if (!studentId) {
+        console.log('Student ID not found');
+        setLoading(false);
+        return;
+      }
+
+      await Promise.all([
+        loadMessages(studentId),
+        loadExerciseStats(studentId),
+        loadLists(),
+        loadWeeklyProgress(studentId),
+        loadFavoriteSubjects(studentId)
+      ]);
+
+    } catch (error: any) {
+      console.error('Erro ao carregar dashboard:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os dados do dashboard.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMessages = async (studentId: string) => {
+    try {
+      // Buscar mensagens do chat usando student ID ou name
+      const studentName = getStudentName();
+      const userId = `user_${studentName?.toLowerCase().replace(/\s+/g, '_')}`;
+      
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('sender', 'user');
+
+      if (error) {
+        console.error('Erro ao buscar mensagens:', error);
+        return;
+      }
+
+      setStats(prev => ({ ...prev, messages: data?.length || 0 }));
+    } catch (error) {
+      console.error('Erro ao carregar mensagens:', error);
+    }
+  };
+
+  const loadExerciseStats = async (studentId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('student_answers')
+        .select('is_correct')
+        .eq('student_id', studentId);
+
+      if (error) {
+        console.error('Erro ao buscar respostas:', error);
+        return;
+      }
+
+      const totalAnswers = data?.length || 0;
+      const correctAnswers = data?.filter(answer => answer.is_correct).length || 0;
+
+      setStats(prev => ({ 
+        ...prev, 
+        exercises: totalAnswers,
+        correctAnswers,
+        totalAnswers
+      }));
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas de exercícios:', error);
+    }
+  };
+
+  const loadLists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exercise_lists')
+        .select('id');
+
+      if (error) {
+        console.error('Erro ao buscar listas:', error);
+        return;
+      }
+
+      setStats(prev => ({ ...prev, lists: data?.length || 0 }));
+    } catch (error) {
+      console.error('Erro ao carregar listas:', error);
+    }
+  };
+
+  const loadWeeklyProgress = async (studentId: string) => {
+    try {
+      // Calcular exercícios da semana atual
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      const { data, error } = await supabase
+        .from('student_answers')
+        .select('id')
+        .eq('student_id', studentId)
+        .gte('answered_at', oneWeekAgo.toISOString());
+
+      if (error) {
+        console.error('Erro ao buscar progresso semanal:', error);
+        return;
+      }
+
+      setWeeklyProgress(prev => ({ 
+        ...prev, 
+        completed: data?.length || 0 
+      }));
+    } catch (error) {
+      console.error('Erro ao carregar progresso semanal:', error);
+    }
+  };
+
+  const loadFavoriteSubjects = async (studentId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('student_answers')
+        .select(`
+          is_correct,
+          exercises!inner(subject)
+        `)
+        .eq('student_id', studentId);
+
+      if (error) {
+        console.error('Erro ao buscar matérias favoritas:', error);
+        return;
+      }
+
+      // Agrupar por matéria e calcular estatísticas
+      const subjectStats: { [key: string]: { total: number, correct: number } } = {};
+      
+      data?.forEach(answer => {
+        const subject = answer.exercises?.subject;
+        if (subject) {
+          if (!subjectStats[subject]) {
+            subjectStats[subject] = { total: 0, correct: 0 };
+          }
+          subjectStats[subject].total++;
+          if (answer.is_correct) {
+            subjectStats[subject].correct++;
+          }
+        }
+      });
+
+      // Ordenar por taxa de acerto
+      const sortedSubjects = Object.entries(subjectStats)
+        .map(([subject, stats]) => ({
+          subject,
+          total: stats.total,
+          correct: stats.correct,
+          percentage: Math.round((stats.correct / stats.total) * 100)
+        }))
+        .sort((a, b) => b.percentage - a.percentage)
+        .slice(0, 3);
+
+      setFavoriteSubjects(sortedSubjects);
+    } catch (error) {
+      console.error('Erro ao carregar matérias favoritas:', error);
+    }
+  };
+
+  const getAccuracyPercentage = () => {
+    if (stats.totalAnswers === 0) return 0;
+    return Math.round((stats.correctAnswers / stats.totalAnswers) * 100);
+  };
+
+  const getWeeklyProgressPercentage = () => {
+    return Math.min(Math.round((weeklyProgress.completed / weeklyProgress.goal) * 100), 100);
+  };
+
+  const getGoalPercentage = () => {
+    return Math.min(Math.round((stats.exercises / 10) * 100), 100);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  const displayStats = [
     {
       icon: MessageCircle,
-      value: '9',
+      value: stats.messages.toString(),
       label: 'Mensagens',
       color: 'bg-purple-100 text-purple-600',
       iconBg: 'bg-purple-600'
     },
     {
       icon: Target,
-      value: '0',
+      value: stats.exercises.toString(),
       label: 'Exercícios',
       color: 'bg-green-100 text-green-600',
       iconBg: 'bg-green-600'
     },
     {
       icon: TrendingUp,
-      value: '0%',
+      value: `${getAccuracyPercentage()}%`,
       label: 'Acertos',
       color: 'bg-yellow-100 text-yellow-600',
       iconBg: 'bg-yellow-600'
     },
     {
       icon: BookOpen,
-      value: '0',
+      value: stats.lists.toString(),
       label: 'Listas',
       color: 'bg-purple-100 text-purple-600',
       iconBg: 'bg-purple-600'
@@ -56,7 +272,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
+        {displayStats.map((stat, index) => (
           <Card key={index} className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -117,13 +333,16 @@ export default function DashboardPage() {
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span>Meta: 10 exercícios</span>
-                  <span>0%</span>
+                  <span>Meta: {weeklyProgress.goal} exercícios</span>
+                  <span>{getWeeklyProgressPercentage()}%</span>
                 </div>
-                <Progress value={0} className="h-2" />
+                <Progress value={getWeeklyProgressPercentage()} className="h-2" />
               </div>
               <p className="text-sm text-muted-foreground flex items-center gap-2">
-                Continue assim! Você está indo muito bem esta semana 🎉
+                {weeklyProgress.completed > 0 
+                  ? `Você já fez ${weeklyProgress.completed} exercício${weeklyProgress.completed > 1 ? 's' : ''} esta semana! 🎉`
+                  : 'Continue assim! Você está indo muito bem esta semana 🎉'
+                }
               </p>
             </div>
           </CardContent>
@@ -137,12 +356,31 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground">
-                Complete alguns exercícios para ver suas matérias favoritas aqui
-              </p>
-            </div>
+            {favoriteSubjects.length > 0 ? (
+              <div className="space-y-3">
+                {favoriteSubjects.map((subject, index) => (
+                  <div key={subject.subject} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold">
+                        {index + 1}
+                      </div>
+                      <span className="font-medium">{subject.subject}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold">{subject.percentage}%</div>
+                      <div className="text-xs text-muted-foreground">{subject.correct}/{subject.total}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  Complete alguns exercícios para ver suas matérias favoritas aqui
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -159,13 +397,13 @@ export default function DashboardPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-muted-foreground" />
+                <CheckCircle className={`w-5 h-5 ${getGoalPercentage() === 100 ? 'text-green-600' : 'text-muted-foreground'}`} />
                 <div>
                   <p className="font-medium">Completar 10 exercícios</p>
                   <p className="text-sm text-muted-foreground">Geral</p>
                 </div>
               </div>
-              <span className="text-sm text-muted-foreground">0%</span>
+              <span className="text-sm text-muted-foreground">{getGoalPercentage()}%</span>
             </div>
             
             <Button variant="outline" className="w-full">
