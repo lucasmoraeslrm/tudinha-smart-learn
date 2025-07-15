@@ -17,7 +17,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string, role: 'admin' | 'student') => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role: 'admin' | 'student', codigo?: string, anoLetivo?: string, turma?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
   isStudent: boolean;
@@ -85,7 +85,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (emailOrCode: string, password: string) => {
+    // Se não contém @, assume que é um código e converte para email
+    const email = emailOrCode.includes('@') ? emailOrCode : `${emailOrCode}@estudante.local`;
+    
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -93,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'admin' | 'student') => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'admin' | 'student', codigo?: string, anoLetivo?: string, turma?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -103,7 +106,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName,
-          role: role
+          role: role,
+          codigo: codigo,
+          ano_letivo: anoLetivo,
+          turma: turma
         }
       }
     });

@@ -3,34 +3,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Plus, Users, Trash2, Edit, Mail } from 'lucide-react';
+import { Loader2, UserPlus, Trash2, Users } from 'lucide-react';
 
-interface Student {
+interface Profile {
   id: string;
-  name: string;
-  email?: string;
-  age?: number;
+  user_id: string;
+  full_name: string;
+  role: string;
+  codigo?: string;
+  ano_letivo?: string;
+  turma?: string;
   created_at: string;
 }
 
 export function ManageStudents() {
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [newStudent, setNewStudent] = useState({
-    name: '',
-    email: '',
-    age: '',
-  });
   const [newUserCredentials, setNewUserCredentials] = useState({
-    email: '',
-    password: '',
     fullName: '',
+    codigo: '',
+    password: '',
+    anoLetivo: '',
+    turma: '',
   });
   const { toast } = useToast();
   const { signUp } = useAuth();
@@ -42,8 +42,9 @@ export function ManageStudents() {
   const loadStudents = async () => {
     try {
       const { data, error } = await supabase
-        .from('students')
+        .from('profiles')
         .select('*')
+        .eq('role', 'student')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -60,70 +61,36 @@ export function ManageStudents() {
     }
   };
 
-  const createStudent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCreating(true);
-
-    try {
-      const { error } = await supabase
-        .from('students')
-        .insert({
-          name: newStudent.name,
-          email: newStudent.email || null,
-          age: newStudent.age ? parseInt(newStudent.age) : null,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: "Aluno criado com sucesso!",
-      });
-
-      setNewStudent({ name: '', email: '', age: '' });
-      loadStudents();
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível criar o aluno.",
-        variant: "destructive",
-      });
-    } finally {
-      setCreating(false);
-    }
-  };
-
   const createStudentWithLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreating(true);
 
     try {
-      // Primeiro criar a conta de usuário
+      // Criar a conta de usuário com os dados adicionais
       const { error: authError } = await signUp(
-        newUserCredentials.email,
+        `${newUserCredentials.codigo}@estudante.local`, // Email temporário baseado no código
         newUserCredentials.password,
         newUserCredentials.fullName,
-        'student'
+        'student',
+        newUserCredentials.codigo,
+        newUserCredentials.anoLetivo,
+        newUserCredentials.turma
       );
 
       if (authError) throw authError;
 
-      // Depois criar o registro na tabela students
-      const { error: studentError } = await supabase
-        .from('students')
-        .insert({
-          name: newUserCredentials.fullName,
-          email: newUserCredentials.email,
-        });
-
-      if (studentError) throw studentError;
-
       toast({
         title: "Sucesso",
-        description: "Aluno criado com acesso ao sistema! Ele precisa verificar o email.",
+        description: "Aluno criado com acesso ao sistema! Login será feito com o código.",
       });
 
-      setNewUserCredentials({ email: '', password: '', fullName: '' });
+      setNewUserCredentials({ 
+        fullName: '', 
+        codigo: '', 
+        password: '', 
+        anoLetivo: '', 
+        turma: '' 
+      });
       loadStudents();
     } catch (error: any) {
       toast({
@@ -136,16 +103,17 @@ export function ManageStudents() {
     }
   };
 
-  const deleteStudent = async (id: string, name: string) => {
+  const deleteStudent = async (userId: string, name: string) => {
     if (!confirm(`Tem certeza que deseja excluir o aluno ${name}?`)) {
       return;
     }
 
     try {
+      // Deletar o perfil (o usuário será deletado automaticamente por cascade)
       const { error } = await supabase
-        .from('students')
+        .from('profiles')
         .delete()
-        .eq('id', id);
+        .eq('user_id', userId);
 
       if (error) throw error;
 
@@ -177,132 +145,113 @@ export function ManageStudents() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Gerenciar Alunos
+            <UserPlus className="h-5 w-5" />
+            Criar Novo Aluno
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="create" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="create">Criar Aluno Simples</TabsTrigger>
-              <TabsTrigger value="create-with-login">Criar com Login</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="create">
-              <form onSubmit={createStudent} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome Completo*</Label>
-                    <Input
-                      id="name"
-                      value={newStudent.name}
-                      onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-                      placeholder="Nome do aluno"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={newStudent.email}
-                      onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-                      placeholder="email@exemplo.com"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="age">Idade</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      value={newStudent.age}
-                      onChange={(e) => setNewStudent({ ...newStudent, age: e.target.value })}
-                      placeholder="Ex: 15"
-                    />
-                  </div>
-                </div>
+          <form onSubmit={createStudentWithLogin} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Nome Completo*</Label>
+                <Input
+                  id="fullName"
+                  value={newUserCredentials.fullName}
+                  onChange={(e) => setNewUserCredentials({ ...newUserCredentials, fullName: e.target.value })}
+                  placeholder="Nome completo do aluno"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="codigo">Código do Aluno*</Label>
+                <Input
+                  id="codigo"
+                  value={newUserCredentials.codigo}
+                  onChange={(e) => setNewUserCredentials({ ...newUserCredentials, codigo: e.target.value })}
+                  placeholder="Ex: ALU001, 2024001"
+                  required
+                />
+              </div>
+            </div>
 
-                <Button type="submit" disabled={creating}>
-                  {creating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Criando...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Criar Aluno
-                    </>
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="create-with-login">
-              <form onSubmit={createStudentWithLogin} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Nome Completo*</Label>
-                    <Input
-                      id="fullName"
-                      value={newUserCredentials.fullName}
-                      onChange={(e) => setNewUserCredentials({ ...newUserCredentials, fullName: e.target.value })}
-                      placeholder="Nome completo do aluno"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="userEmail">Email*</Label>
-                    <Input
-                      id="userEmail"
-                      type="email"
-                      value={newUserCredentials.email}
-                      onChange={(e) => setNewUserCredentials({ ...newUserCredentials, email: e.target.value })}
-                      placeholder="email@exemplo.com"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="userPassword">Senha*</Label>
-                    <Input
-                      id="userPassword"
-                      type="password"
-                      value={newUserCredentials.password}
-                      onChange={(e) => setNewUserCredentials({ ...newUserCredentials, password: e.target.value })}
-                      placeholder="Senha para acesso"
-                      required
-                    />
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha*</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newUserCredentials.password}
+                  onChange={(e) => setNewUserCredentials({ ...newUserCredentials, password: e.target.value })}
+                  placeholder="Senha para acesso"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="anoLetivo">Ano Letivo</Label>
+                <Select value={newUserCredentials.anoLetivo} onValueChange={(value) => setNewUserCredentials({ ...newUserCredentials, anoLetivo: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2024">2024</SelectItem>
+                    <SelectItem value="2025">2025</SelectItem>
+                    <SelectItem value="2026">2026</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="turma">Turma</Label>
+                <Select value={newUserCredentials.turma} onValueChange={(value) => setNewUserCredentials({ ...newUserCredentials, turma: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a turma" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1A">1º Ano A</SelectItem>
+                    <SelectItem value="1B">1º Ano B</SelectItem>
+                    <SelectItem value="2A">2º Ano A</SelectItem>
+                    <SelectItem value="2B">2º Ano B</SelectItem>
+                    <SelectItem value="3A">3º Ano A</SelectItem>
+                    <SelectItem value="3B">3º Ano B</SelectItem>
+                    <SelectItem value="6A">6º Ano A</SelectItem>
+                    <SelectItem value="6B">6º Ano B</SelectItem>
+                    <SelectItem value="7A">7º Ano A</SelectItem>
+                    <SelectItem value="7B">7º Ano B</SelectItem>
+                    <SelectItem value="8A">8º Ano A</SelectItem>
+                    <SelectItem value="8B">8º Ano B</SelectItem>
+                    <SelectItem value="9A">9º Ano A</SelectItem>
+                    <SelectItem value="9B">9º Ano B</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-                <Button type="submit" disabled={creating}>
-                  {creating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Criando...
-                    </>
-                  ) : (
-                    <>
-                      <Mail className="mr-2 h-4 w-4" />
-                      Criar Aluno com Login
-                    </>
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+            <Button type="submit" disabled={creating} className="w-full">
+              {creating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Criando...
+                </>
+              ) : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Criar Aluno com Login
+                </>
+              )}
+            </Button>
+          </form>
         </CardContent>
       </Card>
 
       {/* Lista de alunos */}
       <Card>
         <CardHeader>
-          <CardTitle>Alunos Cadastrados ({students.length})</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Alunos Cadastrados ({students.length})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {students.length === 0 ? (
@@ -314,16 +263,21 @@ export function ManageStudents() {
               {students.map((student) => (
                 <div key={student.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium">{student.name}</h3>
-                      {student.email && (
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-medium">{student.full_name}</h3>
+                      {student.codigo && (
                         <Badge variant="secondary" className="text-xs">
-                          {student.email}
+                          Código: {student.codigo}
                         </Badge>
                       )}
-                      {student.age && (
+                      {student.turma && (
                         <Badge variant="outline" className="text-xs">
-                          {student.age} anos
+                          {student.turma}
+                        </Badge>
+                      )}
+                      {student.ano_letivo && (
+                        <Badge variant="outline" className="text-xs">
+                          {student.ano_letivo}
                         </Badge>
                       )}
                     </div>
@@ -335,7 +289,7 @@ export function ManageStudents() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => deleteStudent(student.id, student.name)}
+                    onClick={() => deleteStudent(student.user_id, student.full_name)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
