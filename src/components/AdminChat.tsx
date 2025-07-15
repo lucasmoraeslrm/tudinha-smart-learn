@@ -314,9 +314,12 @@ export function AdminChat() {
       // Buscar dados do aluno
       const studentData = await getStudentData(selectedStudent);
 
-      // Preparar payload para o webhook incluindo o user_id do admin
+      // Converter dados do aluno para string
+      const studentDataString = JSON.stringify(studentData, null, 2);
+
+      // Preparar payload para o webhook com aluno como string
       const payload = {
-        ...studentData,
+        aluno: studentDataString,
         mensagem_admin: message,
         user_id: user.id
       };
