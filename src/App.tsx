@@ -12,10 +12,14 @@ import ExerciciosPage from "./pages/ExerciciosPage";
 import ExerciseListView from "./pages/ExerciseListView";
 import ExerciseView from "./pages/ExerciseView";
 import StudentLayout from "./components/StudentLayout";
+import AdminLayout from "./components/AdminLayout";
 import StudentLogin from "./pages/StudentLogin";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminChat from "./pages/AdminChat";
+import AdminStudents from "./pages/AdminStudents";
+import AdminExercises from "./pages/AdminExercises";
+import AdminLists from "./pages/AdminLists";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -67,10 +71,44 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Admin Routes */}
+            {/* Admin Routes with Layout */}
             <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/chat" element={<ProtectedRoute requireAdmin><AdminChat /></ProtectedRoute>} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute requireAdmin>
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/chat" element={
+              <ProtectedRoute requireAdmin>
+                <AdminLayout>
+                  <AdminChat />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/students" element={
+              <ProtectedRoute requireAdmin>
+                <AdminLayout>
+                  <AdminStudents />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/exercises" element={
+              <ProtectedRoute requireAdmin>
+                <AdminLayout>
+                  <AdminExercises />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/lists" element={
+              <ProtectedRoute requireAdmin>
+                <AdminLayout>
+                  <AdminLists />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
