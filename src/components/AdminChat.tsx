@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, MessageCircle, User, Bot, TrendingUp, TrendingDown, Clock, Eye } from 'lucide-react';
+import { Loader2, MessageCircle, User, Bot, TrendingUp, TrendingDown, Clock, Eye, CheckCircle, XCircle, Calendar } from 'lucide-react';
 
 interface Student {
   id: string;
@@ -194,6 +194,98 @@ export function AdminChat() {
     } catch (error) {
       console.error('Erro ao buscar dados do aluno:', error);
       throw error;
+    }
+  };
+
+  // Função para formatar a resposta da IA
+  const formatAIResponse = (response: string) => {
+    try {
+      // Tentar fazer parse do JSON
+      const parsed = JSON.parse(response);
+      
+      if (parsed.relatorio && parsed.relatorio.nome) {
+        const { relatorio } = parsed;
+        
+        return (
+          <div className="space-y-4">
+            {/* Cabeçalho do relatório */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-blue-900 mb-2">📊 Relatório do Aluno</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                <div><span className="font-medium">Nome:</span> {relatorio.nome}</div>
+                <div><span className="font-medium">Código:</span> {relatorio.codigo}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Taxa de Acerto:</span>
+                  <Badge variant={relatorio.porcentagem_acertos >= 70 ? "default" : "destructive"}>
+                    {relatorio.porcentagem_acertos}%
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Últimos exercícios */}
+            {relatorio.ultimos_exercicios && relatorio.ultimos_exercicios.length > 0 && (
+              <div className="space-y-3">
+                <h5 className="font-medium text-gray-700 flex items-center gap-2">
+                  📝 Últimos Exercícios ({relatorio.ultimos_exercicios.length})
+                </h5>
+                <div className="space-y-2">
+                  {relatorio.ultimos_exercicios.map((exercicio: any, index: number) => (
+                    <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-800 mb-1">
+                            {exercicio.pergunta}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Resposta:</span> {exercicio.resposta}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {exercicio.correto ? (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          )}
+                          <Badge variant={exercicio.correto ? "default" : "destructive"} className="text-xs">
+                            {exercicio.correto ? "Correto" : "Incorreto"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(exercicio.data).toLocaleString('pt-BR')}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Análise da IA */}
+            {parsed.analise && (
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h5 className="font-medium text-green-800 mb-2 flex items-center gap-2">
+                  🤖 Análise da IA
+                </h5>
+                <div className="text-sm text-green-700 whitespace-pre-wrap">
+                  {parsed.analise}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+      
+      // Se não for o formato esperado, mostrar JSON formatado
+      return (
+        <pre className="text-xs bg-gray-50 p-3 rounded border overflow-x-auto whitespace-pre-wrap">
+          {JSON.stringify(parsed, null, 2)}
+        </pre>
+      );
+    } catch (error) {
+      // Se não for JSON válido, mostrar como texto
+      return <div className="text-sm whitespace-pre-wrap">{response}</div>;
     }
   };
 
@@ -430,7 +522,7 @@ export function AdminChat() {
                         <Bot className="h-4 w-4 mt-1 text-green-500" />
                         <div className="flex-1">
                           <div className="text-sm font-medium text-green-600">IA</div>
-                          <div className="text-sm whitespace-pre-wrap">{chat.ai_response}</div>
+                          {formatAIResponse(chat.ai_response)}
                         </div>
                       </div>
                     </div>
