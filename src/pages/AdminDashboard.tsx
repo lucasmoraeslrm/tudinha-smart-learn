@@ -2,10 +2,12 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AdminChat } from '@/components/AdminChat';
 import { ManageStudents } from '@/components/ManageStudents';
+import CreateExercise from '@/components/CreateExercise';
+import CreateExerciseList from '@/components/CreateExerciseList';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, MessageCircle, Users, Shield } from 'lucide-react';
+import { LogOut, MessageCircle, Users, Shield, BookOpen, List } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
@@ -55,7 +57,7 @@ export default function AdminDashboard() {
       
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="chat" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
+          <TabsList className="grid w-full grid-cols-4 max-w-4xl mx-auto mb-8">
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
               Chat com IA
@@ -63,6 +65,14 @@ export default function AdminDashboard() {
             <TabsTrigger value="students" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Gerenciar Alunos
+            </TabsTrigger>
+            <TabsTrigger value="exercises" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Criar Exercícios
+            </TabsTrigger>
+            <TabsTrigger value="lists" className="flex items-center gap-2">
+              <List className="h-4 w-4" />
+              Criar Listas
             </TabsTrigger>
           </TabsList>
           
@@ -72,6 +82,14 @@ export default function AdminDashboard() {
           
           <TabsContent value="students" className="max-w-4xl mx-auto">
             <ManageStudents />
+          </TabsContent>
+          
+          <TabsContent value="exercises" className="max-w-4xl mx-auto">
+            <CreateExercise />
+          </TabsContent>
+          
+          <TabsContent value="lists" className="max-w-4xl mx-auto">
+            <CreateExerciseList />
           </TabsContent>
         </Tabs>
       </main>

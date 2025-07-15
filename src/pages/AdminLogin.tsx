@@ -103,9 +103,8 @@ export default function AdminLogin() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Criar Admin</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-1">
+              <TabsTrigger value="login">Login Administrativo</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
@@ -147,59 +146,6 @@ export default function AdminLogin() {
               </form>
             </TabsContent>
             
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="new-name">Nome Completo</Label>
-                  <Input
-                    id="new-name"
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Nome do administrador"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="new-email">Email</Label>
-                  <Input
-                    id="new-email"
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="admin@colegio.com"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="new-password">Senha</Label>
-                  <Input
-                    id="new-password"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Senha segura"
-                    required
-                  />
-                </div>
-
-                <Button type="submit" className="w-full" disabled={signupLoading}>
-                  {signupLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Criando...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Criar Conta Admin
-                    </>
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
           </Tabs>
 
           <div className="mt-6 text-center">
@@ -208,7 +154,7 @@ export default function AdminLogin() {
             </p>
             <Button 
               variant="outline" 
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/')}
               className="flex items-center gap-2"
             >
               <User className="h-4 w-4" />

@@ -9,7 +9,7 @@ import { Loader2, User, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function StudentLogin() {
-  const [email, setEmail] = useState('');
+  const [codigo, setCodigo] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
@@ -21,7 +21,7 @@ export default function StudentLogin() {
     setLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(codigo, password);
       
       if (error) {
         throw error;
@@ -32,7 +32,7 @@ export default function StudentLogin() {
         description: "Bem-vindo de volta!",
       });
       
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: "Erro no login",
@@ -68,13 +68,13 @@ export default function StudentLogin() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="codigo">Código do Aluno</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
+                id="codigo"
+                type="text"
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value)}
+                placeholder="Digite seu código"
                 required
               />
             </div>
@@ -109,7 +109,7 @@ export default function StudentLogin() {
             </p>
             <Button 
               variant="outline" 
-              onClick={() => navigate('/admin/login')}
+              onClick={() => navigate('/admin')}
               className="flex items-center gap-2"
             >
               <Shield className="h-4 w-4" />
