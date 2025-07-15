@@ -1,74 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import WelcomeScreen from '@/components/WelcomeScreen';
-import Dashboard from '@/components/Dashboard';
-import Chat from '@/components/Chat';
-import Exercises from '@/pages/Exercises';
-import Layout from '@/components/Layout';
-
-type AppState = 'welcome' | 'app';
-type AppView = 'dashboard' | 'chat' | 'exercises';
+import StudentDashboard from '@/components/StudentDashboard';
+import StudentLogin from './StudentLogin';
 
 const Index = () => {
-  const [appState, setAppState] = useState<AppState>('welcome');
-  const [activeView, setActiveView] = useState<AppView>('dashboard');
-  const [userName, setUserName] = useState<string>('');
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, studentSession, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (loading) return;
     
-    if (user && profile) {
-      // Se o usuário é admin, redirecionar para o dashboard admin
-      if (profile.role === 'admin') {
-        navigate('/admin/dashboard');
-        return;
-      }
-      
-      // Se é aluno autenticado, usar o nome do perfil
-      setUserName(profile.full_name || user.email || 'Usuário');
-      setAppState('app');
-    } else {
-      // Se não está logado, verificar localStorage para manter compatibilidade
-      const savedUserName = localStorage.getItem('tudinha_user_name');
-      if (savedUserName) {
-        setUserName(savedUserName);
-        setAppState('app');
-      } else {
-        // Redirecionar para login se não tiver dados salvos
-        setAppState('welcome');
-      }
+    if (user && profile?.role === 'admin') {
+      navigate('/admin/dashboard');
     }
   }, [user, profile, loading, navigate]);
-
-  const handleUserSetup = (name: string) => {
-    // Se não há usuário autenticado, salvar no localStorage (modo offline)
-    if (!user) {
-      setUserName(name);
-      localStorage.setItem('tudinha_user_name', name);
-      setAppState('app');
-    }
-  };
-
-  const handleLogout = async () => {
-    if (user) {
-      await signOut();
-    }
-    localStorage.removeItem('tudinha_user_name');
-    setUserName('');
-    setAppState('welcome');
-    setActiveView('dashboard');
-  };
-
-  const handleStartChat = () => {
-    setActiveView('chat');
-  };
-
-  const handleViewExercises = () => {
-    setActiveView('exercises');
-  };
 
   if (loading) {
     return (
@@ -87,28 +33,17 @@ const Index = () => {
     );
   }
 
-  if (appState === 'welcome') {
-    return <WelcomeScreen onUserSetup={handleUserSetup} />;
+  // Redirect admin to admin dashboard
+  if (user && profile?.role === 'admin') {
+    return null;
   }
-
-  return (
-    <Layout 
-      userName={userName}
-      activeView={activeView}
-      onViewChange={setActiveView}
-      onLogout={handleLogout}
-    >
-      {activeView === 'dashboard' && (
-        <Dashboard userName={userName} onStartChat={handleStartChat} onViewExercises={handleViewExercises} />
-      )}
-      {activeView === 'chat' && (
-        <Chat userName={userName} />
-      )}
-      {activeView === 'exercises' && (
-        <Exercises />
-      )}
-    </Layout>
-  );
+  
+  // Show dashboard if student is logged in, login screen otherwise
+  if (studentSession) {
+    return <StudentDashboard />;
+  }
+  
+  return <StudentLogin />;
 };
 
 export default Index;

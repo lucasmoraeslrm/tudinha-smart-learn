@@ -33,7 +33,7 @@ export function ManageStudents() {
     turma: '',
   });
   const { toast } = useToast();
-  const { signUp } = useAuth();
+  const { signUpStudent } = useAuth();
 
   useEffect(() => {
     loadStudents();
@@ -41,14 +41,45 @@ export function ManageStudents() {
 
   const loadStudents = async () => {
     try {
-      const { data, error } = await supabase
+      // Carregar estudantes do sistema antigo (com user_id)
+      const { data: profileStudents, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('role', 'student')
-        .order('created_at', { ascending: false });
+        .not('user_id', 'is', null);
 
-      if (error) throw error;
-      setStudents(data || []);
+      if (profileError) throw profileError;
+
+      // Carregar estudantes do novo sistema (com student_id)
+      const { data: newStudents, error: studentsError } = await supabase
+        .from('students')
+        .select(`
+          *,
+          profiles!student_id(*)
+        `);
+
+      if (studentsError) throw studentsError;
+
+      // Combinar os dados em uma única lista
+      const allStudents = [
+        ...(profileStudents || []),
+        ...(newStudents || []).map(student => {
+          const profile = Array.isArray(student.profiles) ? student.profiles[0] : student.profiles;
+          return {
+            id: profile?.id || student.id,
+            user_id: student.id, // Usar student.id como user_id para compatibilidade
+            full_name: profile?.full_name || student.name,
+            role: 'student',
+            codigo: student.codigo,
+            ano_letivo: student.ano_letivo,
+            turma: student.turma,
+            created_at: student.created_at,
+            is_new_system: true // Flag para identificar estudantes do novo sistema
+          };
+        })
+      ];
+
+      setStudents(allStudents);
     } catch (error) {
       console.error('Erro ao carregar alunos:', error);
       toast({
@@ -66,22 +97,27 @@ export function ManageStudents() {
     setCreating(true);
 
     try {
-      // Criar a conta de usuário com os dados adicionais
-      const { error: authError } = await signUp(
-        `${newUserCredentials.codigo}@estudante.local`, // Email temporário baseado no código
+      // Usar o novo sistema de criação de estudantes
+      const { error: authError } = await signUpStudent(
+        newUserCredentials.codigo,
         newUserCredentials.password,
         newUserCredentials.fullName,
-        'student',
-        newUserCredentials.codigo,
         newUserCredentials.anoLetivo,
         newUserCredentials.turma
       );
 
-      if (authError) throw authError;
+      if (authError) {
+        toast({
+          title: "Erro",
+          description: authError,
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "Sucesso",
-        description: "Aluno criado com acesso ao sistema! Login será feito com o código.",
+        description: "Aluno criado com sucesso! O aluno pode fazer login com o código e senha.",
       });
 
       setNewUserCredentials({ 
@@ -95,7 +131,7 @@ export function ManageStudents() {
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error.message || "Não foi possível criar o aluno com login.",
+        description: error.message || "Não foi possível criar o aluno.",
         variant: "destructive",
       });
     } finally {

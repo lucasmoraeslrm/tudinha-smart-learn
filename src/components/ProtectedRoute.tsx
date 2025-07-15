@@ -9,26 +9,40 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, studentSession, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user && profile) {
-      if (requireAdmin && profile.role !== 'admin') {
-        navigate('/');
+    if (!loading) {
+      // Check admin authentication
+      if (user && profile) {
+        if (requireAdmin && profile.role !== 'admin') {
+          navigate('/');
+          return;
+        }
+
+        if (!requireAdmin && profile.role === 'admin') {
+          navigate('/admin/dashboard');
+          return;
+        }
+      }
+
+      // Check student authentication
+      if (studentSession) {
+        if (requireAdmin) {
+          navigate('/');
+          return;
+        }
+        // Student is logged in and doesn't need admin - allow access
         return;
       }
 
-      if (!requireAdmin && profile.role === 'admin') {
-        navigate('/admin/dashboard');
-        return;
+      // No authentication found
+      if (!user && !studentSession) {
+        navigate(requireAdmin ? '/admin' : '/');
       }
     }
-
-    if (!loading && !user) {
-      navigate(requireAdmin ? '/admin' : '/');
-    }
-  }, [user, profile, loading, navigate, requireAdmin]);
+  }, [user, profile, studentSession, loading, navigate, requireAdmin]);
 
   if (loading) {
     return (
@@ -41,14 +55,19 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     );
   }
 
-  if (!user) {
+  // Check if user is authenticated (either admin or student)
+  const isAuthenticated = (user && profile) || studentSession;
+  
+  if (!isAuthenticated) {
     return null; // Será redirecionado
   }
 
+  // Check admin requirements
   if (requireAdmin && profile?.role !== 'admin') {
     return null; // Será redirecionado
   }
 
+  // Redirect admin to admin dashboard if accessing student area
   if (!requireAdmin && profile?.role === 'admin') {
     return null; // Será redirecionado
   }

@@ -12,26 +12,33 @@ export default function StudentLogin() {
   const [codigo, setCodigo] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, user, profile } = useAuth();
+  const { signInStudent, user, profile, studentSession } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Redireciona admin logado para dashboard admin
+  // Redireciona usuários já logados
   useEffect(() => {
     if (user && profile?.role === 'admin') {
       navigate('/admin/dashboard');
+    } else if (studentSession) {
+      navigate('/dashboard');
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, studentSession, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await signIn(codigo, password);
+      const { error } = await signInStudent(codigo, password);
       
       if (error) {
-        throw error;
+        toast({
+          title: "Erro no login",
+          description: error,
+          variant: "destructive",
+        });
+        return;
       }
 
       toast({
@@ -43,7 +50,7 @@ export default function StudentLogin() {
     } catch (error: any) {
       toast({
         title: "Erro no login",
-        description: error.message || "Credenciais inválidas. Tente novamente.",
+        description: error.message || "Erro inesperado. Tente novamente.",
         variant: "destructive",
       });
     } finally {

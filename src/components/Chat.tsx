@@ -22,6 +22,7 @@ const Chat: React.FC<ChatProps> = ({ userName }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
   // Use consistent user and session IDs based on userName to maintain chat history
   const [userId] = useState(() => `user_${userName.toLowerCase().replace(/\s+/g, '_')}`);
   const [sessionId] = useState(() => `session_${userName.toLowerCase().replace(/\s+/g, '_')}`);

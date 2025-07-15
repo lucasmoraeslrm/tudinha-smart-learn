@@ -150,9 +150,10 @@ export type Database = {
           full_name: string | null
           id: string
           role: string
+          student_id: string | null
           turma: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           ano_letivo?: string | null
@@ -161,9 +162,10 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: string
+          student_id?: string | null
           turma?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           ano_letivo?: string | null
@@ -172,11 +174,20 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: string
+          student_id?: string | null
           turma?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_answers: {
         Row: {
@@ -230,29 +241,73 @@ export type Database = {
           },
         ]
       }
+      student_auth: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          password_hash: string
+          student_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          password_hash: string
+          student_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          password_hash?: string
+          student_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_auth_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           age: number | null
+          ano_letivo: string | null
+          codigo: string | null
           created_at: string
           email: string | null
           id: string
           name: string
+          turma: string | null
           updated_at: string
         }
         Insert: {
           age?: number | null
+          ano_letivo?: string | null
+          codigo?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name: string
+          turma?: string | null
           updated_at?: string
         }
         Update: {
           age?: number | null
+          ano_letivo?: string | null
+          codigo?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name?: string
+          turma?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -262,7 +317,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      verify_student_password: {
+        Args: { input_codigo: string; input_password: string }
+        Returns: {
+          student_data: Json
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
