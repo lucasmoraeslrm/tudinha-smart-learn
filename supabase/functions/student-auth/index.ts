@@ -1,6 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
+
+// Simple password hashing using Web Crypto API
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  const hashedInput = await hashPassword(password);
+  return hashedInput === hashedPassword;
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,7 +78,7 @@ serve(async (req) => {
       const student = studentData[0].student_data
 
       // Verify password
-      const isValidPassword = await bcrypt.compare(password, student.password_hash)
+      const isValidPassword = await verifyPassword(password, student.password_hash)
       
       if (!isValidPassword) {
         return new Response(
@@ -97,9 +111,13 @@ serve(async (req) => {
     }
 
     if (action === 'register') {
+      console.log('Starting student registration...');
+      
       const { codigo, password, name, anoLetivo, turma, age }: StudentRegisterRequest = await req.json()
+      console.log('Received data:', { codigo, name, anoLetivo, turma });
 
       if (!codigo || !password || !name) {
+        console.log('Missing required fields');
         return new Response(
           JSON.stringify({ error: 'Código, senha e nome são obrigatórios' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -121,7 +139,8 @@ serve(async (req) => {
       }
 
       // Hash password
-      const passwordHash = await bcrypt.hash(password)
+      console.log('Hashing password for:', codigo);
+      const passwordHash = await hashPassword(password);
 
       // Create student
       const { data: student, error: studentError } = await supabase
