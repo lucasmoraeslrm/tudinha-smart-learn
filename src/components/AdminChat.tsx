@@ -344,9 +344,22 @@ export function AdminChat() {
         throw new Error(`Erro ${response.status}: ${errorText}`);
       }
 
-      const aiData = await response.json();
-      console.log('Resposta do webhook:', aiData);
-      const aiResponse = aiData?.response || aiData?.mensagem || 'Resposta não disponível';
+      // Verificar se há conteúdo na resposta
+      const responseText = await response.text();
+      console.log('Texto da resposta:', responseText);
+      
+      let aiData;
+      let aiResponse = 'Mensagem enviada com sucesso para o webhook';
+      
+      if (responseText && responseText.trim()) {
+        try {
+          aiData = JSON.parse(responseText);
+          aiResponse = aiData?.response || aiData?.mensagem || aiResponse;
+        } catch (jsonError) {
+          console.log('Resposta não é JSON válido, usando resposta como texto:', responseText);
+          aiResponse = responseText;
+        }
+      }
 
       // Salvar no banco de dados
       const { error: saveError } = await supabase
