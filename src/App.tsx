@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
 import ExerciciosPage from "./pages/ExerciciosPage";
+import ExerciseListView from "./pages/ExerciseListView";
+import ExerciseView from "./pages/ExerciseView";
 import StudentLayout from "./components/StudentLayout";
 import StudentLogin from "./pages/StudentLogin";
 import AdminLogin from "./pages/AdminLogin";
@@ -47,6 +49,20 @@ const App = () => (
               <ProtectedRoute>
                 <StudentLayout>
                   <ExerciciosPage />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/lista/:listId" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <ExerciseListView />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/exercicio/:exerciseId" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <ExerciseView />
                 </StudentLayout>
               </ProtectedRoute>
             } />

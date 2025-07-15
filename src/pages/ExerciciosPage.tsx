@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function ExerciciosPage() {
   const [exerciseLists, setExerciseLists] = useState<any[]>([]);
   const [exercises, setExercises] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
@@ -142,14 +144,26 @@ export default function ExerciciosPage() {
       {exerciseLists.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Listas de Exercícios</h2>
+          <p className="text-muted-foreground">Escolha uma lista para começar a praticar</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {exerciseLists.map((list) => (
-              <Card key={list.id} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={list.id} 
+                className="hover:shadow-lg transition-shadow cursor-pointer group"
+                onClick={() => navigate(`/lista/${list.id}`)}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{list.title}</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">{list.description}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          {list.title}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">{list.subject}</p>
+                      </div>
                     </div>
                     <Badge variant="secondary" className={getDifficultyColor(list.difficulty)}>
                       {list.difficulty || 'Médio'}
@@ -158,23 +172,13 @@ export default function ExerciciosPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Progresso</span>
-                      <span>0/{list.exercise_ids?.length || 0} exercícios</span>
-                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {list.description}
+                    </p>
                     
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-primary h-2 rounded-full transition-all duration-300" style={{ width: '0%' }}></div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">{list.exercise_ids?.length || 0} exercícios</span>
                     </div>
-
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">{list.subject}</Badge>
-                      <span className="text-sm text-muted-foreground">{list.exercise_ids?.length || 0} exercícios</span>
-                    </div>
-
-                    <Button className="w-full">
-                      Iniciar
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -189,12 +193,23 @@ export default function ExerciciosPage() {
           <h2 className="text-xl font-semibold">Exercícios Individuais</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {exercises.map((exercise) => (
-              <Card key={exercise.id} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={exercise.id} 
+                className="hover:shadow-lg transition-shadow cursor-pointer group"
+                onClick={() => navigate(`/exercicio/${exercise.id}`)}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{exercise.title}</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{exercise.question}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          {exercise.title}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">{exercise.subject}</p>
+                      </div>
                     </div>
                     <Badge variant="secondary" className={getDifficultyColor(exercise.difficulty)}>
                       {exercise.difficulty || 'Médio'}
@@ -203,14 +218,13 @@ export default function ExerciciosPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">{exercise.subject}</Badge>
-                      <span className="text-sm text-muted-foreground">1 exercício</span>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {exercise.question}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">1 exercício</span>
                     </div>
-
-                    <Button className="w-full">
-                      Resolver
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
