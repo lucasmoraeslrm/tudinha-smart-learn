@@ -42,7 +42,7 @@ export function AdminChat() {
   const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
   const [showFullHistory, setShowFullHistory] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   // Carregar lista de alunos
   useEffect(() => {
@@ -299,10 +299,10 @@ export function AdminChat() {
       return;
     }
 
-    if (!user?.id) {
+    if (!user?.id || !isAdmin) {
       toast({
         title: "Erro",
-        description: "Usuário não identificado. Faça login novamente.",
+        description: "Acesso negado. Você precisa estar logado como administrador para usar esta funcionalidade.",
         variant: "destructive",
       });
       return;
