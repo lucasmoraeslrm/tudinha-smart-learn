@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Target, Clock, Trophy, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { BookOpen, Clock, Trophy, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ExerciciosPage() {
   const [exerciseLists, setExerciseLists] = useState<any[]>([]);
   const [exercises, setExercises] = useState<any[]>([]);
+  const [stats, setStats] = useState({ totalExercises: 0, completedExercises: 0, studyTimeMinutes: 0 });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { getStudentId } = useAuth();
 
   useEffect(() => {
     loadData();
@@ -21,6 +23,7 @@ export default function ExerciciosPage() {
   const loadData = async () => {
     try {
       setLoading(true);
+      const studentId = getStudentId();
 
       // Carregar listas de exercícios
       const { data: listsData, error: listsError } = await supabase
@@ -37,6 +40,27 @@ export default function ExerciciosPage() {
         .order('created_at', { ascending: false });
 
       if (exercisesError) throw exercisesError;
+
+      // Carregar estatísticas do estudante
+      if (studentId) {
+        const { data: answersData, error: answersError } = await supabase
+          .from('student_answers')
+          .select('*')
+          .eq('student_id', studentId);
+
+        if (!answersError && answersData) {
+          const completedExercises = answersData.length;
+          
+          // Calcular tempo de estudo (assumindo 2 minutos por exercício respondido)
+          const studyTimeMinutes = completedExercises * 2;
+
+          setStats({
+            totalExercises: (exercisesData?.length || 0) + (listsData?.reduce((acc, list) => acc + (list.exercise_ids?.length || 0), 0) || 0),
+            completedExercises,
+            studyTimeMinutes
+          });
+        }
+      }
 
       setExerciseLists(listsData || []);
       setExercises(exercisesData || []);
@@ -84,15 +108,9 @@ export default function ExerciciosPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Exercícios</h1>
-          <p className="text-muted-foreground">Pratique e teste seus conhecimentos</p>
-        </div>
-        <Button>
-          <Target className="w-4 h-4 mr-2" />
-          Criar Lista Personalizada
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold">Exercícios</h1>
+        <p className="text-muted-foreground">Pratique e teste seus conhecimentos</p>
       </div>
 
       {/* Stats */}
@@ -104,7 +122,7 @@ export default function ExerciciosPage() {
                 <BookOpen className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-lg font-semibold">{totalExercises}</p>
+                <p className="text-lg font-semibold">{stats.totalExercises}</p>
                 <p className="text-sm text-muted-foreground">Exercícios Disponíveis</p>
               </div>
             </div>
@@ -118,7 +136,7 @@ export default function ExerciciosPage() {
                 <Trophy className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-lg font-semibold">0</p>
+                <p className="text-lg font-semibold">{stats.completedExercises}</p>
                 <p className="text-sm text-muted-foreground">Concluídos</p>
               </div>
             </div>
@@ -132,7 +150,9 @@ export default function ExerciciosPage() {
                 <Clock className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-lg font-semibold">0h 0m</p>
+                <p className="text-lg font-semibold">
+                  {Math.floor(stats.studyTimeMinutes / 60)}h {stats.studyTimeMinutes % 60}m
+                </p>
                 <p className="text-sm text-muted-foreground">Tempo de Estudo</p>
               </div>
             </div>
