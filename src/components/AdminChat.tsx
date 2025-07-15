@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, MessageCircle, User, Bot, TrendingUp, TrendingDown, Clock, Eye } from 'lucide-react';
 
@@ -41,6 +42,7 @@ export function AdminChat() {
   const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
   const [showFullHistory, setShowFullHistory] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Carregar lista de alunos
   useEffect(() => {
@@ -205,16 +207,26 @@ export function AdminChat() {
       return;
     }
 
+    if (!user?.id) {
+      toast({
+        title: "Erro",
+        description: "Usuário não identificado. Faça login novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       // Buscar dados do aluno
       const studentData = await getStudentData(selectedStudent);
 
-      // Preparar payload para o webhook
+      // Preparar payload para o webhook incluindo o user_id do admin
       const payload = {
         ...studentData,
-        mensagem_admin: message
+        mensagem_admin: message,
+        user_id: user.id
       };
 
       // Enviar para o webhook
