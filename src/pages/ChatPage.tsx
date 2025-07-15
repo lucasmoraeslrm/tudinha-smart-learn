@@ -11,13 +11,7 @@ export default function ChatPage() {
   return (
     <div className="h-full">
       <Card className="h-[calc(100vh-8rem)]">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            Converse com a Tudinha
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="h-[calc(100%-80px)] p-0">
+        <CardContent className="h-full p-0">
           <Chat userName={studentName} />
         </CardContent>
       </Card>
