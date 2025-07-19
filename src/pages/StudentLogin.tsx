@@ -5,12 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Shield } from 'lucide-react';
+import { Loader2, User, Shield, ArrowLeft, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function StudentLogin() {
+interface StudentLoginProps {
+  onBack?: () => void;
+}
+
+export default function StudentLogin({ onBack }: StudentLoginProps) {
   const [codigo, setCodigo] = useState('');
   const [password, setPassword] = useState('');
+  const [maquinaCodigo, setMaquinaCodigo] = useState('');
   const [loading, setLoading] = useState(false);
   const { signInStudent, user, profile, studentSession } = useAuth();
   const { toast } = useToast();
@@ -41,12 +46,17 @@ export default function StudentLogin() {
         return;
       }
 
+      // TODO: Registrar login com código da máquina
+      // Para implementar depois: salvar log de login com maquinaCodigo
+
       toast({
         title: "Login realizado com sucesso!",
         description: "Bem-vindo de volta!",
       });
       
-      navigate('/dashboard');
+      if (!onBack) {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       toast({
         title: "Erro no login",
@@ -62,21 +72,23 @@ export default function StudentLogin() {
     <div className="min-h-screen bg-gradient-main flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-primary p-3">
-              <img 
-                src="https://storange.tudinha.com.br/colag.png" 
-                alt="Colégio Almeida Garrett" 
-                className="w-full h-full object-contain"
-              />
-            </div>
+          {onBack && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onBack}
+              className="absolute left-4 top-4"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          )}
+          
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <GraduationCap className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="flex items-center justify-center gap-2 text-xl">
-            <User className="h-5 w-5" />
-            Login do Aluno
-          </CardTitle>
+          <CardTitle className="text-2xl">Portal do Aluno</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Colégio Almeida Garrett
+            Entre com seu código e senha para acessar
           </p>
         </CardHeader>
         <CardContent>
@@ -100,7 +112,19 @@ export default function StudentLogin() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Sua senha"
+                placeholder="Digite sua senha"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="maquina">Código da Máquina</Label>
+              <Input
+                id="maquina"
+                type="text"
+                placeholder="Ex: LAB01-PC05"
+                value={maquinaCodigo}
+                onChange={(e) => setMaquinaCodigo(e.target.value)}
                 required
               />
             </div>
@@ -117,19 +141,21 @@ export default function StudentLogin() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground mb-2">
-              Acesso administrativo?
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/admin')}
-              className="flex items-center gap-2"
-            >
-              <Shield className="h-4 w-4" />
-              Login Admin
-            </Button>
-          </div>
+          {!onBack && (
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                Acesso administrativo?
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/admin')}
+                className="flex items-center gap-2"
+              >
+                <Shield className="h-4 w-4" />
+                Login Admin
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

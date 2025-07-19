@@ -46,6 +46,92 @@ export type Database = {
           },
         ]
       }
+      aulas_programadas: {
+        Row: {
+          assunto: string | null
+          ativa: boolean | null
+          created_at: string
+          data_hora_fim: string
+          data_hora_inicio: string
+          duracao_minutos: number | null
+          id: string
+          materia: string
+          professor_id: string | null
+          titulo: string
+          turma: string | null
+        }
+        Insert: {
+          assunto?: string | null
+          ativa?: boolean | null
+          created_at?: string
+          data_hora_fim: string
+          data_hora_inicio: string
+          duracao_minutos?: number | null
+          id?: string
+          materia: string
+          professor_id?: string | null
+          titulo: string
+          turma?: string | null
+        }
+        Update: {
+          assunto?: string | null
+          ativa?: boolean | null
+          created_at?: string
+          data_hora_fim?: string
+          data_hora_inicio?: string
+          duracao_minutos?: number | null
+          id?: string
+          materia?: string
+          professor_id?: string | null
+          titulo?: string
+          turma?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aulas_programadas_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coordenadores: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string
+          email: string | null
+          funcao: string
+          id: string
+          nome: string
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string
+          email?: string | null
+          funcao: string
+          id?: string
+          nome: string
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string
+          email?: string | null
+          funcao?: string
+          id?: string
+          nome?: string
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       exercise_lists: {
         Row: {
           created_at: string
@@ -86,6 +172,7 @@ export type Database = {
           difficulty: string | null
           explanation: string | null
           id: string
+          nivel_dificuldade: string | null
           options: Json | null
           question: string
           subject: string
@@ -97,6 +184,7 @@ export type Database = {
           difficulty?: string | null
           explanation?: string | null
           id?: string
+          nivel_dificuldade?: string | null
           options?: Json | null
           question: string
           subject: string
@@ -108,10 +196,144 @@ export type Database = {
           difficulty?: string | null
           explanation?: string | null
           id?: string
+          nivel_dificuldade?: string | null
           options?: Json | null
           question?: string
           subject?: string
           title?: string
+        }
+        Relationships: []
+      }
+      jornadas: {
+        Row: {
+          assunto: string | null
+          aula_titulo: string
+          created_at: string
+          fim_previsto: string | null
+          fim_real: string | null
+          id: string
+          inicio_previsto: string | null
+          inicio_real: string | null
+          materia: string
+          professor_nome: string | null
+          resultado_exercicio: Json | null
+          resumo_inicial: string | null
+          status: string | null
+          student_id: string | null
+          tempo_resumo_segundos: number | null
+          updated_at: string
+        }
+        Insert: {
+          assunto?: string | null
+          aula_titulo: string
+          created_at?: string
+          fim_previsto?: string | null
+          fim_real?: string | null
+          id?: string
+          inicio_previsto?: string | null
+          inicio_real?: string | null
+          materia: string
+          professor_nome?: string | null
+          resultado_exercicio?: Json | null
+          resumo_inicial?: string | null
+          status?: string | null
+          student_id?: string | null
+          tempo_resumo_segundos?: number | null
+          updated_at?: string
+        }
+        Update: {
+          assunto?: string | null
+          aula_titulo?: string
+          created_at?: string
+          fim_previsto?: string | null
+          fim_real?: string | null
+          id?: string
+          inicio_previsto?: string | null
+          inicio_real?: string | null
+          materia?: string
+          professor_nome?: string | null
+          resultado_exercicio?: Json | null
+          resumo_inicial?: string | null
+          status?: string | null
+          student_id?: string | null
+          tempo_resumo_segundos?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jornadas_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      login_logs: {
+        Row: {
+          id: string
+          ip_address: string | null
+          login_time: string
+          logout_time: string | null
+          maquina_codigo: string | null
+          status: string | null
+          student_id: string | null
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+          logout_time?: string | null
+          maquina_codigo?: string | null
+          status?: string | null
+          student_id?: string | null
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+          logout_time?: string | null
+          maquina_codigo?: string | null
+          status?: string | null
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "login_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maquinas: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          nome: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          nome?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          nome?: string | null
+          status?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -139,6 +361,42 @@ export type Database = {
           sender?: string
           session_id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      professores: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string
+          email: string | null
+          id: string
+          materias: string[] | null
+          nome: string
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          materias?: string[] | null
+          nome: string
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          materias?: string[] | null
+          nome?: string
+          password_hash?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -284,6 +542,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          maquina_padrao: string | null
           name: string
           turma: string | null
           updated_at: string
@@ -295,6 +554,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          maquina_padrao?: string | null
           name: string
           turma?: string | null
           updated_at?: string
@@ -306,6 +566,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          maquina_padrao?: string | null
           name?: string
           turma?: string | null
           updated_at?: string
@@ -317,6 +578,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      verify_coordenador_password: {
+        Args: { input_codigo: string; input_password: string }
+        Returns: {
+          coordenador_data: Json
+        }[]
+      }
+      verify_professor_password: {
+        Args: { input_codigo: string; input_password: string }
+        Returns: {
+          professor_data: Json
+        }[]
+      }
       verify_student_password: {
         Args: { input_codigo: string; input_password: string }
         Returns: {
