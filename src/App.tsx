@@ -19,6 +19,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminChat from "./pages/AdminChat";
 import AdminStudents from "./pages/AdminStudents";
+import AdminJornadas from "./pages/AdminJornadas";
 import AdminExercises from "./pages/AdminExercises";
 import AdminLists from "./pages/AdminLists";
 import NotFound from "./pages/NotFound";
@@ -100,6 +101,13 @@ const App = () => (
               <ProtectedRoute requireAdmin>
                 <AdminLayout>
                   <AdminStudents />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/jornadas" element={
+              <ProtectedRoute requireAdmin>
+                <AdminLayout>
+                  <AdminJornadas />
                 </AdminLayout>
               </ProtectedRoute>
             } />
