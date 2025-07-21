@@ -236,7 +236,7 @@ Clique no botão abaixo para começar! 🚀`;
       })
       .eq('id', jornada.id);
 
-    // Enviar dados para o webhook n8n para gerar explicação
+    // Enviar dados para o webhook n8n para gerar explicação personalizada
     if (studentSession) {
       const response = await sendWebhookMessage({
         aluno: {
@@ -244,10 +244,13 @@ Clique no botão abaixo para começar! 🚀`;
           nome: studentSession.name
         },
         mensagem: {
-          evento: "explicacao",
+          evento: "explicacao_personalizada",
           etapa: "explicacao",
-          resposta_aluno: resumoInicial,
-          assunto_admin: jornada.assunto
+          resumo_aluno: resumoInicial,
+          descricao_professor: jornada.assunto,
+          titulo_aula: jornada.aula_titulo,
+          materia: jornada.materia,
+          professor_nome: jornada.professor_nome
         }
       });
 
@@ -255,8 +258,10 @@ Clique no botão abaixo para começar! 🚀`;
       if (response && response.explicacao) {
         setAiMessage(response.explicacao);
       } else {
-        // Mensagem padrão caso N8N não responda
-        const explicacaoIA = `Muito bem! Com base no que você compartilhou sobre ${jornada.assunto}, vou explicar os conceitos principais.
+        // Mensagem padrão personalizada caso N8N não responda
+        const explicacaoIA = `Muito bem! Com base no que você compartilhou sobre ${jornada.aula_titulo}, vou explicar os conceitos principais.
+
+${jornada.assunto}
 
 Esta explicação foi personalizada com base no seu conhecimento prévio. Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
         setAiMessage(explicacaoIA);
