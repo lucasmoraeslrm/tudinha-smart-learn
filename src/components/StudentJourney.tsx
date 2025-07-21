@@ -94,8 +94,14 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
   }, [isExerciseTimerRunning]);
 
   const sendWebhookMessage = async (data: any) => {
+    // Adiciona o ID da jornada aos dados
+    const dataWithJornadaId = {
+      ...data,
+      jornada_id: jornada.id
+    };
+    
     try {
-      console.log('Enviando dados para webhook N8N via Edge Function:', data);
+      console.log('Enviando dados para webhook N8N via Edge Function:', dataWithJornadaId);
       
       const response = await fetch('https://pwdkfekouyyujfwmgqls.supabase.co/functions/v1/send-n8n-webhook', {
         method: 'POST',
@@ -103,7 +109,7 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
           'Content-Type': 'application/json',
           'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3ZGtmZWtvdXl5dWpmd21ncWxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1Mjc4OTQsImV4cCI6MjA2ODEwMzg5NH0.FQfRU7zv5Y2cj2CZT6KFdciekApZl8NxThZjfTNLzko`,
         },
-        body: JSON.stringify({ webhookData: data }),
+        body: JSON.stringify({ webhookData: dataWithJornadaId }),
       });
 
       if (response.ok) {
@@ -130,7 +136,7 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
             'Content-Type': 'application/json',
           },
           mode: 'no-cors',
-          body: JSON.stringify(data),
+          body: JSON.stringify(dataWithJornadaId),
         });
 
         console.log('Webhook enviado diretamente com sucesso');
