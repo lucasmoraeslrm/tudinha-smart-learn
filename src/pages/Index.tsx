@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import StudentDashboard from '@/components/StudentDashboard';
 import StudentLogin from './StudentLogin';
 import UserTypeSelector from '@/components/UserTypeSelector';
@@ -24,14 +25,23 @@ const Index = () => {
     
     if (loading) return;
     
+    // Limpar qualquer sessão admin do Supabase se não for uma sessão válida
+    if (user && !profile) {
+      console.log('User without profile found, clearing session');
+      // Há um usuário mas sem profile, pode ser uma sessão inválida
+      return;
+    }
+    
     // Se há sessão de aluno ativa, redireciona para dashboard do aluno
     if (studentSession) {
+      console.log('Student session found, redirecting to dashboard');
       navigate('/dashboard');
       return;
     }
 
-    // Se há usuário admin autenticado via Supabase, redireciona para admin
+    // Se há usuário admin autenticado via Supabase E tem profile, redireciona para admin
     if (user && profile?.role === 'admin') {
+      console.log('Admin session found, redirecting to admin dashboard');
       navigate('/admin/dashboard');
       return;
     }
@@ -48,26 +58,13 @@ const Index = () => {
       const coordenadorSession = JSON.parse(savedCoordenadorSession);
       setCoordenadorData(coordenadorSession);
       setCurrentView('coordenador');
+    } else {
+      console.log('No active sessions, showing selector');
+      setCurrentView('selector');
     }
     // Se não há nenhuma sessão ativa, mantém na tela de seleção (currentView = 'selector')
   }, [user, profile, studentSession, loading, navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4">
-            <img 
-              src="https://storange.tudinha.com.br/colag.png" 
-              alt="Carregando..." 
-              className="w-full h-full object-contain animate-pulse"
-            />
-          </div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
 
 
   const handleUserTypeSelect = (type: 'student' | 'professor' | 'coordenador') => {
@@ -99,6 +96,40 @@ const Index = () => {
     setCoordenadorData(null);
     setCurrentView('selector');
   };
+
+  const handleClearAllSessions = async () => {
+    // Limpar todas as sessões
+    await supabase.auth.signOut();
+    localStorage.clear();
+    setCurrentView('selector');
+    setProfessorData(null);
+    setCoordenadorData(null);
+    window.location.reload();
+  };
+
+  // Se há carregamento, mostrar tela de loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4">
+            <img 
+              src="https://storange.tudinha.com.br/colag.png" 
+              alt="Carregando..." 
+              className="w-full h-full object-contain animate-pulse"
+            />
+          </div>
+          <p className="text-muted-foreground">Carregando...</p>
+          <button 
+            onClick={handleClearAllSessions}
+            className="mt-4 text-sm text-muted-foreground underline"
+          >
+            Limpar sessões
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Renderizar baseado na visualização atual
   switch (currentView) {
