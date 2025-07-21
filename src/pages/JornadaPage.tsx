@@ -30,21 +30,25 @@ const JornadaPage = () => {
 
       if (!studentId) return;
 
-      // Buscar jornadas disponíveis para a série do aluno no dia atual
-      const hoje = new Date();
-      const inicioDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-      const fimDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1);
+      console.log('Student data:', studentData);
 
-      const { data: jornadas } = await supabase
+      // Buscar jornadas disponíveis para a série do aluno
+      const hoje = new Date();
+      console.log('Data atual:', hoje.toISOString());
+      
+      const { data: jornadas, error } = await supabase
         .from('jornadas')
         .select('*')
         .eq('serie_ano_letivo', studentData.ano_letivo)
         .eq('serie_turma', studentData.turma)
-        .gte('created_at', inicioDia.toISOString())
-        .lt('created_at', fimDia.toISOString())
         .in('status', ['pendente', 'em_andamento', 'aguardando_liberacao'])
-        .order('created_at', { ascending: false })
-        .limit(1);
+        .order('created_at', { ascending: false });
+
+      console.log('Jornadas query result:', { jornadas, error });
+      console.log('Filtros aplicados:', {
+        serie_ano_letivo: studentData.ano_letivo,
+        serie_turma: studentData.turma
+      });
 
       if (jornadas && jornadas.length > 0) {
         setJornadaAtual(jornadas[0]);
