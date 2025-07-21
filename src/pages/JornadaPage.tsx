@@ -30,29 +30,18 @@ const JornadaPage = () => {
 
       if (!studentId) return;
 
-      // Buscar próxima aula do dia
-      const agora = new Date();
-      const { data: aulas } = await supabase
-        .from('aulas_programadas')
-        .select(`
-          *,
-          professores:professor_id (nome)
-        `)
-        .eq('turma', studentData.turma)
-        .gte('data_hora_inicio', agora.toISOString())
-        .order('data_hora_inicio', { ascending: true })
-        .limit(1);
+      // Buscar jornadas disponíveis para a série do aluno no dia atual
+      const hoje = new Date();
+      const inicioDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+      const fimDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1);
 
-      if (aulas && aulas.length > 0) {
-        setProximaAula(aulas[0]);
-      }
-
-      // Buscar jornadas da série do aluno
       const { data: jornadas } = await supabase
         .from('jornadas')
         .select('*')
         .eq('serie_ano_letivo', studentData.ano_letivo)
         .eq('serie_turma', studentData.turma)
+        .gte('created_at', inicioDia.toISOString())
+        .lt('created_at', fimDia.toISOString())
         .in('status', ['pendente', 'em_andamento', 'aguardando_liberacao'])
         .order('created_at', { ascending: false })
         .limit(1);
@@ -79,10 +68,10 @@ const JornadaPage = () => {
 
   const iniciarJornada = async () => {
     try {
-      if (!proximaAula) {
+      if (!jornadaAtual) {
         toast({
-          title: "Nenhuma aula disponível",
-          description: "Não há aulas programadas para agora",
+          title: "Nenhuma jornada disponível",
+          description: "Não há jornadas programadas para hoje",
           variant: "destructive",
         });
         return;
@@ -90,30 +79,31 @@ const JornadaPage = () => {
 
       const studentData = JSON.parse(localStorage.getItem('studentSession') || '{}');
       
-      // Criar nova jornada
-      const { data: novaJornada, error } = await supabase
+      // Atualizar status da jornada para em_andamento
+      const { error } = await supabase
         .from('jornadas')
-        .insert({
-          student_id: studentData.id,
-          aula_titulo: proximaAula.titulo,
-          professor_nome: proximaAula.professores?.nome,
-          materia: proximaAula.materia,
-          assunto: proximaAula.assunto,
-          inicio_previsto: proximaAula.data_hora_inicio,
-          fim_previsto: proximaAula.data_hora_fim,
-          status: 'pendente'
+        .update({
+          status: 'em_andamento',
+          inicio_real: new Date().toISOString(),
+          student_id: studentData.id
         })
-        .select()
-        .single();
+        .eq('id', jornadaAtual.id);
 
       if (error) throw error;
 
-      setJornadaAtual(novaJornada);
+      // Atualizar estado local
+      setJornadaAtual({
+        ...jornadaAtual,
+        status: 'em_andamento',
+        inicio_real: new Date().toISOString(),
+        student_id: studentData.id
+      });
+      
       setActiveJourney(true);
       
       toast({
         title: "Jornada iniciada!",
-        description: `Bem-vindo à aula de ${proximaAula.materia}`,
+        description: `Bem-vindo à jornada de ${jornadaAtual.materia}`,
       });
 
     } catch (error: any) {
@@ -146,52 +136,43 @@ const JornadaPage = () => {
 
       {/* Jornada Atual */}
       {jornadaAtual ? (
-        <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
+        <Card className={`${
+          jornadaAtual.status === 'em_andamento' 
+            ? 'bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/20' 
+            : 'bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/20'
+        }`}>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Clock className="w-5 h-5 mr-2 text-yellow-600" />
-              Jornada em Andamento
+              <Clock className={`w-5 h-5 mr-2 ${
+                jornadaAtual.status === 'em_andamento' ? 'text-green-600' : 'text-yellow-600'
+              }`} />
+              {jornadaAtual.status === 'em_andamento' ? 'Jornada em Andamento' : 'Jornada Disponível'}
               <Badge variant="outline" className="ml-2 capitalize">
                 {jornadaAtual.status.replace('_', ' ')}
               </Badge>
             </CardTitle>
             <CardDescription>
-              {jornadaAtual.materia} - {jornadaAtual.assunto}
+              {jornadaAtual.materia} - {jornadaAtual.assunto || jornadaAtual.aula_titulo}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Professor: {jornadaAtual.professor_nome}
-              </p>
-              <Button onClick={() => setActiveJourney(true)} size="lg">
-                <Play className="w-4 h-4 mr-2" />
-                Continuar Jornada
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : proximaAula ? (
-        <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BookOpen className="w-5 h-5 mr-2 text-blue-600" />
-              Próxima Aula: {proximaAula.titulo}
-            </CardTitle>
-            <CardDescription>
-              {proximaAula.assunto} • Prof. {proximaAula.professores?.nome}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Clock className="w-4 h-4 mr-2" />
-                {new Date(proximaAula.data_hora_inicio).toLocaleString()} • {proximaAula.duracao_minutos} min
-              </div>
-              <Button onClick={iniciarJornada} size="lg" className="w-full">
-                <Play className="w-4 h-4 mr-2" />
-                Iniciar Jornada
-              </Button>
+              {jornadaAtual.professor_nome && (
+                <p className="text-sm text-muted-foreground">
+                  Professor: {jornadaAtual.professor_nome}
+                </p>
+              )}
+              {jornadaAtual.status === 'em_andamento' ? (
+                <Button onClick={() => setActiveJourney(true)} size="lg">
+                  <Play className="w-4 h-4 mr-2" />
+                  Continuar Jornada
+                </Button>
+              ) : (
+                <Button onClick={iniciarJornada} size="lg" className="w-full">
+                  <Play className="w-4 h-4 mr-2" />
+                  Iniciar Jornada
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -203,14 +184,14 @@ const JornadaPage = () => {
               Nenhuma jornada disponível
             </CardTitle>
             <CardDescription>
-              Aguarde a programação da próxima aula
+              Não há jornadas programadas para hoje
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8">
               <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">
-                Em breve novas jornadas estarão disponíveis
+                Aguarde novas jornadas serem criadas pelo professor
               </p>
             </div>
           </CardContent>
