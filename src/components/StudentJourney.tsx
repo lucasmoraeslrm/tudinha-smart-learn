@@ -308,25 +308,30 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
 
   const loadExercises = async () => {
     try {
+      // Usar os exercise_ids da jornada atual
+      if (!jornada.exercise_ids || jornada.exercise_ids.length === 0) {
+        toast({
+          title: "Nenhum exercício vinculado",
+          description: "Esta jornada não possui exercícios vinculados.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data: exerciciosData } = await supabase
         .from('exercises')
         .select('*')
-        .eq('subject', jornada.materia)
-        .limit(10);
+        .in('id', jornada.exercise_ids);
 
-      if (exerciciosData && exerciciosData.length >= 6) {
-        // Separar por dificuldade: 2 fáceis, 2 médios, 2 difíceis
-        const faceis = exerciciosData.filter(e => e.difficulty === 'easy').slice(0, 2);
-        const medios = exerciciosData.filter(e => e.difficulty === 'medium').slice(0, 2);
-        const dificeis = exerciciosData.filter(e => e.difficulty === 'hard').slice(0, 2);
-        
-        const exerciciosSelecionados = [...faceis, ...medios, ...dificeis];
-        setExercicios(exerciciosSelecionados);
+      if (exerciciosData && exerciciosData.length > 0) {
+        // Embaralhar exercícios de forma aleatória para cada aluno
+        const exerciciosEmbaralhados = [...exerciciosData].sort(() => Math.random() - 0.5);
+        setExercicios(exerciciosEmbaralhados);
         setIsExerciseTimerRunning(true);
       } else {
         toast({
-          title: "Exercícios insuficientes",
-          description: "Não há exercícios suficientes cadastrados para esta matéria.",
+          title: "Exercícios não encontrados",
+          description: "Os exercícios vinculados a esta jornada não foram encontrados.",
           variant: "destructive",
         });
       }
