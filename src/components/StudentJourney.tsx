@@ -635,16 +635,19 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
                       </div>
                       <h4 className="font-medium">{exercicio.question}</h4>
                       <div className="space-y-2">
-                        {exercicio.options.map((opcao: string, optIndex: number) => (
-                          <Button
-                            key={optIndex}
-                            variant={respostasExercicio[exercicio.id] === opcao ? "default" : "outline"}
-                            className="w-full justify-start text-left"
-                            onClick={() => handleExerciseAnswer(exercicio.id, opcao)}
-                          >
-                            {String.fromCharCode(65 + optIndex)}) {opcao}
-                          </Button>
-                        ))}
+                        {exercicio.options.map((opcao: any, optIndex: number) => {
+                          const opcaoText = typeof opcao === 'string' ? opcao : opcao.text || opcao;
+                          return (
+                            <Button
+                              key={optIndex}
+                              variant={respostasExercicio[exercicio.id] === opcaoText ? "default" : "outline"}
+                              className="w-full justify-start text-left"
+                              onClick={() => handleExerciseAnswer(exercicio.id, opcaoText)}
+                            >
+                              {String.fromCharCode(65 + optIndex)}) {opcaoText}
+                            </Button>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
