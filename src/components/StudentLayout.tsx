@@ -8,11 +8,13 @@ import {
   BookOpen, 
   Settings, 
   LogOut,
-  User
+  User,
+  MapPin
 } from 'lucide-react';
 
 const sidebarItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Jornada', url: '/jornada', icon: MapPin },
   { title: 'Tudinha', url: '/chat', icon: MessageCircle },
   { title: 'Exercícios', url: '/exercicios', icon: BookOpen },
 ];
