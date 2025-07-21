@@ -316,9 +316,9 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
 
       if (exerciciosData && exerciciosData.length >= 6) {
         // Separar por dificuldade: 2 fáceis, 2 médios, 2 difíceis
-        const faceis = exerciciosData.filter(e => e.nivel_dificuldade === 'facil').slice(0, 2);
-        const medios = exerciciosData.filter(e => e.nivel_dificuldade === 'medio').slice(0, 2);
-        const dificeis = exerciciosData.filter(e => e.nivel_dificuldade === 'dificil').slice(0, 2);
+        const faceis = exerciciosData.filter(e => e.difficulty === 'easy').slice(0, 2);
+        const medios = exerciciosData.filter(e => e.difficulty === 'medium').slice(0, 2);
+        const dificeis = exerciciosData.filter(e => e.difficulty === 'hard').slice(0, 2);
         
         const exerciciosSelecionados = [...faceis, ...medios, ...dificeis];
         setExercicios(exerciciosSelecionados);
