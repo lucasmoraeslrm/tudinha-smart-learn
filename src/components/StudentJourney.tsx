@@ -254,13 +254,44 @@ Clique no botão abaixo para começar! 🚀`;
         }
       });
 
-      // Se recebeu resposta do N8N, usar ela, senão usar mensagem padrão
+      // Tratar resposta do N8N
       console.log('Resposta completa do webhook:', response);
       
-      if (response && (response.explicacao || response.resposta)) {
-        const explicacaoPersonalizada = response.explicacao || response.resposta;
-        console.log('Usando explicação personalizada do N8N:', explicacaoPersonalizada);
-        setAiMessage(explicacaoPersonalizada);
+      if (response && response.resposta) {
+        console.log('Usando explicação personalizada do N8N:', response.resposta);
+        
+        // Verificar se a resposta contém o formato JSON com marcadores
+        let explicacaoPersonalizada = response.resposta;
+        
+        // Se a resposta contém format_final_json_response, extrair o JSON
+        if (typeof explicacaoPersonalizada === 'string' && explicacaoPersonalizada.includes('format_final_json_response')) {
+          try {
+            // Extrair o JSON entre as marcações
+            const jsonMatch = explicacaoPersonalizada.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const jsonData = JSON.parse(jsonMatch[0]);
+              
+              // Montar a explicação formatada
+              let explicacaoFormatada = jsonData.resposta;
+              
+              if (jsonData.topicos && jsonData.topicos.length > 0) {
+                explicacaoFormatada += '\n\n**Tópicos principais:**\n';
+                jsonData.topicos.forEach((topico: any, index: number) => {
+                  explicacaoFormatada += `\n${index + 1}. **${topico.titulo}**\n${topico.conteudo}\n`;
+                });
+              }
+              
+              setAiMessage(explicacaoFormatada);
+            } else {
+              setAiMessage(explicacaoPersonalizada);
+            }
+          } catch (parseError) {
+            console.log('Erro ao extrair JSON da resposta N8N:', parseError);
+            setAiMessage(explicacaoPersonalizada);
+          }
+        } else {
+          setAiMessage(explicacaoPersonalizada);
+        }
       } else {
         console.log('Usando explicação padrão (N8N não retornou dados válidos)');
         // Mensagem padrão personalizada caso N8N não responda
