@@ -16,6 +16,11 @@ const Index = () => {
   const [coordenadorData, setCoordenadorData] = useState<any>(null);
 
   useEffect(() => {
+    console.log('Index: Loading status:', loading);
+    console.log('Index: User:', user);
+    console.log('Index: Profile:', profile);
+    console.log('Index: Student session:', studentSession);
+    
     if (loading) return;
     
     if (user && profile?.role === 'admin') {

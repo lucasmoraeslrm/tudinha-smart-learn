@@ -20,11 +20,8 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
           navigate('/');
           return;
         }
-
-        if (!requireAdmin && profile.role === 'admin') {
-          navigate('/admin/dashboard');
-          return;
-        }
+        // Allow admin access to student areas
+        return;
       }
 
       // Check student authentication
@@ -67,10 +64,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return null; // Será redirecionado
   }
 
-  // Redirect admin to admin dashboard if accessing student area
-  if (!requireAdmin && profile?.role === 'admin') {
-    return null; // Será redirecionado
-  }
+  // Allow admins to access student areas if needed
 
   return <>{children}</>;
 }
