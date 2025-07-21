@@ -319,7 +319,7 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
       }
 
       const { data: exerciciosData } = await supabase
-        .from('exercises')
+        .from('jornada_exercises')
         .select('*')
         .in('id', jornada.exercise_ids);
 
