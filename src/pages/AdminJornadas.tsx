@@ -26,7 +26,8 @@ import {
   Filter,
   Edit,
   Trash2,
-  GraduationCap
+  GraduationCap,
+  Copy
 } from 'lucide-react';
 
 interface Serie {
@@ -99,6 +100,7 @@ export default function AdminJornadas() {
   const [filterSerie, setFilterSerie] = useState('all');
   const [openJornadaDialog, setOpenJornadaDialog] = useState(false);
   const [openExerciseDialog, setOpenExerciseDialog] = useState(false);
+  const [editingJornada, setEditingJornada] = useState<Jornada | null>(null);
   
   const [novaJornada, setNovaJornada] = useState<NovaJornada>({
     serieAnoLetivo: '',
@@ -390,6 +392,133 @@ export default function AdminJornadas() {
     }
   };
 
+  const editarJornada = (jornada: Jornada) => {
+    const inicioDate = new Date(jornada.inicio_previsto);
+    const fimDate = new Date(jornada.fim_previsto);
+    const duracaoMinutos = Math.round((fimDate.getTime() - inicioDate.getTime()) / (1000 * 60));
+
+    setNovaJornada({
+      serieAnoLetivo: jornada.serie_ano_letivo,
+      serieTurma: jornada.serie_turma,
+      aulaTitulo: jornada.aula_titulo,
+      materia: jornada.materia,
+      assunto: jornada.assunto || '',
+      professorNome: jornada.professor_nome || '',
+      inicioDate: inicioDate.toISOString().split('T')[0],
+      inicioTime: inicioDate.toTimeString().slice(0, 5),
+      duracaoMinutos,
+      exercisesIds: jornada.exercise_ids || []
+    });
+    setEditingJornada(jornada);
+    setOpenJornadaDialog(true);
+  };
+
+  const duplicarJornada = (jornada: Jornada) => {
+    const hoje = new Date();
+    const amanha = new Date(hoje);
+    amanha.setDate(hoje.getDate() + 1);
+
+    const inicioDate = new Date(jornada.inicio_previsto);
+    const fimDate = new Date(jornada.fim_previsto);
+    const duracaoMinutos = Math.round((fimDate.getTime() - inicioDate.getTime()) / (1000 * 60));
+
+    setNovaJornada({
+      serieAnoLetivo: jornada.serie_ano_letivo,
+      serieTurma: jornada.serie_turma,
+      aulaTitulo: `${jornada.aula_titulo} (Cópia)`,
+      materia: jornada.materia,
+      assunto: jornada.assunto || '',
+      professorNome: jornada.professor_nome || '',
+      inicioDate: amanha.toISOString().split('T')[0],
+      inicioTime: inicioDate.toTimeString().slice(0, 5),
+      duracaoMinutos,
+      exercisesIds: jornada.exercise_ids || []
+    });
+    setEditingJornada(null);
+    setOpenJornadaDialog(true);
+  };
+
+  const salvarJornada = async () => {
+    if (!novaJornada.serieAnoLetivo || !novaJornada.serieTurma || !novaJornada.aulaTitulo || !novaJornada.materia) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCreating(true);
+
+    try {
+      const inicioDateTime = new Date(`${novaJornada.inicioDate}T${novaJornada.inicioTime}`);
+      const fimDateTime = new Date(inicioDateTime.getTime() + novaJornada.duracaoMinutos * 60000);
+
+      const jornadaData = {
+        serie_ano_letivo: novaJornada.serieAnoLetivo,
+        serie_turma: novaJornada.serieTurma,
+        aula_titulo: novaJornada.aulaTitulo,
+        materia: novaJornada.materia,
+        assunto: novaJornada.assunto,
+        professor_nome: novaJornada.professorNome,
+        inicio_previsto: inicioDateTime.toISOString(),
+        fim_previsto: fimDateTime.toISOString(),
+        exercise_ids: novaJornada.exercisesIds,
+        status: 'pendente'
+      };
+
+      let error;
+      if (editingJornada) {
+        // Editando jornada existente
+        const { error: updateError } = await supabase
+          .from('jornadas')
+          .update(jornadaData)
+          .eq('id', editingJornada.id);
+        error = updateError;
+      } else {
+        // Criando nova jornada
+        const { error: insertError } = await supabase
+          .from('jornadas')
+          .insert(jornadaData);
+        error = insertError;
+      }
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: editingJornada 
+          ? "Jornada atualizada com sucesso!"
+          : `Jornada criada para a série ${novaJornada.serieAnoLetivo} - ${novaJornada.serieTurma}!`,
+      });
+
+      setOpenJornadaDialog(false);
+      setEditingJornada(null);
+      setNovaJornada({
+        serieAnoLetivo: '',
+        serieTurma: '',
+        aulaTitulo: '',
+        materia: '',
+        assunto: '',
+        professorNome: '',
+        inicioDate: '',
+        inicioTime: '',
+        duracaoMinutos: 40,
+        exercisesIds: []
+      });
+      loadData();
+
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível salvar a jornada.",
+        variant: "destructive",
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const filteredJornadas = jornadas.filter(jornada => {
     const matchesSearch = jornada.aula_titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          jornada.materia.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -560,7 +689,24 @@ export default function AdminJornadas() {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={openJornadaDialog} onOpenChange={setOpenJornadaDialog}>
+          <Dialog open={openJornadaDialog} onOpenChange={(open) => {
+            setOpenJornadaDialog(open);
+            if (!open) {
+              setEditingJornada(null);
+              setNovaJornada({
+                serieAnoLetivo: '',
+                serieTurma: '',
+                aulaTitulo: '',
+                materia: '',
+                assunto: '',
+                professorNome: '',
+                inicioDate: '',
+                inicioTime: '',
+                duracaoMinutos: 40,
+                exercisesIds: []
+              });
+            }
+          }}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
@@ -569,9 +715,14 @@ export default function AdminJornadas() {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Criar Nova Jornada por Série</DialogTitle>
+                <DialogTitle>
+                  {editingJornada ? 'Editar Jornada' : 'Criar Nova Jornada por Série'}
+                </DialogTitle>
                 <DialogDescription>
-                  Configure uma nova jornada de aprendizagem para uma série inteira
+                  {editingJornada 
+                    ? 'Atualize as informações da jornada existente'
+                    : 'Configure uma nova jornada de aprendizagem para uma série inteira'
+                  }
                 </DialogDescription>
               </DialogHeader>
 
@@ -718,8 +869,8 @@ export default function AdminJornadas() {
                   <Button variant="outline" onClick={() => setOpenJornadaDialog(false)}>
                     Cancelar
                   </Button>
-                  <Button onClick={criarJornada} disabled={creating}>
-                    {creating ? 'Criando...' : 'Criar Jornada'}
+                  <Button onClick={salvarJornada} disabled={creating}>
+                    {creating ? 'Salvando...' : editingJornada ? 'Salvar Alterações' : 'Criar Jornada'}
                   </Button>
                 </div>
               </div>
@@ -875,6 +1026,22 @@ export default function AdminJornadas() {
                               Finalizar
                             </Button>
                           )}
+
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => editarJornada(jornada)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => duplicarJornada(jornada)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
 
                           <Button
                             size="sm"
