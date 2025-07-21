@@ -31,6 +31,7 @@ const JornadaPage = () => {
       if (!studentId) return;
 
       console.log('Student data:', studentData);
+      console.log('Student ano_letivo:', studentData.ano_letivo, 'Student turma:', studentData.turma);
 
       // Buscar jornadas disponíveis para a série do aluno
       const hoje = new Date();
