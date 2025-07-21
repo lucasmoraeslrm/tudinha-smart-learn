@@ -47,11 +47,12 @@ const JornadaPage = () => {
         setProximaAula(aulas[0]);
       }
 
-      // Buscar jornada atual
+      // Buscar jornadas da série do aluno
       const { data: jornadas } = await supabase
         .from('jornadas')
         .select('*')
-        .eq('student_id', studentId)
+        .eq('serie_ano_letivo', studentData.ano_letivo)
+        .eq('serie_turma', studentData.turma)
         .in('status', ['pendente', 'em_andamento', 'aguardando_liberacao'])
         .order('created_at', { ascending: false })
         .limit(1);
@@ -60,11 +61,12 @@ const JornadaPage = () => {
         setJornadaAtual(jornadas[0]);
       }
 
-      // Buscar histórico de jornadas
+      // Buscar histórico de jornadas da série
       const { data: historicoData } = await supabase
         .from('jornadas')
         .select('*')
-        .eq('student_id', studentId)
+        .eq('serie_ano_letivo', studentData.ano_letivo)
+        .eq('serie_turma', studentData.turma)
         .order('created_at', { ascending: false })
         .limit(10);
 

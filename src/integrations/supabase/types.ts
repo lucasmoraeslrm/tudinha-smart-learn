@@ -204,11 +204,54 @@ export type Database = {
         }
         Relationships: []
       }
+      jornada_exercises: {
+        Row: {
+          correct_answer: string
+          created_at: string
+          difficulty: string | null
+          explanation: string | null
+          id: string
+          options: Json | null
+          ordem: number
+          question: string
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          options?: Json | null
+          ordem?: number
+          question: string
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          options?: Json | null
+          ordem?: number
+          question?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       jornadas: {
         Row: {
           assunto: string | null
           aula_titulo: string
           created_at: string
+          exercise_ids: string[] | null
           fim_previsto: string | null
           fim_real: string | null
           id: string
@@ -218,6 +261,8 @@ export type Database = {
           professor_nome: string | null
           resultado_exercicio: Json | null
           resumo_inicial: string | null
+          serie_ano_letivo: string | null
+          serie_turma: string | null
           status: string | null
           student_id: string | null
           tempo_resumo_segundos: number | null
@@ -227,6 +272,7 @@ export type Database = {
           assunto?: string | null
           aula_titulo: string
           created_at?: string
+          exercise_ids?: string[] | null
           fim_previsto?: string | null
           fim_real?: string | null
           id?: string
@@ -236,6 +282,8 @@ export type Database = {
           professor_nome?: string | null
           resultado_exercicio?: Json | null
           resumo_inicial?: string | null
+          serie_ano_letivo?: string | null
+          serie_turma?: string | null
           status?: string | null
           student_id?: string | null
           tempo_resumo_segundos?: number | null
@@ -245,6 +293,7 @@ export type Database = {
           assunto?: string | null
           aula_titulo?: string
           created_at?: string
+          exercise_ids?: string[] | null
           fim_previsto?: string | null
           fim_real?: string | null
           id?: string
@@ -254,6 +303,8 @@ export type Database = {
           professor_nome?: string | null
           resultado_exercicio?: Json | null
           resumo_inicial?: string | null
+          serie_ano_letivo?: string | null
+          serie_turma?: string | null
           status?: string | null
           student_id?: string | null
           tempo_resumo_segundos?: number | null
