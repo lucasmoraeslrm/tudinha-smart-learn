@@ -20,6 +20,12 @@ const Index = () => {
     
     if (user && profile?.role === 'admin') {
       navigate('/admin/dashboard');
+      return;
+    }
+
+    if (studentSession) {
+      navigate('/dashboard');
+      return;
     }
 
     // Verificar se há sessão de professor ou coordenador salva
@@ -35,7 +41,7 @@ const Index = () => {
       setCoordenadorData(coordenadorSession);
       setCurrentView('coordenador');
     }
-  }, [user, profile, loading, navigate]);
+  }, [user, profile, studentSession, loading, navigate]);
 
   if (loading) {
     return (
