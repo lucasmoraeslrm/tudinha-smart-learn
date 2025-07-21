@@ -15,10 +15,13 @@ import {
   Send,
   ArrowRight,
   Timer,
-  Brain
+  Brain,
+  User,
+  Bot
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StudentJourneyProps {
   jornada: any;
@@ -26,14 +29,25 @@ interface StudentJourneyProps {
 }
 
 const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) => {
+  const { studentSession } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [resumoInicial, setResumoInicial] = useState('');
   const [tempoResumo, setTempoResumo] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
-  const [exercicioUrl, setExercicioUrl] = useState('');
+  const [chatMessages, setChatMessages] = useState<{pergunta: string, resposta: string}[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState('');
+  const [exercicios, setExercicios] = useState<any[]>([]);
+  const [respostasExercicio, setRespostasExercicio] = useState<{[key: string]: string}>({});
+  const [tempoExercicio, setTempoExercicio] = useState(0);
+  const [isExerciseTimerRunning, setIsExerciseTimerRunning] = useState(false);
+  const [exerciseResults, setExerciseResults] = useState<{acertos: number, erros: number, tempo: string} | null>(null);
+  const [aguardandoLiberacao, setAguardandoLiberacao] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
   const { toast } = useToast();
+
+  const N8N_WEBHOOK_URL = 'https://n8n.srv863581.hstgr.cloud/webhook/aff2ff16-db64-4463-92ee-285a68f249d3';
 
   const steps = [
     { id: 1, title: 'Boas-vindas', description: 'Mensagem personalizada' },
@@ -50,15 +64,79 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
     }
   }, []);
 
+  // Timer para resumo inicial
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTimerRunning) {
       interval = setInterval(() => {
-        setTempoResumo(prev => prev + 1);
+        setTempoResumo(prev => {
+          const newTime = prev + 1;
+          // Se passou de 5 minutos, enviar webhook de notificação
+          if (newTime === 300) {
+            sendTimeoutNotification();
+          }
+          return newTime;
+        });
       }, 1000);
     }
     return () => clearInterval(interval);
   }, [isTimerRunning]);
+
+  // Timer para exercícios
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isExerciseTimerRunning) {
+      interval = setInterval(() => {
+        setTempoExercicio(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isExerciseTimerRunning]);
+
+  const sendWebhookMessage = async (data: any) => {
+    try {
+      await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'no-cors',
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error('Erro ao enviar webhook:', error);
+    }
+  };
+
+  const sendTimeoutNotification = async () => {
+    if (!studentSession) return;
+
+    await sendWebhookMessage({
+      aluno: {
+        id: studentSession.id,
+        nome: studentSession.name
+      },
+      mensagem: {
+        evento: "sem_resposta",
+        etapa: "resumo_inicial",
+        maquina: "N/A"
+      }
+    });
+
+    setAguardandoLiberacao(true);
+    setIsTimerRunning(false);
+    
+    await supabase
+      .from('jornadas')
+      .update({ status: 'aguardando_liberacao' })
+      .eq('id', jornada.id);
+
+    toast({
+      title: "Tempo esgotado",
+      description: "O professor foi notificado. Aguarde a liberação para continuar.",
+      variant: "destructive",
+    });
+  };
 
   const initializeJourney = async () => {
     try {
@@ -73,14 +151,12 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
         })
         .eq('id', jornada.id);
 
-      // Gerar mensagem personalizada via IA (simulado)
-      const mensagemIA = `Olá! Bem-vindo à aula de ${jornada.materia}! Hoje vamos estudar sobre ${jornada.assunto} com o professor ${jornada.professor_nome}. 
+      // Mensagem simples de boas-vindas conforme solicitado
+      const mensagemBoasVindas = `Olá ${studentSession?.name || 'aluno'}! 👋
+Bem-vindo à sua jornada de hoje.
+Clique no botão abaixo para começar! 🚀`;
 
-Esta será uma jornada interativa onde você poderá aprender de forma personalizada. Estou aqui para te ajudar em cada etapa!
-
-Você está pronto para começar?`;
-
-      setAiMessage(mensagemIA);
+      setAiMessage(mensagemBoasVindas);
       
     } catch (error) {
       console.error('Erro ao inicializar jornada:', error);
@@ -94,94 +170,196 @@ Você está pronto para começar?`;
     }
   };
 
-  const handleNextStep = async () => {
-    if (currentStep === 2) {
-      // Validar resumo inicial
-      if (!resumoInicial.trim()) {
-        toast({
-          title: "Resumo necessário",
-          description: "Por favor, escreva um resumo sobre o que você sabe do assunto",
-          variant: "destructive",
-        });
-        return;
-      }
+  const handleStepTwoSubmit = async () => {
+    if (!resumoInicial.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, escreva o que você sabe sobre o assunto antes de continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Parar timer
-      setIsTimerRunning(false);
+    if (aguardandoLiberacao) {
+      toast({
+        title: "Aguardando liberação",
+        description: "Aguarde o professor liberar para continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Salvar resumo inicial
-      await supabase
-        .from('jornadas')
-        .update({ 
-          resumo_inicial: resumoInicial,
-          tempo_resumo_segundos: tempoResumo
-        })
-        .eq('id', jornada.id);
+    setIsTimerRunning(false);
 
-      // Se passou de 5 minutos, alertar professor
-      if (tempoResumo > 300) {
-        await supabase
-          .from('jornadas')
-          .update({ status: 'aguardando_liberacao' })
-          .eq('id', jornada.id);
-        
-        toast({
-          title: "Aguardando liberação",
-          description: "O professor foi avisado. Aguarde a liberação para continuar.",
-          variant: "destructive",
-        });
-        return;
-      }
+    // Salvar resumo inicial no banco
+    await supabase
+      .from('jornadas')
+      .update({ 
+        resumo_inicial: resumoInicial,
+        tempo_resumo_segundos: tempoResumo
+      })
+      .eq('id', jornada.id);
 
-      // Gerar explicação da IA baseada no resumo
-      const explicacaoIA = `Muito bem! Com base no que você compartilhou sobre ${jornada.assunto}, vou explicar os conceitos principais:
+    // Enviar dados para o webhook n8n para gerar explicação
+    if (studentSession) {
+      await sendWebhookMessage({
+        aluno: {
+          id: studentSession.id,
+          nome: studentSession.name
+        },
+        mensagem: {
+          evento: "explicacao",
+          etapa: "explicacao",
+          resposta_aluno: resumoInicial,
+          assunto_admin: jornada.assunto
+        }
+      });
+    }
 
-${jornada.assunto === 'Leis de Newton' ? 
-  `As Leis de Newton são três princípios fundamentais da mecânica clássica:
-  
-  1ª Lei (Inércia): Um corpo em repouso tende a permanecer em repouso, e um corpo em movimento tende a continuar em movimento retilíneo uniforme, a menos que uma força externa atue sobre ele.
-  
-  2ª Lei (F = ma): A aceleração de um objeto é diretamente proporcional à força resultante aplicada e inversamente proporcional à sua massa.
-  
-  3ª Lei (Ação e Reação): Para toda ação existe uma reação igual e oposta.` :
-  
-  `Vou explicar os conceitos principais de ${jornada.assunto} de forma clara e didática, relacionando com exemplos práticos do seu dia a dia.`
-}
+    // Simulação da resposta da IA (em produção virá do webhook)
+    const explicacaoIA = `Muito bem! Com base no que você compartilhou, vou explicar os conceitos principais sobre ${jornada.assunto}.
+
+Esta explicação será gerada pela IA através do n8n com base no seu resumo e no assunto definido pelo professor.
 
 Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
 
-      setAiMessage(explicacaoIA);
-    }
+    setAiMessage(explicacaoIA);
+    setCurrentStep(3);
+  };
 
-    if (currentStep === 4) {
-      // Buscar exercícios relacionados ao assunto
-      const { data: exercicios } = await supabase
+  const handleSendQuestion = async () => {
+    if (!currentQuestion.trim() || !studentSession) return;
+
+    setSendingMessage(true);
+
+    // Adicionar pergunta à lista de mensagens
+    const novaPergunta = currentQuestion;
+    setCurrentQuestion('');
+
+    // Enviar pergunta para o webhook n8n
+    await sendWebhookMessage({
+      aluno: {
+        id: studentSession.id,
+        nome: studentSession.name
+      },
+      mensagem: {
+        evento: "duvida_aluno",
+        etapa: "duvidas",
+        pergunta: novaPergunta,
+        assunto: jornada.assunto
+      }
+    });
+
+    // Simulação da resposta da IA (em produção virá do webhook)
+    const respostaIA = `Esta é uma resposta simulada da IA para a pergunta: "${novaPergunta}". 
+
+Em produção, esta resposta será gerada pelo n8n baseada na pergunta do aluno e no contexto da aula.`;
+
+    // Adicionar à lista de mensagens
+    setChatMessages(prev => [...prev, {
+      pergunta: novaPergunta,
+      resposta: respostaIA
+    }]);
+
+    setSendingMessage(false);
+  };
+
+  const loadExercises = async () => {
+    try {
+      const { data: exerciciosData } = await supabase
         .from('exercises')
         .select('*')
         .eq('subject', jornada.materia)
-        .limit(6);
+        .limit(10);
 
-      if (exercicios && exercicios.length >= 6) {
+      if (exerciciosData && exerciciosData.length >= 6) {
         // Separar por dificuldade: 2 fáceis, 2 médios, 2 difíceis
-        const faceis = exercicios.filter(e => e.nivel_dificuldade === 'facil').slice(0, 2);
-        const medios = exercicios.filter(e => e.nivel_dificuldade === 'medio').slice(0, 2);
-        const dificeis = exercicios.filter(e => e.nivel_dificuldade === 'dificil').slice(0, 2);
+        const faceis = exerciciosData.filter(e => e.nivel_dificuldade === 'facil').slice(0, 2);
+        const medios = exerciciosData.filter(e => e.nivel_dificuldade === 'medio').slice(0, 2);
+        const dificeis = exerciciosData.filter(e => e.nivel_dificuldade === 'dificil').slice(0, 2);
         
         const exerciciosSelecionados = [...faceis, ...medios, ...dificeis];
-        
-        // Simular URL do exercício (depois implementar página real)
-        setExercicioUrl(`/exercicio/${jornada.id}`);
+        setExercicios(exerciciosSelecionados);
+        setIsExerciseTimerRunning(true);
+      } else {
+        toast({
+          title: "Exercícios insuficientes",
+          description: "Não há exercícios suficientes cadastrados para esta matéria.",
+          variant: "destructive",
+        });
       }
+    } catch (error) {
+      console.error('Erro ao carregar exercícios:', error);
+    }
+  };
+
+  const handleExerciseAnswer = (exercicioId: string, resposta: string) => {
+    setRespostasExercicio(prev => ({
+      ...prev,
+      [exercicioId]: resposta
+    }));
+  };
+
+  const finishExercises = async () => {
+    setIsExerciseTimerRunning(false);
+    
+    // Calcular resultados
+    let acertos = 0;
+    exercicios.forEach(exercicio => {
+      if (respostasExercicio[exercicio.id] === exercicio.correct_answer) {
+        acertos++;
+      }
+    });
+    
+    const erros = exercicios.length - acertos;
+    const tempoFormatado = formatTime(tempoExercicio);
+    
+    const resultado = {
+      acertos,
+      erros,
+      tempo: tempoFormatado
+    };
+    
+    setExerciseResults(resultado);
+
+    // Enviar resultado para o webhook n8n
+    if (studentSession) {
+      await sendWebhookMessage({
+        aluno: {
+          id: studentSession.id,
+          nome: studentSession.name
+        },
+        mensagem: {
+          evento: "resultado_exercicio",
+          etapa: "exercicios",
+          acertos: acertos,
+          erros: erros,
+          tempo: tempoFormatado
+        }
+      });
     }
 
-    if (currentStep < 6) {
-      setCurrentStep(prev => prev + 1);
-      
-      // Iniciar timer no step 2
-      if (currentStep === 1) {
-        setIsTimerRunning(true);
-      }
-    } else {
+    // Salvar resultado no banco
+    await supabase
+      .from('jornadas')
+      .update({ 
+        resultado_exercicio: resultado
+      })
+      .eq('id', jornada.id);
+
+    setCurrentStep(6);
+  };
+
+  const handleNextStep = async () => {
+    if (currentStep === 1) {
+      setCurrentStep(2);
+      setIsTimerRunning(true);
+    } else if (currentStep === 3) {
+      setCurrentStep(4);
+    } else if (currentStep === 4) {
+      setCurrentStep(5);
+      await loadExercises();
+    } else if (currentStep === 6) {
       // Finalizar jornada
       await supabase
         .from('jornadas')
@@ -203,7 +381,7 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}min${secs.toString().padStart(2, '0')}s`;
   };
 
   const getCurrentStepContent = () => {
@@ -214,16 +392,16 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
             <CardHeader>
               <CardTitle className="flex items-center">
                 <MessageSquare className="w-5 h-5 mr-2" />
-                Mensagem da IA
+                Boas-vindas
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="whitespace-pre-line text-sm leading-relaxed">
+              <div className="whitespace-pre-line text-lg leading-relaxed text-center py-4">
                 {aiMessage}
               </div>
-              <Button className="mt-4" onClick={handleNextStep}>
+              <Button className="mt-4 w-full" size="lg" onClick={handleNextStep}>
                 <ArrowRight className="w-4 h-4 mr-2" />
-                Vamos começar!
+                Vamos Começar
               </Button>
             </CardContent>
           </Card>
@@ -246,21 +424,38 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
                   )}
                 </div>
               </CardTitle>
-              <CardDescription>
-                Conte o que você já sabe sobre {jornada.assunto}. Você tem até 5 minutos.
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-white/5 p-4 rounded-lg">
+                <p className="text-sm font-medium">
+                  Conte com suas palavras o que você já sabe sobre o assunto de hoje.
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Você tem 5 minutos para escrever. Se não responder, o professor será notificado.
+                </p>
+              </div>
+              
+              {aguardandoLiberacao && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg">
+                  <div className="flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-2 text-yellow-500" />
+                    <span className="text-sm font-medium">Aguardando liberação do professor</span>
+                  </div>
+                </div>
+              )}
+              
               <Textarea
-                placeholder={`Escreva aqui o que você sabe sobre ${jornada.assunto}...`}
+                placeholder="Escreva aqui o que você sabe sobre o assunto..."
                 value={resumoInicial}
                 onChange={(e) => setResumoInicial(e.target.value)}
                 rows={6}
+                disabled={aguardandoLiberacao}
               />
               <Button 
-                onClick={handleNextStep} 
-                disabled={!resumoInicial.trim()}
+                onClick={handleStepTwoSubmit}
+                disabled={!resumoInicial.trim() || aguardandoLiberacao}
                 className="w-full"
+                size="lg"
               >
                 <Send className="w-4 h-4 mr-2" />
                 Enviar Resumo
@@ -279,10 +474,10 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="whitespace-pre-line text-sm leading-relaxed mb-4">
+              <div className="whitespace-pre-line text-sm leading-relaxed mb-4 bg-white/5 p-4 rounded-lg">
                 {aiMessage}
               </div>
-              <Button onClick={handleNextStep}>
+              <Button onClick={handleNextStep} size="lg" className="w-full">
                 <ArrowRight className="w-4 h-4 mr-2" />
                 Entendido, continuar
               </Button>
@@ -303,8 +498,32 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Histórico de mensagens */}
+              {chatMessages.length > 0 && (
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {chatMessages.map((msg, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="bg-blue-500/10 p-3 rounded-lg">
+                        <div className="flex items-center mb-1">
+                          <User className="w-4 h-4 mr-2" />
+                          <span className="text-sm font-medium">Você</span>
+                        </div>
+                        <p className="text-sm">{msg.pergunta}</p>
+                      </div>
+                      <div className="bg-green-500/10 p-3 rounded-lg">
+                        <div className="flex items-center mb-1">
+                          <Bot className="w-4 h-4 mr-2" />
+                          <span className="text-sm font-medium">IA</span>
+                        </div>
+                        <p className="text-sm">{msg.resposta}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               <div className="bg-white/5 p-4 rounded-lg">
-                <p className="text-sm mb-2">💡 Dica: Você pode perguntar sobre:</p>
+                <p className="text-sm mb-2">💡 Você pode perguntar sobre:</p>
                 <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                   <li>Conceitos que não ficaram claros</li>
                   <li>Exemplos práticos do assunto</li>
@@ -315,13 +534,20 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
               
               <Textarea
                 placeholder="Digite sua pergunta aqui..."
+                value={currentQuestion}
+                onChange={(e) => setCurrentQuestion(e.target.value)}
                 rows={3}
               />
               
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={handleSendQuestion}
+                  disabled={!currentQuestion.trim() || sendingMessage}
+                >
                   <Send className="w-4 h-4 mr-2" />
-                  Fazer Pergunta
+                  {sendingMessage ? 'Enviando...' : 'Fazer Pergunta'}
                 </Button>
                 <Button onClick={handleNextStep}>
                   <ArrowRight className="w-4 h-4 mr-2" />
@@ -336,29 +562,61 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
         return (
           <Card className="bg-gradient-to-r from-red-500/10 to-purple-500/10 border-red-500/20">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Play className="w-5 h-5 mr-2" />
-                Exercícios Práticos
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Play className="w-5 h-5 mr-2" />
+                  Exercícios Práticos
+                </div>
+                <div className="flex items-center text-sm">
+                  <Timer className="w-4 h-4 mr-1" />
+                  {formatTime(tempoExercicio)}
+                </div>
               </CardTitle>
               <CardDescription>
                 6 questões: 2 fáceis, 2 intermediárias, 2 difíceis
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-white/5 p-4 rounded-lg">
-                <p className="text-sm mb-2">📋 Sobre os exercícios:</p>
-                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                  <li>6 questões de múltipla escolha</li>
-                  <li>Tempo será contabilizado</li>
-                  <li>Resultado imediato após envio</li>
-                  <li>Explicações das respostas</li>
-                </ul>
-              </div>
-              
-              <Button onClick={handleNextStep} size="lg" className="w-full">
-                <Play className="w-4 h-4 mr-2" />
-                Iniciar Exercícios
-              </Button>
+              {exercicios.length > 0 ? (
+                <>
+                  {exercicios.map((exercicio, index) => (
+                    <div key={exercicio.id} className="bg-white/5 p-4 rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline">
+                          Questão {index + 1} - {exercicio.nivel_dificuldade}
+                        </Badge>
+                      </div>
+                      <h4 className="font-medium">{exercicio.question}</h4>
+                      <div className="space-y-2">
+                        {exercicio.options.map((opcao: string, optIndex: number) => (
+                          <Button
+                            key={optIndex}
+                            variant={respostasExercicio[exercicio.id] === opcao ? "default" : "outline"}
+                            className="w-full justify-start text-left"
+                            onClick={() => handleExerciseAnswer(exercicio.id, opcao)}
+                          >
+                            {String.fromCharCode(65 + optIndex)}) {opcao}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <Button 
+                    onClick={finishExercises}
+                    disabled={Object.keys(respostasExercicio).length < exercicios.length}
+                    size="lg" 
+                    className="w-full"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Finalizar Exercícios
+                  </Button>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <p>Carregando exercícios...</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         );
@@ -369,7 +627,7 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
             <CardHeader>
               <CardTitle className="flex items-center">
                 <CheckCircle className="w-5 h-5 mr-2" />
-                Jornada Concluída!
+                Resultados
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -377,9 +635,29 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
                 <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
                 <h3 className="text-xl font-semibold mb-2">Parabéns!</h3>
                 <p className="text-muted-foreground">
-                  Você completou com sucesso sua jornada de aprendizado sobre {jornada.assunto}
+                  Você completou sua jornada de aprendizado sobre {jornada.assunto}
                 </p>
               </div>
+              
+              {exerciseResults && (
+                <div className="bg-white/5 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-3 text-center">📈 Resultado dos Exercícios</h4>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-2xl font-bold text-green-500">{exerciseResults.acertos}</div>
+                      <div className="text-sm text-muted-foreground">Acertos</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-red-500">{exerciseResults.erros}</div>
+                      <div className="text-sm text-muted-foreground">Erros</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-blue-500">{exerciseResults.tempo}</div>
+                      <div className="text-sm text-muted-foreground">Tempo</div>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white/5 p-3 rounded-lg text-center">
@@ -414,7 +692,7 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
             <div>
               <h1 className="text-2xl font-bold text-foreground">{jornada.aula_titulo}</h1>
               <p className="text-muted-foreground">
-                {jornada.materia} • {jornada.assunto} • Prof. {jornada.professor_nome}
+                {jornada.materia} • Prof. {jornada.professor_nome}
               </p>
             </div>
             <Badge variant="outline" className="text-sm">
