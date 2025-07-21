@@ -17,52 +17,58 @@ const Index = () => {
   const [coordenadorData, setCoordenadorData] = useState<any>(null);
 
   useEffect(() => {
-    console.log('Index: Loading status:', loading);
-    console.log('Index: User:', user);
-    console.log('Index: Profile:', profile);
-    console.log('Index: Student session:', studentSession);
-    console.log('Index: LocalStorage keys:', Object.keys(localStorage));
-    
-    if (loading) return;
-    
-    // Limpar qualquer sessão admin do Supabase se não for uma sessão válida
-    if (user && !profile) {
-      console.log('User without profile found, clearing session');
-      // Há um usuário mas sem profile, pode ser uma sessão inválida
-      return;
-    }
-    
-    // Se há sessão de aluno ativa, redireciona para dashboard do aluno
-    if (studentSession) {
-      console.log('Student session found, redirecting to dashboard');
-      navigate('/dashboard');
-      return;
-    }
+    const initializeApp = async () => {
+      console.log('Index: Loading status:', loading);
+      console.log('Index: User:', user);
+      console.log('Index: Profile:', profile);
+      console.log('Index: Student session:', studentSession);
+      console.log('Index: LocalStorage keys:', Object.keys(localStorage));
+      
+      if (loading) return;
+      
+      // FORÇAR LIMPEZA DE SESSÕES ADMIN INVÁLIDAS
+      // Se há user mas não há profile, limpar tudo
+      if (user && !profile) {
+        console.log('Clearing invalid admin session');
+        await supabase.auth.signOut();
+        localStorage.clear();
+        window.location.reload();
+        return;
+      }
+      
+      // Se há sessão de aluno ativa, redireciona para dashboard do aluno
+      if (studentSession) {
+        console.log('Student session found, redirecting to dashboard');
+        navigate('/dashboard');
+        return;
+      }
 
-    // Se há usuário admin autenticado via Supabase E tem profile, redireciona para admin
-    if (user && profile?.role === 'admin') {
-      console.log('Admin session found, redirecting to admin dashboard');
-      navigate('/admin/dashboard');
-      return;
-    }
+      // Se há usuário admin autenticado E tem profile válido, redireciona para admin
+      if (user && profile?.role === 'admin') {
+        console.log('Valid admin session found, redirecting to admin dashboard');
+        navigate('/admin/dashboard');
+        return;
+      }
 
-    // Verificar se há sessão de professor ou coordenador salva
-    const savedProfessorSession = localStorage.getItem('professorSession');
-    const savedCoordenadorSession = localStorage.getItem('coordenadorSession');
+      // Verificar se há sessão de professor ou coordenador salva
+      const savedProfessorSession = localStorage.getItem('professorSession');
+      const savedCoordenadorSession = localStorage.getItem('coordenadorSession');
+      
+      if (savedProfessorSession) {
+        const professorSession = JSON.parse(savedProfessorSession);
+        setProfessorData(professorSession);
+        setCurrentView('professor');
+      } else if (savedCoordenadorSession) {
+        const coordenadorSession = JSON.parse(savedCoordenadorSession);
+        setCoordenadorData(coordenadorSession);
+        setCurrentView('coordenador');
+      } else {
+        console.log('No active sessions, showing selector');
+        setCurrentView('selector');
+      }
+    };
     
-    if (savedProfessorSession) {
-      const professorSession = JSON.parse(savedProfessorSession);
-      setProfessorData(professorSession);
-      setCurrentView('professor');
-    } else if (savedCoordenadorSession) {
-      const coordenadorSession = JSON.parse(savedCoordenadorSession);
-      setCoordenadorData(coordenadorSession);
-      setCurrentView('coordenador');
-    } else {
-      console.log('No active sessions, showing selector');
-      setCurrentView('selector');
-    }
-    // Se não há nenhuma sessão ativa, mantém na tela de seleção (currentView = 'selector')
+    initializeApp();
   }, [user, profile, studentSession, loading, navigate]);
 
 
