@@ -255,9 +255,14 @@ Clique no botão abaixo para começar! 🚀`;
       });
 
       // Se recebeu resposta do N8N, usar ela, senão usar mensagem padrão
-      if (response && response.explicacao) {
-        setAiMessage(response.explicacao);
+      console.log('Resposta completa do webhook:', response);
+      
+      if (response && (response.explicacao || response.resposta)) {
+        const explicacaoPersonalizada = response.explicacao || response.resposta;
+        console.log('Usando explicação personalizada do N8N:', explicacaoPersonalizada);
+        setAiMessage(explicacaoPersonalizada);
       } else {
+        console.log('Usando explicação padrão (N8N não retornou dados válidos)');
         // Mensagem padrão personalizada caso N8N não responda
         const explicacaoIA = `Muito bem! Com base no que você compartilhou sobre ${jornada.aula_titulo}, vou explicar os conceitos principais.
 

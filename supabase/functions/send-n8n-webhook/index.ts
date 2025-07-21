@@ -32,14 +32,21 @@ serve(async (req) => {
     let responseData = null
     try {
       const textResponse = await response.text()
-      console.log('Resposta N8N (texto):', textResponse)
+      console.log('Resposta N8N (texto completo):', textResponse)
       
-      if (textResponse) {
-        responseData = JSON.parse(textResponse)
+      if (textResponse && textResponse.trim()) {
+        try {
+          responseData = JSON.parse(textResponse)
+          console.log('Resposta N8N (JSON parseado):', responseData)
+        } catch (parseError) {
+          console.log('Texto não é JSON válido, usando como string:', textResponse)
+          // Se não for JSON, trata como string simples
+          responseData = { explicacao: textResponse, resposta: textResponse }
+        }
       }
-    } catch (parseError) {
-      console.log('Erro ao parsear resposta:', parseError)
-      // Se não conseguir parsear, deixa como null
+    } catch (responseError) {
+      console.log('Erro ao ler resposta:', responseError)
+      // Se não conseguir ler, deixa como null
     }
 
     return new Response(
