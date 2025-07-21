@@ -26,16 +26,19 @@ const JornadaPage = () => {
   const carregarDados = async () => {
     try {
       const studentData = JSON.parse(localStorage.getItem('studentSession') || '{}');
-      const studentId = studentData.id;
-
-      if (!studentId) return;
-
-      console.log('Student data:', studentData);
-      console.log('Student ano_letivo:', studentData.ano_letivo, 'Student turma:', studentData.turma);
+      console.log('=== INICIO DEBUG JORNADAS ===');
+      console.log('Student data completo:', studentData);
+      
+      if (!studentData.id) {
+        console.log('Nenhum student ID encontrado, saindo...');
+        return;
+      }
 
       // Buscar jornadas disponíveis para a série do aluno
-      const hoje = new Date();
-      console.log('Data atual:', hoje.toISOString());
+      console.log('Buscando jornadas para:', {
+        ano_letivo: studentData.ano_letivo,
+        turma: studentData.turma
+      });
       
       const { data: jornadas, error } = await supabase
         .from('jornadas')
@@ -45,11 +48,8 @@ const JornadaPage = () => {
         .in('status', ['pendente', 'em_andamento', 'aguardando_liberacao'])
         .order('created_at', { ascending: false });
 
-      console.log('Jornadas query result:', { jornadas, error });
-      console.log('Filtros aplicados:', {
-        serie_ano_letivo: studentData.ano_letivo,
-        serie_turma: studentData.turma
-      });
+      console.log('Resultado da query jornadas:', jornadas);
+      console.log('Erro da query jornadas:', error);
 
       // Debug: buscar TODAS as jornadas para comparar
       const { data: todasJornadas, error: errorTodas } = await supabase
@@ -58,10 +58,14 @@ const JornadaPage = () => {
         .order('created_at', { ascending: false });
       
       console.log('TODAS as jornadas no banco:', todasJornadas);
-      console.log('Error todas jornadas:', errorTodas);
+      console.log('=== FIM DEBUG JORNADAS ===');
 
       if (jornadas && jornadas.length > 0) {
+        console.log('Definindo jornada atual:', jornadas[0]);
         setJornadaAtual(jornadas[0]);
+      } else {
+        console.log('Nenhuma jornada encontrada para o aluno');
+        setJornadaAtual(null);
       }
 
       // Buscar histórico de jornadas da série
