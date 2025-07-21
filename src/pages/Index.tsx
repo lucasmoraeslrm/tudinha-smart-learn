@@ -20,16 +20,19 @@ const Index = () => {
     console.log('Index: User:', user);
     console.log('Index: Profile:', profile);
     console.log('Index: Student session:', studentSession);
+    console.log('Index: LocalStorage keys:', Object.keys(localStorage));
     
     if (loading) return;
     
-    if (user && profile?.role === 'admin') {
-      navigate('/admin/dashboard');
+    // Se há sessão de aluno ativa, redireciona para dashboard do aluno
+    if (studentSession) {
+      navigate('/dashboard');
       return;
     }
 
-    if (studentSession) {
-      navigate('/dashboard');
+    // Se há usuário admin autenticado via Supabase, redireciona para admin
+    if (user && profile?.role === 'admin') {
+      navigate('/admin/dashboard');
       return;
     }
 
@@ -46,6 +49,7 @@ const Index = () => {
       setCoordenadorData(coordenadorSession);
       setCurrentView('coordenador');
     }
+    // Se não há nenhuma sessão ativa, mantém na tela de seleção (currentView = 'selector')
   }, [user, profile, studentSession, loading, navigate]);
 
   if (loading) {
@@ -65,10 +69,6 @@ const Index = () => {
     );
   }
 
-  // Redirect admin to admin dashboard
-  if (user && profile?.role === 'admin') {
-    return null;
-  }
 
   const handleUserTypeSelect = (type: 'student' | 'professor' | 'coordenador') => {
     setCurrentView(type);
