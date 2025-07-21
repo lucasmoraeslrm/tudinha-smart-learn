@@ -25,26 +25,25 @@ const JornadaPage = () => {
 
   const carregarDados = async () => {
     try {
-      const studentData = JSON.parse(localStorage.getItem('studentSession') || '{}');
       console.log('=== INICIO DEBUG JORNADAS ===');
-      console.log('Student data completo:', studentData);
+      console.log('studentSession do context:', studentSession);
       
-      if (!studentData.id) {
-        console.log('Nenhum student ID encontrado, saindo...');
+      if (!studentSession?.id) {
+        console.log('Nenhum studentSession encontrado, saindo...');
         return;
       }
 
       // Buscar jornadas disponíveis para a série do aluno
       console.log('Buscando jornadas para:', {
-        ano_letivo: studentData.ano_letivo,
-        turma: studentData.turma
+        ano_letivo: studentSession.ano_letivo,
+        turma: studentSession.turma
       });
       
       const { data: jornadas, error } = await supabase
         .from('jornadas')
         .select('*')
-        .eq('serie_ano_letivo', studentData.ano_letivo)
-        .eq('serie_turma', studentData.turma)
+        .eq('serie_ano_letivo', studentSession.ano_letivo)
+        .eq('serie_turma', studentSession.turma)
         .in('status', ['pendente', 'em_andamento', 'aguardando_liberacao'])
         .order('created_at', { ascending: false });
 
@@ -72,8 +71,8 @@ const JornadaPage = () => {
       const { data: historicoData } = await supabase
         .from('jornadas')
         .select('*')
-        .eq('serie_ano_letivo', studentData.ano_letivo)
-        .eq('serie_turma', studentData.turma)
+        .eq('serie_ano_letivo', studentSession.ano_letivo)
+        .eq('serie_turma', studentSession.turma)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -95,7 +94,14 @@ const JornadaPage = () => {
         return;
       }
 
-      const studentData = JSON.parse(localStorage.getItem('studentSession') || '{}');
+      if (!studentSession?.id) {
+        toast({
+          title: "Erro",
+          description: "Sessão de aluno não encontrada",
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Atualizar status da jornada para em_andamento
       const { error } = await supabase
@@ -103,7 +109,7 @@ const JornadaPage = () => {
         .update({
           status: 'em_andamento',
           inicio_real: new Date().toISOString(),
-          student_id: studentData.id
+          student_id: studentSession.id
         })
         .eq('id', jornadaAtual.id);
 
@@ -114,7 +120,7 @@ const JornadaPage = () => {
         ...jornadaAtual,
         status: 'em_andamento',
         inicio_real: new Date().toISOString(),
-        student_id: studentData.id
+        student_id: studentSession.id
       });
       
       setActiveJourney(true);
