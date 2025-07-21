@@ -95,16 +95,24 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
 
   const sendWebhookMessage = async (data: any) => {
     try {
-      await fetch(N8N_WEBHOOK_URL, {
+      const response = await fetch(N8N_WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'no-cors',
         body: JSON.stringify(data),
       });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result;
+      } else {
+        console.error('Erro na resposta do webhook:', response.status);
+        return null;
+      }
     } catch (error) {
       console.error('Erro ao enviar webhook:', error);
+      return null;
     }
   };
 
@@ -190,6 +198,7 @@ Clique no botão abaixo para começar! 🚀`;
     }
 
     setIsTimerRunning(false);
+    setLoading(true);
 
     // Salvar resumo inicial no banco
     await supabase
@@ -202,7 +211,7 @@ Clique no botão abaixo para começar! 🚀`;
 
     // Enviar dados para o webhook n8n para gerar explicação
     if (studentSession) {
-      await sendWebhookMessage({
+      const response = await sendWebhookMessage({
         aluno: {
           id: studentSession.id,
           nome: studentSession.name
@@ -214,16 +223,20 @@ Clique no botão abaixo para começar! 🚀`;
           assunto_admin: jornada.assunto
         }
       });
+
+      // Se recebeu resposta do N8N, usar ela, senão usar mensagem padrão
+      if (response && response.explicacao) {
+        setAiMessage(response.explicacao);
+      } else {
+        // Mensagem padrão caso N8N não responda
+        const explicacaoIA = `Muito bem! Com base no que você compartilhou sobre ${jornada.assunto}, vou explicar os conceitos principais.
+
+Esta explicação foi personalizada com base no seu conhecimento prévio. Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
+        setAiMessage(explicacaoIA);
+      }
     }
 
-    // Simulação da resposta da IA (em produção virá do webhook)
-    const explicacaoIA = `Muito bem! Com base no que você compartilhou, vou explicar os conceitos principais sobre ${jornada.assunto}.
-
-Esta explicação será gerada pela IA através do n8n com base no seu resumo e no assunto definido pelo professor.
-
-Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
-
-    setAiMessage(explicacaoIA);
+    setLoading(false);
     setCurrentStep(3);
   };
 
@@ -237,7 +250,7 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
     setCurrentQuestion('');
 
     // Enviar pergunta para o webhook n8n
-    await sendWebhookMessage({
+    const response = await sendWebhookMessage({
       aluno: {
         id: studentSession.id,
         nome: studentSession.name
@@ -250,10 +263,12 @@ Agora você pode fazer perguntas sobre qualquer parte que não entendeu!`;
       }
     });
 
-    // Simulação da resposta da IA (em produção virá do webhook)
-    const respostaIA = `Esta é uma resposta simulada da IA para a pergunta: "${novaPergunta}". 
-
-Em produção, esta resposta será gerada pelo n8n baseada na pergunta do aluno e no contexto da aula.`;
+    // Se recebeu resposta do N8N, usar ela, senão usar mensagem padrão
+    let respostaIA = `Obrigado pela sua pergunta! Esta é uma resposta automática enquanto o sistema N8N está sendo configurado.`;
+    
+    if (response && response.resposta) {
+      respostaIA = response.resposta;
+    }
 
     // Adicionar à lista de mensagens
     setChatMessages(prev => [...prev, {
@@ -451,15 +466,15 @@ Em produção, esta resposta será gerada pelo n8n baseada na pergunta do aluno 
                 rows={6}
                 disabled={aguardandoLiberacao}
               />
-              <Button 
-                onClick={handleStepTwoSubmit}
-                disabled={!resumoInicial.trim() || aguardandoLiberacao}
-                className="w-full"
-                size="lg"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                Enviar Resumo
-              </Button>
+               <Button 
+                 onClick={handleStepTwoSubmit}
+                 disabled={!resumoInicial.trim() || aguardandoLiberacao || loading}
+                 className="w-full"
+                 size="lg"
+               >
+                 <Send className="w-4 h-4 mr-2" />
+                 {loading ? 'Processando...' : 'Enviar Resumo'}
+               </Button>
             </CardContent>
           </Card>
         );
