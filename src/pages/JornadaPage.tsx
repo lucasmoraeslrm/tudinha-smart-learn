@@ -51,6 +51,15 @@ const JornadaPage = () => {
         serie_turma: studentData.turma
       });
 
+      // Debug: buscar TODAS as jornadas para comparar
+      const { data: todasJornadas, error: errorTodas } = await supabase
+        .from('jornadas')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      console.log('TODAS as jornadas no banco:', todasJornadas);
+      console.log('Error todas jornadas:', errorTodas);
+
       if (jornadas && jornadas.length > 0) {
         setJornadaAtual(jornadas[0]);
       }
