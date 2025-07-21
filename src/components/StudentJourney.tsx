@@ -95,24 +95,51 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
 
   const sendWebhookMessage = async (data: any) => {
     try {
-      const response = await fetch(N8N_WEBHOOK_URL, {
+      console.log('Enviando dados para webhook N8N via Edge Function:', data);
+      
+      const response = await fetch('https://pwdkfekouyyujfwmgqls.supabase.co/functions/v1/send-n8n-webhook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3ZGtmZWtvdXl5dWpmd21ncWxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1Mjc4OTQsImV4cCI6MjA2ODEwMzg5NH0.FQfRU7zv5Y2cj2CZT6KFdciekApZl8NxThZjfTNLzko`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ webhookData: data }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        return result;
-      } else {
-        console.error('Erro na resposta do webhook:', response.status);
+        console.log('Resposta da Edge Function:', result);
+        
+        if (result.success && result.data) {
+          return result.data;
+        }
+      }
+      
+      return null;
+      
+    } catch (error) {
+      console.error('Erro ao enviar webhook via Edge Function:', error);
+      
+      // Fallback: tentar envio direto
+      try {
+        console.log('Tentando envio direto para N8N...');
+        
+        await fetch(N8N_WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          mode: 'no-cors',
+          body: JSON.stringify(data),
+        });
+
+        console.log('Webhook enviado diretamente com sucesso');
+        return null; // Modo no-cors não permite ler resposta
+        
+      } catch (directError) {
+        console.error('Erro no envio direto também:', directError);
         return null;
       }
-    } catch (error) {
-      console.error('Erro ao enviar webhook:', error);
-      return null;
     }
   };
 
