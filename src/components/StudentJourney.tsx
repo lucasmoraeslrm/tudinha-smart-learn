@@ -378,6 +378,10 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
         // Embaralhar exercícios de forma aleatória para cada aluno
         const exerciciosEmbaralhados = [...exerciciosData].sort(() => Math.random() - 0.5);
         setExercicios(exerciciosEmbaralhados);
+        setCurrentExerciseIndex(0);
+        setExerciseAnswered(false);
+        setExerciseCorrect(false);
+        setExerciseFeedback('');
         setIsExerciseTimerRunning(true);
       } else {
         toast({
