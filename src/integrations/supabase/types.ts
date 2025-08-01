@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
@@ -203,6 +203,44 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      interacoes_jornada_n8n: {
+        Row: {
+          criada_em: string | null
+          etapa: string
+          id: number
+          jornada_id: string | null
+          mensagem_aluno: string | null
+          mensagem_professor: string | null
+          resposta_ia: string | null
+        }
+        Insert: {
+          criada_em?: string | null
+          etapa: string
+          id?: never
+          jornada_id?: string | null
+          mensagem_aluno?: string | null
+          mensagem_professor?: string | null
+          resposta_ia?: string | null
+        }
+        Update: {
+          criada_em?: string | null
+          etapa?: string
+          id?: never
+          jornada_id?: string | null
+          mensagem_aluno?: string | null
+          mensagem_professor?: string | null
+          resposta_ia?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interacoes_jornada_n8n_jornada_id_fkey"
+            columns: ["jornada_id"]
+            isOneToOne: false
+            referencedRelation: "jornadas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       jornada_exercises: {
         Row: {
