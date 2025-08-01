@@ -30,6 +30,14 @@ import {
   Copy
 } from 'lucide-react';
 
+interface Professor {
+  id: string;
+  nome: string;
+  codigo: string;
+  materias: string[];
+  ativo: boolean;
+}
+
 interface Serie {
   ano_letivo: string;
   turma: string;
@@ -90,6 +98,7 @@ interface NovoExercicio {
 
 export default function AdminJornadas() {
   const [series, setSeries] = useState<Serie[]>([]);
+  const [professores, setProfessores] = useState<Professor[]>([]);
   const [jornadaExercises, setJornadaExercises] = useState<JornadaExercise[]>([]);
   const [jornadas, setJornadas] = useState<Jornada[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,6 +168,13 @@ export default function AdminJornadas() {
         }
       });
 
+      // Carregar professores ativos
+      const { data: professoresData } = await supabase
+        .from('professores')
+        .select('id, nome, codigo, materias, ativo')
+        .eq('ativo', true)
+        .order('nome');
+
       // Carregar exercícios específicos de jornada
       const { data: exercisesData } = await supabase
         .from('jornada_exercises')
@@ -173,6 +189,7 @@ export default function AdminJornadas() {
         .order('created_at', { ascending: false });
 
       setSeries(Array.from(seriesMap.values()));
+      setProfessores(professoresData || []);
       setJornadaExercises(exercisesData || []);
       setJornadas(jornadasData || []);
 
@@ -793,11 +810,30 @@ export default function AdminJornadas() {
 
                 <div className="space-y-2">
                   <Label>Professor</Label>
-                  <Input
-                    value={novaJornada.professorNome}
-                    onChange={(e) => setNovaJornada({...novaJornada, professorNome: e.target.value})}
-                    placeholder="Nome do professor responsável"
-                  />
+                  <Select 
+                    value={novaJornada.professorNome} 
+                    onValueChange={(value) => setNovaJornada({...novaJornada, professorNome: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um professor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {professores.length === 0 ? (
+                        <SelectItem value="" disabled>Nenhum professor ativo encontrado</SelectItem>
+                      ) : (
+                        professores.map((professor) => (
+                          <SelectItem key={professor.id} value={professor.nome}>
+                            {professor.nome} ({professor.codigo}) - {professor.materias.join(', ')}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {professores.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Nenhum professor ativo cadastrado. Cadastre professores na seção "Gerenciar Professores".
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
