@@ -17,7 +17,7 @@ serve(async (req) => {
     
     console.log('Enviando dados para N8N:', webhookData)
 
-    const N8N_WEBHOOK_URL = 'https://n8n.srv863581.hstgr.cloud/webhook-test/aff2ff16-db64-4463-92ee-285a68f249d3'
+    const N8N_WEBHOOK_URL = 'https://n8n.srv863581.hstgr.cloud/webhook/aff2ff16-db64-4463-92ee-285a68f249d3'
 
     const response = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
