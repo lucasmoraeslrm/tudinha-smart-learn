@@ -45,6 +45,10 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
   const [aguardandoLiberacao, setAguardandoLiberacao] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const [exerciseAnswered, setExerciseAnswered] = useState(false);
+  const [exerciseCorrect, setExerciseCorrect] = useState(false);
+  const [exerciseFeedback, setExerciseFeedback] = useState('');
   const { toast } = useToast();
 
   const N8N_WEBHOOK_URL = 'https://n8n.srv863581.hstgr.cloud/webhook/aff2ff16-db64-4463-92ee-285a68f249d3';
@@ -388,10 +392,28 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
   };
 
   const handleExerciseAnswer = (exercicioId: string, resposta: string) => {
+    const exercicioAtual = exercicios[currentExerciseIndex];
+    const isCorrect = resposta === exercicioAtual.correct_answer;
+    
     setRespostasExercicio(prev => ({
       ...prev,
       [exercicioId]: resposta
     }));
+    
+    setExerciseAnswered(true);
+    setExerciseCorrect(isCorrect);
+    setExerciseFeedback(exercicioAtual.explanation || '');
+  };
+
+  const handleNextExercise = () => {
+    if (currentExerciseIndex < exercicios.length - 1) {
+      setCurrentExerciseIndex(prev => prev + 1);
+      setExerciseAnswered(false);
+      setExerciseCorrect(false);
+      setExerciseFeedback('');
+    } else {
+      finishExercises();
+    }
   };
 
   const finishExercises = async () => {
@@ -653,6 +675,8 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
         );
 
       case 5:
+        const exercicioAtual = exercicios[currentExerciseIndex];
+        
         return (
           <Card className="bg-gradient-to-r from-red-500/10 to-purple-500/10 border-red-500/20">
             <CardHeader>
@@ -667,47 +691,112 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
                 </div>
               </CardTitle>
               <CardDescription>
-                6 questões: 2 fáceis, 2 intermediárias, 2 difíceis
+                Questão {currentExerciseIndex + 1} de {exercicios.length}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {exercicios.length > 0 ? (
+              {exercicios.length > 0 && exercicioAtual ? (
                 <>
-                  {exercicios.map((exercicio, index) => (
-                    <div key={exercicio.id} className="bg-white/5 p-4 rounded-lg space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline">
-                          Questão {index + 1} - {exercicio.nivel_dificuldade}
-                        </Badge>
-                      </div>
-                      <h4 className="font-medium">{exercicio.question}</h4>
+                  <div className="bg-white/5 p-4 rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline">
+                        Questão {currentExerciseIndex + 1} - {exercicioAtual.difficulty || exercicioAtual.nivel_dificuldade}
+                      </Badge>
+                    </div>
+                    <h4 className="font-medium">{exercicioAtual.question}</h4>
+                    
+                    {!exerciseAnswered ? (
                       <div className="space-y-2">
-                        {exercicio.options.map((opcao: any, optIndex: number) => {
+                        {exercicioAtual.options.map((opcao: any, optIndex: number) => {
                           const opcaoText = typeof opcao === 'string' ? opcao : opcao.text || opcao;
                           return (
                             <Button
                               key={optIndex}
-                              variant={respostasExercicio[exercicio.id] === opcaoText ? "default" : "outline"}
+                              variant="outline"
                               className="w-full justify-start text-left"
-                              onClick={() => handleExerciseAnswer(exercicio.id, opcaoText)}
+                              onClick={() => handleExerciseAnswer(exercicioAtual.id, opcaoText)}
                             >
                               {String.fromCharCode(65 + optIndex)}) {opcaoText}
                             </Button>
                           );
                         })}
                       </div>
-                    </div>
-                  ))}
-                  
-                  <Button 
-                    onClick={finishExercises}
-                    disabled={Object.keys(respostasExercicio).length < exercicios.length}
-                    size="lg" 
-                    className="w-full"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Finalizar Exercícios
-                  </Button>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          {exercicioAtual.options.map((opcao: any, optIndex: number) => {
+                            const opcaoText = typeof opcao === 'string' ? opcao : opcao.text || opcao;
+                            const isSelected = respostasExercicio[exercicioAtual.id] === opcaoText;
+                            const isCorrect = opcaoText === exercicioAtual.correct_answer;
+                            
+                            let variant: "default" | "outline" | "destructive" | "secondary" = "outline";
+                            let className = "w-full justify-start text-left";
+                            
+                            if (isSelected && isCorrect) {
+                              variant = "default";
+                              className += " bg-green-500/20 border-green-500";
+                            } else if (isSelected && !isCorrect) {
+                              variant = "destructive";
+                              className += " bg-red-500/20 border-red-500";
+                            } else if (isCorrect) {
+                              variant = "secondary";
+                              className += " bg-green-500/10 border-green-500/50";
+                            }
+                            
+                            return (
+                              <Button
+                                key={optIndex}
+                                variant={variant}
+                                className={className}
+                                disabled
+                              >
+                                {String.fromCharCode(65 + optIndex)}) {opcaoText}
+                                {isCorrect && <span className="ml-2">✓</span>}
+                                {isSelected && !isCorrect && <span className="ml-2">✗</span>}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                        
+                        <div className={`mt-4 p-4 rounded-lg ${exerciseCorrect ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+                          <div className="flex items-center mb-2">
+                            {exerciseCorrect ? (
+                              <>
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                                <span className="font-medium text-green-500">Resposta Correta!</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle className="w-4 h-4 mr-2 text-red-500" />
+                                <span className="font-medium text-red-500">Resposta Incorreta</span>
+                              </>
+                            )}
+                          </div>
+                          {exerciseFeedback && (
+                            <p className="text-sm text-muted-foreground">{exerciseFeedback}</p>
+                          )}
+                        </div>
+                        
+                        <Button 
+                          onClick={handleNextExercise}
+                          size="lg" 
+                          className="w-full mt-4"
+                        >
+                          {currentExerciseIndex < exercicios.length - 1 ? (
+                            <>
+                              <ArrowRight className="w-4 h-4 mr-2" />
+                              Próxima Questão
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Finalizar Exercícios
+                            </>
+                          )}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </>
               ) : (
                 <div className="text-center py-8">
