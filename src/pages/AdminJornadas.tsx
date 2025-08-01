@@ -814,24 +814,35 @@ export default function AdminJornadas() {
                     value={novaJornada.professorNome} 
                     onValueChange={(value) => setNovaJornada({...novaJornada, professorNome: value})}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Selecione um professor" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {professores.length === 0 ? (
+                    <SelectContent className="bg-background border shadow-lg z-50">
+                      {loading ? (
+                        <SelectItem value="" disabled>Carregando professores...</SelectItem>
+                      ) : professores.length === 0 ? (
                         <SelectItem value="" disabled>Nenhum professor ativo encontrado</SelectItem>
                       ) : (
                         professores.map((professor) => (
-                          <SelectItem key={professor.id} value={professor.nome}>
-                            {professor.nome} ({professor.codigo}) - {professor.materias.join(', ')}
+                          <SelectItem 
+                            key={professor.id} 
+                            value={professor.nome}
+                            className="hover:bg-muted cursor-pointer"
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium">{professor.nome}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {professor.codigo} • {professor.materias.join(', ')}
+                              </span>
+                            </div>
                           </SelectItem>
                         ))
                       )}
                     </SelectContent>
                   </Select>
-                  {professores.length === 0 && (
+                  {!loading && professores.length === 0 && (
                     <p className="text-sm text-muted-foreground">
-                      Nenhum professor ativo cadastrado. Cadastre professores na seção "Gerenciar Professores".
+                      ⚠️ Nenhum professor ativo cadastrado. Cadastre professores na seção "Gerenciar Professores".
                     </p>
                   )}
                 </div>
