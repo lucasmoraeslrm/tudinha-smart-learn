@@ -42,6 +42,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Student auth function called:', req.method, req.url)
+    
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -49,9 +51,12 @@ serve(async (req) => {
 
     const url = new URL(req.url)
     const action = url.searchParams.get('action')
+    console.log('Action:', action)
 
     if (action === 'login') {
+      console.log('Processing login request')
       const { codigo, password }: StudentLoginRequest = await req.json()
+      console.log('Login data received:', { codigo, password: '***' })
 
       if (!codigo || !password) {
         return new Response(
@@ -61,11 +66,14 @@ serve(async (req) => {
       }
 
       // Get student data and password hash
+      console.log('Calling verify_student_password RPC with:', { codigo })
       const { data: studentData, error: queryError } = await supabase
         .rpc('verify_student_password', { 
           input_codigo: codigo,
           input_password: password 
         })
+
+      console.log('RPC response:', { studentData, queryError })
 
       if (queryError || !studentData || studentData.length === 0) {
         console.log('Student not found or query error:', queryError)
@@ -76,17 +84,23 @@ serve(async (req) => {
       }
 
       const student = studentData[0].student_data
+      console.log('Student data found:', { ...student, password_hash: 'HIDDEN' })
 
       // Verify password
+      console.log('Verifying password...')
       const isValidPassword = await verifyPassword(password, student.password_hash)
+      console.log('Password valid:', isValidPassword)
       
       if (!isValidPassword) {
+        console.log('Invalid password for codigo:', codigo)
         return new Response(
           JSON.stringify({ error: 'Código ou senha inválidos' }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
+      console.log('Login successful, generating session token')
+      
       // Generate simple session token (in production, use proper JWT)
       const sessionToken = btoa(JSON.stringify({
         studentId: student.id,
@@ -97,6 +111,7 @@ serve(async (req) => {
       // Return student data without password hash
       const { password_hash, ...safeStudentData } = student
 
+      console.log('Returning success response')
       return new Response(
         JSON.stringify({ 
           success: true,
