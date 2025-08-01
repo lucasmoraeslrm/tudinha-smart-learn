@@ -146,10 +146,8 @@ const Index = () => {
       return <StudentLogin onBack={handleBackToSelector} />;
     
     case 'professor':
-      if (professorData) {
-        return <ProfessorDashboard professorData={professorData} onLogout={handleProfessorLogout} />;
-      }
-      return <ProfessorLogin onBack={handleBackToSelector} onSuccess={handleProfessorSuccess} />;
+      navigate('/professor');
+      return null;
     
     case 'coordenador':
       if (coordenadorData) {

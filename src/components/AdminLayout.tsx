@@ -18,6 +18,7 @@ const sidebarItems = [
   { title: 'Dashboard', url: '/admin/dashboard', icon: LayoutDashboard },
   { title: 'Chat com IA', url: '/admin/chat', icon: MessageCircle },
   { title: 'Gerenciar Alunos', url: '/admin/students', icon: Users },
+  { title: 'Gerenciar Professores', url: '/admin/professores', icon: Users },
   { title: 'Gerenciar Jornadas', url: '/admin/jornadas', icon: MapPin },
   { title: 'Criar Exercícios', url: '/admin/exercises', icon: BookOpen },
   { title: 'Criar Listas', url: '/admin/lists', icon: List },

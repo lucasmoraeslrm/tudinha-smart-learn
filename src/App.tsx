@@ -22,6 +22,9 @@ import AdminStudents from "./pages/AdminStudents";
 import AdminJornadas from "./pages/AdminJornadas";
 import AdminExercises from "./pages/AdminExercises";
 import AdminLists from "./pages/AdminLists";
+import AdminProfessores from "./pages/AdminProfessores";
+import ProfessorLayout from "./components/ProfessorLayout";
+import ProfessorDashboard from "./components/ProfessorDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -125,6 +128,16 @@ const App = () => (
                 </AdminLayout>
               </ProtectedRoute>
             } />
+            <Route path="/admin/professores" element={
+              <ProtectedRoute requireAdmin>
+                <AdminLayout>
+                  <AdminProfessores />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            
+            {/* Professor Routes */}
+            <Route path="/professor" element={<ProfessorLayout />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
