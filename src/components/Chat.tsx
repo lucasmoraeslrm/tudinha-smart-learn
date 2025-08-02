@@ -118,7 +118,7 @@ const Chat: React.FC<ChatProps> = ({ userName }) => {
 
     try {
       // Call n8n webhook with new format
-      const response = await fetch('https://tudinha.app.n8n.cloud/webhook/tudinha-chat', {
+      const response = await fetch('https://n8n.srv863581.hstgr.cloud/webhook/tudinha-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
