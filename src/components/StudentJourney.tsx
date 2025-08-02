@@ -51,7 +51,7 @@ const StudentJourney: React.FC<StudentJourneyProps> = ({ jornada, onComplete }) 
   const [exerciseFeedback, setExerciseFeedback] = useState('');
   const { toast } = useToast();
 
-  const N8N_WEBHOOK_URL = 'https://n8n.srv863581.hstgr.cloud/webhook-test/dea013f8-8c32-4c58-bd34-e0aaf2f0007a';
+  const N8N_WEBHOOK_URL = 'https://n8n.srv863581.hstgr.cloud/webhook/dea013f8-8c32-4c58-bd34-e0aaf2f0007a';
 
   const steps = [
     { id: 1, title: 'Boas-vindas', description: 'Mensagem personalizada' },
