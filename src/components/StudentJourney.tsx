@@ -270,37 +270,38 @@ Clique no botão abaixo para começar! 🚀`;
       if (response && response.resposta) {
         console.log('Usando explicação personalizada do N8N:', response.resposta);
         
-        // Verificar se a resposta contém o formato JSON com marcadores
         let explicacaoPersonalizada = response.resposta;
         
-        // Se a resposta contém format_final_json_response, extrair o JSON
-        if (typeof explicacaoPersonalizada === 'string' && explicacaoPersonalizada.includes('format_final_json_response')) {
-          try {
-            // Extrair o JSON entre as marcações
-            const jsonMatch = explicacaoPersonalizada.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              const jsonData = JSON.parse(jsonMatch[0]);
-              
-              // Montar a explicação formatada
-              let explicacaoFormatada = jsonData.resposta;
-              
-              if (jsonData.topicos && jsonData.topicos.length > 0) {
-                explicacaoFormatada += '\n\n**Tópicos principais:**\n';
-                jsonData.topicos.forEach((topico: any, index: number) => {
-                  explicacaoFormatada += `\n${index + 1}. **${topico.titulo}**\n${topico.conteudo}\n`;
-                });
-              }
-              
-              setAiMessage(explicacaoFormatada);
+        try {
+          // Tentar extrair JSON da resposta se existir
+          const jsonMatch = explicacaoPersonalizada.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const jsonData = JSON.parse(jsonMatch[0]);
+            
+            // Se encontrou o campo "complicacao", usar apenas o texto limpo
+            if (jsonData.complicacao) {
+              setAiMessage(jsonData.complicacao);
+            } else if (jsonData.resposta) {
+              setAiMessage(jsonData.resposta);
             } else {
-              setAiMessage(explicacaoPersonalizada);
+              // Se não encontrou campos esperados, usar a resposta como texto limpo
+              setAiMessage(explicacaoPersonalizada.replace(/[{}",]/g, '').replace(/complicacao:\s*/, ''));
             }
-          } catch (parseError) {
-            console.log('Erro ao extrair JSON da resposta N8N:', parseError);
+          } else {
+            // Se não é JSON, usar a resposta como está
             setAiMessage(explicacaoPersonalizada);
           }
-        } else {
-          setAiMessage(explicacaoPersonalizada);
+        } catch (parseError) {
+          console.log('Erro ao processar resposta N8N:', parseError);
+          // Limpar formatação JSON básica como fallback
+          const textoLimpo = explicacaoPersonalizada
+            .replace(/^\{/, '')
+            .replace(/\}$/, '')
+            .replace(/^"complicacao":\s*"/, '')
+            .replace(/"$/, '')
+            .replace(/\\n/g, '\n')
+            .replace(/\\"/g, '"');
+          setAiMessage(textoLimpo);
         }
       } else {
         console.log('Usando explicação padrão (N8N não retornou dados válidos)');
