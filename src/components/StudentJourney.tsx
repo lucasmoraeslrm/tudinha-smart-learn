@@ -328,32 +328,83 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
     const novaPergunta = currentQuestion;
     setCurrentQuestion('');
 
-    // Enviar pergunta para o webhook n8n
-    const response = await sendWebhookMessage({
-      aluno: {
-        id: studentSession.id,
-        nome: studentSession.name
-      },
-      mensagem: {
-        evento: "duvida_aluno",
-        etapa: "duvidas",
-        pergunta: novaPergunta,
-        assunto: jornada.assunto
+    try {
+      const webhookData = {
+        aluno: {
+          id: studentSession.id,
+          nome: studentSession.name
+        },
+        mensagem: {
+          evento: "duvida_aluno",
+          etapa: "duvidas",
+          pergunta: novaPergunta,
+          assunto: jornada.assunto
+        },
+        jornada_id: jornada.id
+      };
+
+      console.log('Enviando pergunta para webhook específico de dúvidas:', webhookData);
+
+      const response = await fetch('https://n8n.srv863581.hstgr.cloud/webhook/9669fe8b-1146-4fe2-bc74-e5e895c5acca', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      });
+
+      let respostaIA = `Obrigado pela sua pergunta! Esta é uma resposta automática enquanto o sistema N8N está sendo configurado.`;
+      
+      if (response.ok) {
+        const responseData = await response.text();
+        console.log('Resposta recebida do webhook de dúvidas:', responseData);
+        
+        if (responseData && responseData.trim()) {
+          try {
+            // Tentar extrair JSON da resposta se existir
+            const jsonMatch = responseData.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const jsonData = JSON.parse(jsonMatch[0]);
+              
+              if (jsonData.complicacao) {
+                respostaIA = jsonData.complicacao;
+              } else if (jsonData.resposta) {
+                respostaIA = jsonData.resposta;
+              } else {
+                respostaIA = responseData.replace(/[{}",]/g, '').replace(/complicacao:\s*/, '');
+              }
+            } else {
+              respostaIA = responseData;
+            }
+          } catch (parseError) {
+            console.log('Erro ao processar resposta:', parseError);
+            const textoLimpo = responseData
+              .replace(/^\{/, '')
+              .replace(/\}$/, '')
+              .replace(/^"resposta":\s*"/, '')
+              .replace(/"$/, '')
+              .replace(/\\n/g, '\n')
+              .replace(/\\"/g, '"');
+            respostaIA = textoLimpo;
+          }
+        }
       }
-    });
 
-    // Se recebeu resposta do N8N, usar ela, senão usar mensagem padrão
-    let respostaIA = `Obrigado pela sua pergunta! Esta é uma resposta automática enquanto o sistema N8N está sendo configurado.`;
-    
-    if (response && response.resposta) {
-      respostaIA = response.resposta;
+      // Adicionar à lista de mensagens
+      setChatMessages(prev => [...prev, {
+        pergunta: novaPergunta,
+        resposta: respostaIA
+      }]);
+
+    } catch (error) {
+      console.error('Erro ao enviar pergunta:', error);
+      
+      // Adicionar mensagem de erro
+      setChatMessages(prev => [...prev, {
+        pergunta: novaPergunta,
+        resposta: 'Erro ao enviar pergunta. Tente novamente.'
+      }]);
     }
-
-    // Adicionar à lista de mensagens
-    setChatMessages(prev => [...prev, {
-      pergunta: novaPergunta,
-      resposta: respostaIA
-    }]);
 
     setSendingMessage(false);
   };
