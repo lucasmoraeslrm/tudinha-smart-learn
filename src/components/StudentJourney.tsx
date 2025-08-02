@@ -371,21 +371,23 @@ Esta explicação foi personalizada com base no seu conhecimento prévio. Agora 
               } else if (jsonData.resposta) {
                 respostaIA = jsonData.resposta;
               } else {
-                respostaIA = responseData.replace(/[{}",]/g, '').replace(/complicacao:\s*/, '');
+                // Se não encontrou campos esperados, usar a resposta como texto limpo
+                respostaIA = responseData.replace(/^\{.*?"resposta":\s*"/, '').replace(/"\s*\}$/, '').replace(/\\n/g, '\n').replace(/\\"/g, '"');
               }
             } else {
               respostaIA = responseData;
             }
           } catch (parseError) {
             console.log('Erro ao processar resposta:', parseError);
-            const textoLimpo = responseData
+            // Limpar formatação JSON básica como fallback
+            respostaIA = responseData
               .replace(/^\{/, '')
               .replace(/\}$/, '')
-              .replace(/^"resposta":\s*"/, '')
+              .replace(/^".*?":\s*"/, '')
               .replace(/"$/, '')
               .replace(/\\n/g, '\n')
-              .replace(/\\"/g, '"');
-            respostaIA = textoLimpo;
+              .replace(/\\"/g, '"')
+              .replace(/",.*$/, '');
           }
         }
       }
