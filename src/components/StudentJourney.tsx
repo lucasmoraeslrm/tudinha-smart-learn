@@ -273,31 +273,48 @@ Clique no botão abaixo para começar! 🚀`;
         let explicacaoPersonalizada = response.resposta;
         
         try {
-          // Tentar extrair JSON da resposta se existir
-          const jsonMatch = explicacaoPersonalizada.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const jsonData = JSON.parse(jsonMatch[0]);
-            
-            // Se encontrou o campo "complicacao", usar apenas o texto limpo
-            if (jsonData.complicacao) {
-              setAiMessage(jsonData.complicacao);
-            } else if (jsonData.resposta) {
-              setAiMessage(jsonData.resposta);
+          // Primeiro verificar se a resposta é um objeto com propriedades específicas
+          if (typeof explicacaoPersonalizada === 'object' && explicacaoPersonalizada.explicacao_aprofundada) {
+            setAiMessage(explicacaoPersonalizada.explicacao_aprofundada);
+          } else if (typeof explicacaoPersonalizada === 'string') {
+            // Tentar extrair JSON da resposta se existir
+            const jsonMatch = explicacaoPersonalizada.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const jsonData = JSON.parse(jsonMatch[0]);
+              
+              // Procurar por diferentes campos possíveis
+              if (jsonData.explicacao_aprofundada) {
+                setAiMessage(jsonData.explicacao_aprofundada);
+              } else if (jsonData.complicacao) {
+                setAiMessage(jsonData.complicacao);
+              } else if (jsonData.resposta) {
+                setAiMessage(jsonData.resposta);
+              } else {
+                // Se não encontrou campos esperados, usar a resposta como texto limpo
+                const textoLimpo = explicacaoPersonalizada
+                  .replace(/^\{/, '')
+                  .replace(/\}$/, '')
+                  .replace(/^"[^"]*":\s*"/, '')
+                  .replace(/"$/, '')
+                  .replace(/\\n/g, '\n')
+                  .replace(/\\"/g, '"');
+                setAiMessage(textoLimpo);
+              }
             } else {
-              // Se não encontrou campos esperados, usar a resposta como texto limpo
-              setAiMessage(explicacaoPersonalizada.replace(/[{}",]/g, '').replace(/complicacao:\s*/, ''));
+              // Se não é JSON, usar a resposta como está
+              setAiMessage(explicacaoPersonalizada);
             }
           } else {
-            // Se não é JSON, usar a resposta como está
-            setAiMessage(explicacaoPersonalizada);
+            // Fallback para qualquer outro tipo
+            setAiMessage(String(explicacaoPersonalizada));
           }
         } catch (parseError) {
           console.log('Erro ao processar resposta N8N:', parseError);
           // Limpar formatação JSON básica como fallback
-          const textoLimpo = explicacaoPersonalizada
+          const textoLimpo = String(explicacaoPersonalizada)
             .replace(/^\{/, '')
             .replace(/\}$/, '')
-            .replace(/^"complicacao":\s*"/, '')
+            .replace(/^"[^"]*":\s*"/, '')
             .replace(/"$/, '')
             .replace(/\\n/g, '\n')
             .replace(/\\"/g, '"');
