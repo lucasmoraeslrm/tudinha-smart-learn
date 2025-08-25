@@ -125,17 +125,27 @@ export default function LaunsEscolaDetails() {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="users">Usuários</TabsTrigger>
-            <TabsTrigger value="access">Acessos</TabsTrigger>
-            <TabsTrigger value="config">Configurações</TabsTrigger>
-            <TabsTrigger value="modules">Módulos</TabsTrigger>
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Visão Geral
+            </TabsTrigger>
+            <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Usuários
+            </TabsTrigger>
+            <TabsTrigger value="access" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Acessos
+            </TabsTrigger>
+            <TabsTrigger value="config" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Configurações
+            </TabsTrigger>
+            <TabsTrigger value="modules" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Módulos
+            </TabsTrigger>
           </TabsList>
 
           {/* Visão Geral */}
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Informações Básicas */}
               <Card>
@@ -273,14 +283,16 @@ export default function LaunsEscolaDetails() {
           </TabsContent>
 
           {/* Usuários */}
-          <TabsContent value="users" className="space-y-6">
-            <SchoolStudentsCRUD schoolId={school.id} />
-            <SchoolProfessorsCRUD schoolId={school.id} />
-            <SchoolCoordinatorsCRUD schoolId={school.id} />
+          <TabsContent value="users" className="mt-6">
+            <div className="space-y-6">
+              <SchoolStudentsCRUD schoolId={school.id} />
+              <SchoolProfessorsCRUD schoolId={school.id} />
+              <SchoolCoordinatorsCRUD schoolId={school.id} />
+            </div>
           </TabsContent>
 
           {/* Acessos */}
-          <TabsContent value="access" className="space-y-6">
+          <TabsContent value="access" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -306,7 +318,7 @@ export default function LaunsEscolaDetails() {
           </TabsContent>
 
           {/* Configurações */}
-          <TabsContent value="config" className="space-y-6">
+          <TabsContent value="config" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -332,7 +344,7 @@ export default function LaunsEscolaDetails() {
           </TabsContent>
 
           {/* Módulos */}
-          <TabsContent value="modules" className="space-y-6">
+          <TabsContent value="modules" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
