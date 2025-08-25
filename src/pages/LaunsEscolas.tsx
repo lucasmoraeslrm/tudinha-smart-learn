@@ -22,16 +22,7 @@ export default function LaunsEscolas() {
 
   return (
     <LaunsLayout>
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Gerenciar Escolas
-          </h1>
-          <p className="text-white/80">
-            Visualize e gerencie todas as escolas da plataforma
-          </p>
-        </div>
-        
+      <div className="p-6 bg-background min-h-screen">
         <SchoolManager onViewUsers={setSelectedSchool} />
       </div>
     </LaunsLayout>
