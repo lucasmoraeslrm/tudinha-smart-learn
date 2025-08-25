@@ -273,31 +273,6 @@ export default function LaunsEscolaForm() {
                 />
               </div>
             </div>
-
-            {/* Visual */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground border-b pb-2">Identidade Visual</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="cor_primaria">Cor Primária</Label>
-                  <Input
-                    id="cor_primaria"
-                    type="color"
-                    value={formData.cor_primaria}
-                    onChange={(e) => handleInputChange('cor_primaria', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cor_secundaria">Cor Secundária</Label>
-                  <Input
-                    id="cor_secundaria"
-                    type="color"
-                    value={formData.cor_secundaria}
-                    onChange={(e) => handleInputChange('cor_secundaria', e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
             
             <div className="flex justify-end gap-4 pt-6 border-t">
               <Button 
