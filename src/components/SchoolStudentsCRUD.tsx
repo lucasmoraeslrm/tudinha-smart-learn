@@ -17,10 +17,13 @@ interface Student {
   name: string;
   email?: string;
   codigo?: string;
+  ra?: string;
   ano_letivo?: string;
   turma?: string;
+  turma_id?: string;
   idade?: number;
   maquina_padrao?: string;
+  password_hash?: string;
   escola_id: string;
   created_at: string;
 }
@@ -29,8 +32,17 @@ interface SchoolStudentsCRUDProps {
   schoolId: string;
 }
 
+interface Turma {
+  id: string;
+  nome: string;
+  codigo: string;
+  serie: string;
+  ano_letivo: string;
+}
+
 export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps) {
   const [students, setStudents] = useState<Student[]>([]);
+  const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -41,15 +53,36 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
     name: '',
     email: '',
     codigo: '',
+    ra: '',
+    password: '',
     ano_letivo: '',
     turma: '',
+    turma_id: '',
     idade: '',
     maquina_padrao: ''
   });
 
   useEffect(() => {
     fetchStudents();
+    fetchTurmas();
   }, [schoolId]);
+
+  const fetchTurmas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('turmas')
+        .select('*')
+        .eq('escola_id', schoolId)
+        .eq('ativo', true)
+        .order('serie', { ascending: true })
+        .order('nome', { ascending: true });
+
+      if (error) throw error;
+      setTurmas(data || []);
+    } catch (error: any) {
+      console.error('Erro ao carregar turmas:', error);
+    }
+  };
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -78,9 +111,17 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
     
     try {
       const studentData = {
-        ...formData,
+        name: formData.name,
+        email: formData.email || null,
+        codigo: formData.codigo || null,
+        ra: formData.ra || null,
+        turma_id: formData.turma_id || null,
+        ano_letivo: formData.ano_letivo || null,
+        turma: formData.turma || null,
         idade: formData.idade ? parseInt(formData.idade) : null,
-        escola_id: schoolId
+        maquina_padrao: formData.maquina_padrao || null,
+        escola_id: schoolId,
+        ...(formData.password && { password_hash: formData.password }) // In production, hash this properly
       };
 
       if (editingStudent) {
@@ -114,8 +155,11 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
         name: '',
         email: '',
         codigo: '',
+        ra: '',
+        password: '',
         ano_letivo: '',
         turma: '',
+        turma_id: '',
         idade: '',
         maquina_padrao: ''
       });
@@ -135,8 +179,11 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
       name: student.name,
       email: student.email || '',
       codigo: student.codigo || '',
+      ra: student.ra || '',
+      password: '',
       ano_letivo: student.ano_letivo || '',
       turma: student.turma || '',
+      turma_id: student.turma_id || '',
       idade: student.idade?.toString() || '',
       maquina_padrao: student.maquina_padrao || ''
     });
@@ -193,8 +240,11 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                   name: '',
                   email: '',
                   codigo: '',
+                  ra: '',
+                  password: '',
                   ano_letivo: '',
                   turma: '',
+                  turma_id: '',
                   idade: '',
                   maquina_padrao: ''
                 });
@@ -239,6 +289,52 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                     onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
                   />
                 </div>
+                <div>
+                  <Label htmlFor="ra">RA *</Label>
+                  <Input
+                    id="ra"
+                    value={formData.ra}
+                    onChange={(e) => setFormData({ ...formData, ra: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Senha *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required={!editingStudent}
+                    placeholder={editingStudent ? "Deixe em branco para manter" : ""}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="turma">Turma</Label>
+                    <Select value={formData.turma_id} onValueChange={(value) => setFormData({ ...formData, turma_id: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma turma" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {turmas.map((turma) => (
+                          <SelectItem key={turma.id} value={turma.id}>
+                            {turma.codigo} - {turma.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="idade">Idade</Label>
+                    <Input
+                      id="idade"
+                      type="number"
+                      value={formData.idade}
+                      onChange={(e) => setFormData({ ...formData, idade: e.target.value })}
+                    />
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="ano_letivo">Ano Letivo</Label>
@@ -250,22 +346,13 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                   </div>
                   <div>
                     <Label htmlFor="turma">Turma</Label>
-                    <Input
-                      id="turma"
-                      value={formData.turma}
-                      onChange={(e) => setFormData({ ...formData, turma: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="idade">Idade</Label>
-                  <Input
-                    id="idade"
-                    type="number"
-                    value={formData.idade}
-                    onChange={(e) => setFormData({ ...formData, idade: e.target.value })}
-                  />
-                </div>
+                     <Input
+                       id="turma"
+                       value={formData.turma}
+                       onChange={(e) => setFormData({ ...formData, turma: e.target.value })}
+                     />
+                   </div>
+                 </div>
                 <div>
                   <Label htmlFor="maquina_padrao">Máquina Padrão</Label>
                   <Input

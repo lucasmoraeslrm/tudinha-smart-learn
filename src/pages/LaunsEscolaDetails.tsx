@@ -9,6 +9,9 @@ import { useSchools } from '@/hooks/useSchools';
 import SchoolStudentsCRUD from '@/components/SchoolStudentsCRUD';
 import SchoolProfessorsCRUD from '@/components/SchoolProfessorsCRUD';
 import SchoolCoordinatorsCRUD from '@/components/SchoolCoordinatorsCRUD';
+import SchoolMateriasCRUD from '@/components/SchoolMateriasCRUD';
+import SchoolTurmasCRUD from '@/components/SchoolTurmasCRUD';
+import SchoolTutoresCRUD from '@/components/SchoolTutoresCRUD';
 import { 
   ArrowLeft, 
   Edit, 
@@ -285,8 +288,11 @@ export default function LaunsEscolaDetails() {
           {/* Usuários */}
           <TabsContent value="users" className="mt-6">
             <div className="space-y-6">
+              <SchoolMateriasCRUD schoolId={school.id} />
+              <SchoolTurmasCRUD schoolId={school.id} />
               <SchoolStudentsCRUD schoolId={school.id} />
               <SchoolProfessorsCRUD schoolId={school.id} />
+              <SchoolTutoresCRUD schoolId={school.id} />
               <SchoolCoordinatorsCRUD schoolId={school.id} />
             </div>
           </TabsContent>

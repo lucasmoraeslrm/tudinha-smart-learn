@@ -34,7 +34,6 @@ interface Professor {
   id: string;
   nome: string;
   codigo: string;
-  materias: string[];
   ativo: boolean;
 }
 
@@ -171,7 +170,7 @@ export default function AdminJornadas() {
       // Carregar professores ativos
       const { data: professoresData } = await supabase
         .from('professores')
-        .select('id, nome, codigo, materias, ativo')
+        .select('id, nome, codigo, ativo')
         .eq('ativo', true)
         .order('nome');
 
@@ -832,7 +831,7 @@ export default function AdminJornadas() {
                             <div className="flex flex-col">
                               <span className="font-medium">{professor.nome}</span>
                               <span className="text-sm text-muted-foreground">
-                                {professor.codigo} • {professor.materias.join(', ')}
+                                {professor.codigo}
                               </span>
                             </div>
                           </SelectItem>

@@ -22,7 +22,6 @@ const formSchema = z.object({
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   codigo: z.string().min(3, 'Código deve ter pelo menos 3 caracteres'),
   password: z.string().min(4, 'Senha deve ter pelo menos 4 caracteres'),
-  materias: z.string().min(1, 'Informe pelo menos uma matéria'),
   ativo: z.boolean().default(true),
 });
 
@@ -33,7 +32,6 @@ interface Professor {
   nome: string;
   email?: string;
   codigo: string;
-  materias: string[];
   ativo: boolean;
   created_at: string;
   updated_at: string;
@@ -54,7 +52,6 @@ const AdminProfessores = () => {
       email: '',
       codigo: '',
       password: '',
-      materias: '',
       ativo: true,
     },
   });
@@ -85,14 +82,11 @@ const AdminProfessores = () => {
 
   const handleSubmit = async (data: FormData) => {
     try {
-      const materiasArray = data.materias.split(',').map(m => m.trim()).filter(m => m);
-      
       const professorData = {
         nome: data.nome,
         email: data.email || null,
         codigo: data.codigo,
         password_hash: data.password, // Em produção, deveria ser hash
-        materias: materiasArray,
         ativo: data.ativo,
       };
 
@@ -141,7 +135,6 @@ const AdminProfessores = () => {
       email: professor.email || '',
       codigo: professor.codigo,
       password: '', // Não carregamos a senha por segurança
-      materias: professor.materias.join(', '),
       ativo: professor.ativo,
     });
     setDialogOpen(true);
@@ -325,23 +318,6 @@ const AdminProfessores = () => {
 
                 <FormField
                   control={form.control}
-                  name="materias"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Matérias</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="Matemática, Português, História (separado por vírgula)" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="ativo"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -398,7 +374,6 @@ const AdminProfessores = () => {
                   <TableHead>Nome</TableHead>
                   <TableHead>Código</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Matérias</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
@@ -409,20 +384,6 @@ const AdminProfessores = () => {
                     <TableCell className="font-medium">{professor.nome}</TableCell>
                     <TableCell>{professor.codigo}</TableCell>
                     <TableCell>{professor.email || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {professor.materias.slice(0, 2).map((materia, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {materia}
-                          </Badge>
-                        ))}
-                        {professor.materias.length > 2 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{professor.materias.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
                     <TableCell>
                       <Badge variant={professor.ativo ? "default" : "secondary"}>
                         {professor.ativo ? 'Ativo' : 'Inativo'}
