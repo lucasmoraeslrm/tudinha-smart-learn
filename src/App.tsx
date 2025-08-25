@@ -28,6 +28,7 @@ import ProfessorDashboardPage from "./pages/ProfessorDashboardPage";
 import LaunsLogin from "./pages/LaunsLogin";
 import LaunsDashboard from "./pages/LaunsDashboard";
 import LaunsEscolas from "./pages/LaunsEscolas";
+import LaunsEscolaForm from "./pages/LaunsEscolaForm";
 import LaunsExercicios from "./pages/LaunsExercicios";
 import LaunsWebhooks from "./pages/LaunsWebhooks";
 import LaunsUsuarios from "./pages/LaunsUsuarios";
@@ -102,6 +103,16 @@ const App = () => (
             <Route path="/launs/escolas" element={
               <ProtectedRoute requireLauns>
                 <LaunsEscolas />
+              </ProtectedRoute>
+            } />
+            <Route path="/launs/escolas/nova" element={
+              <ProtectedRoute requireLauns>
+                <LaunsEscolaForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/launs/escolas/editar/:id" element={
+              <ProtectedRoute requireLauns>
+                <LaunsEscolaForm />
               </ProtectedRoute>
             } />
             <Route path="/launs/exercicios" element={
