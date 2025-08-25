@@ -9,7 +9,7 @@ interface LaunsLayoutProps {
 export function LaunsLayout({ children }: LaunsLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="launs-theme min-h-screen flex w-full bg-gradient-main">
+      <div className="launs-theme min-h-screen flex w-full bg-background">
         <LaunsSidebar />
         <div className="flex-1 flex flex-col">
           <header className="h-16 flex items-center justify-between px-6 bg-white/95 border-b border-gray-200 backdrop-blur-sm shadow-sm">
@@ -20,7 +20,7 @@ export function LaunsLayout({ children }: LaunsLayoutProps) {
               </span>
             </div>
           </header>
-          <main className="flex-1 overflow-auto bg-gradient-to-br from-transparent to-black/10">
+          <main className="flex-1 overflow-auto bg-secondary">
             {children}
           </main>
         </div>
