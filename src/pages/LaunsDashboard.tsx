@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SchoolManager from '@/components/SchoolManager';
 import SchoolUsersView from '@/components/SchoolUsersView';
-import { School } from '@/hooks/useSchools';
+import { School, useSchools } from '@/hooks/useSchools';
 import { 
   Code2, 
   Users, 
@@ -24,9 +24,10 @@ import {
 } from 'lucide-react';
 
 export default function LaunsDashboard() {
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+  const { schools, modules, loading } = useSchools();
 
   const handleLogout = async () => {
     await signOut();
@@ -34,9 +35,9 @@ export default function LaunsDashboard() {
   };
 
   const stats = [
-    { title: 'Escolas Ativas', value: '12', icon: SchoolIcon, color: 'text-blue-600' },
-    { title: 'Usuários Totais', value: '2,847', icon: Users, color: 'text-green-600' },
-    { title: 'Módulos Ativos', value: '4', icon: Puzzle, color: 'text-purple-600' },
+    { title: 'Escolas Ativas', value: schools.filter(s => s.ativa).length.toString(), icon: SchoolIcon, color: 'text-blue-600' },
+    { title: 'Total de Escolas', value: schools.length.toString(), icon: Users, color: 'text-green-600' },
+    { title: 'Módulos Disponíveis', value: modules.length.toString(), icon: Puzzle, color: 'text-purple-600' },
     { title: 'Uptime Sistema', value: '99.9%', icon: Activity, color: 'text-emerald-600' },
   ];
 
@@ -55,6 +56,17 @@ export default function LaunsDashboard() {
             school={selectedSchool} 
             onBack={() => setSelectedSchool(null)} 
           />
+        </div>
+      </div>
+    );
+  }
+
+  if (loading || authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white/70">Carregando painel...</p>
         </div>
       </div>
     );
@@ -91,24 +103,27 @@ export default function LaunsDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <Card key={index} className="bg-white/10 border-white/20 text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-white/80">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold">
-                      {stat.value}
-                    </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => {
+            const IconComponent = stat.icon;
+            return (
+              <Card key={index} className="bg-white/10 border-white/20 text-white">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-white/80">
+                        {stat.title}
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {stat.value}
+                      </p>
+                    </div>
+                    <IconComponent className={`h-8 w-8 ${stat.color}`} />
                   </div>
-                  <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Main SAAS Dashboard */}
@@ -134,19 +149,22 @@ export default function LaunsDashboard() {
 
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {quickActions.map((action, index) => (
-                <Card key={index} className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors cursor-pointer">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <action.icon className="h-6 w-6" />
-                      <CardTitle className="text-lg">{action.title}</CardTitle>
-                    </div>
-                    <CardDescription className="text-white/70">
-                      {action.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              ))}
+              {quickActions.map((action, index) => {
+                const IconComponent = action.icon;
+                return (
+                  <Card key={index} className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors cursor-pointer">
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <IconComponent className="h-6 w-6" />
+                        <CardTitle className="text-lg">{action.title}</CardTitle>
+                      </div>
+                      <CardDescription className="text-white/70">
+                        {action.description}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 

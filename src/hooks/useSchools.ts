@@ -223,8 +223,13 @@ export function useSchools() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchSchools(), fetchModules()]);
-      setLoading(false);
+      try {
+        await Promise.all([fetchSchools(), fetchModules()]);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadData();

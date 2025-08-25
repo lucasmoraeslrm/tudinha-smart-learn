@@ -90,7 +90,14 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Carregando escolas...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white/70">Carregando escolas...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -171,8 +178,24 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {schools.map((school) => (
+      {schools.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-full flex items-center justify-center">
+            <SchoolIcon className="w-8 h-8 text-white/60" />
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">Nenhuma escola cadastrada</h3>
+          <p className="text-white/70 mb-6">Comece criando sua primeira escola no sistema SAAS</p>
+          <Button 
+            onClick={() => setShowCreateDialog(true)}
+            className="bg-white/10 text-white hover:bg-white/20"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Criar primeira escola
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {schools.map((school) => (
           <Card key={school.id} className="bg-white/10 border-white/20 text-white">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -245,8 +268,9 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Diálogo de visualização da escola */}
       <Dialog open={!!selectedSchool && !showEditDialog} onOpenChange={() => setSelectedSchool(null)}>
