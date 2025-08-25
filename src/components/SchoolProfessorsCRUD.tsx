@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,16 +8,16 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, UserPlus, Edit, Trash2, Search, X } from 'lucide-react';
+import { BookOpen, UserPlus, Edit, Trash2, Search } from 'lucide-react';
 
 interface Professor {
   id: string;
   nome: string;
   email?: string;
   codigo: string;
-  materias?: string[];
   ativo: boolean;
   escola_id: string;
   password_hash: string;
@@ -34,39 +34,81 @@ export default function SchoolProfessorsCRUD({ schoolId }: SchoolProfessorsCRUDP
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProfessor, setEditingProfessor] = useState<Professor | null>(null);
-  const [currentMateria, setCurrentMateria] = useState('');
   const { toast } = useToast();
+
+  // Materias from DB and mapping professor -> materias
+  const [materiasOptions, setMateriasOptions] = useState<{ id: string; nome: string }[]>([]);
+  const [profMateriasMap, setProfMateriasMap] = useState<Record<string, string[]>>({});
 
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     codigo: '',
-    materias: [] as string[],
+    materiasSelectedIds: [] as string[],
     ativo: true,
     password: ''
   });
 
-  useEffect(() => {
-    fetchProfessors();
+  const materiaNameById = useMemo(() => {
+    const map: Record<string, string> = {};
+    materiasOptions.forEach((m) => { map[m.id] = m.nome; });
+    return map;
+  }, [materiasOptions]);
+
+useEffect(() => {
+    const load = async () => {
+      try {
+        await Promise.all([fetchMateriasOptions(), fetchProfessors()]);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    load();
   }, [schoolId]);
+
+  const fetchMateriasOptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('materias')
+        .select('id, nome')
+        .eq('escola_id', schoolId)
+        .order('nome');
+      if (error) throw error;
+      setMateriasOptions(data || []);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Erro ao carregar matérias', description: error.message });
+    }
+  };
 
   const fetchProfessors = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: profs, error: profError } = await supabase
         .from('professores')
         .select('*')
         .eq('escola_id', schoolId)
         .order('created_at', { ascending: false });
+      if (profError) throw profError;
+      setProfessors(profs || []);
 
-      if (error) throw error;
-      setProfessors(data || []);
+      const ids = (profs || []).map((p) => p.id);
+      if (ids.length > 0) {
+        const { data: rels, error: relError } = await supabase
+          .from('professor_materia_turma')
+          .select('professor_id, materia_id')
+          .in('professor_id', ids);
+        if (relError) throw relError;
+        const map: Record<string, string[]> = {};
+        (rels || []).forEach((r: any) => {
+          if (!r.materia_id) return;
+          map[r.professor_id] = [...(map[r.professor_id] || []), r.materia_id];
+        });
+        setProfMateriasMap(map);
+      } else {
+        setProfMateriasMap({});
+      }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao carregar professores",
-        description: error.message
-      });
+      toast({ variant: 'destructive', title: 'Erro ao carregar professores', description: error.message });
     } finally {
       setLoading(false);
     }
@@ -74,53 +116,54 @@ export default function SchoolProfessorsCRUD({ schoolId }: SchoolProfessorsCRUDP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
-      const professorData = {
+      const baseData: any = {
         nome: formData.nome,
         email: formData.email || null,
         codigo: formData.codigo,
-        materias: formData.materias,
         ativo: formData.ativo,
         escola_id: schoolId,
-        ...(formData.password && { password_hash: formData.password }) // In production, hash this properly
       };
+      if (formData.password) baseData.password_hash = formData.password; // TODO: hash corretamente
+
+      let professorId: string | null = null;
 
       if (editingProfessor) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('professores')
-          .update(professorData)
-          .eq('id', editingProfessor.id);
-
+          .update(baseData)
+          .eq('id', editingProfessor.id)
+          .select('id')
+          .maybeSingle();
         if (error) throw error;
-
-        toast({
-          title: "Professor atualizado",
-          description: "Os dados do professor foram atualizados com sucesso"
-        });
+        professorId = data?.id || editingProfessor.id;
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('professores')
-          .insert([{ ...professorData, password_hash: formData.password || 'temp_password' }]);
-
+          .insert([{ ...baseData }])
+          .select('id')
+          .single();
         if (error) throw error;
-
-        toast({
-          title: "Professor cadastrado",
-          description: "Novo professor foi cadastrado com sucesso"
-        });
+        professorId = data.id;
       }
 
+      // Atualiza relações professor -> matérias
+      if (professorId) {
+        await supabase.from('professor_materia_turma').delete().eq('professor_id', professorId);
+        if (formData.materiasSelectedIds.length > 0) {
+          const inserts = formData.materiasSelectedIds.map((materia_id) => ({ professor_id: professorId, materia_id, ativo: true }));
+          const { error: relError } = await supabase.from('professor_materia_turma').insert(inserts);
+          if (relError) throw relError;
+        }
+      }
+
+      toast({ title: editingProfessor ? 'Professor atualizado' : 'Professor cadastrado', description: 'Operação realizada com sucesso' });
       setIsDialogOpen(false);
       setEditingProfessor(null);
       resetForm();
-      fetchProfessors();
+      await Promise.all([fetchMateriasOptions(), fetchProfessors()]);
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao salvar professor",
-        description: error.message
-      });
+      toast({ variant: 'destructive', title: 'Erro ao salvar professor', description: error.message });
     }
   };
 
@@ -129,11 +172,10 @@ export default function SchoolProfessorsCRUD({ schoolId }: SchoolProfessorsCRUDP
       nome: '',
       email: '',
       codigo: '',
-      materias: [],
+      materiasSelectedIds: [],
       ativo: true,
       password: ''
     });
-    setCurrentMateria('');
   };
 
   const handleEdit = (professor: Professor) => {
@@ -142,7 +184,7 @@ export default function SchoolProfessorsCRUD({ schoolId }: SchoolProfessorsCRUDP
       nome: professor.nome,
       email: professor.email || '',
       codigo: professor.codigo,
-      materias: professor.materias || [],
+      materiasSelectedIds: profMateriasMap[professor.id] || [],
       ativo: professor.ativo,
       password: ''
     });
