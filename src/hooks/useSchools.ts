@@ -14,6 +14,18 @@ export interface School {
   plano: string;
   created_at: string;
   updated_at: string;
+  nome_fantasia?: string;
+  razao_social?: string;
+  telefone?: string;
+  celular?: string;
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;
+  cep?: string;
+  email?: string;
 }
 
 export interface Module {

@@ -218,41 +218,77 @@ export type Database = {
       escolas: {
         Row: {
           ativa: boolean
+          bairro: string | null
+          celular: string | null
+          cep: string | null
+          cidade: string | null
           codigo: string
+          complemento: string | null
           cor_primaria: string | null
           cor_secundaria: string | null
           created_at: string
           dominio: string | null
+          email: string | null
+          endereco: string | null
           id: string
           logo_url: string | null
           nome: string
+          nome_fantasia: string | null
+          numero: string | null
           plano: string
+          razao_social: string | null
+          telefone: string | null
+          uf: string | null
           updated_at: string
         }
         Insert: {
           ativa?: boolean
+          bairro?: string | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
           codigo: string
+          complemento?: string | null
           cor_primaria?: string | null
           cor_secundaria?: string | null
           created_at?: string
           dominio?: string | null
+          email?: string | null
+          endereco?: string | null
           id?: string
           logo_url?: string | null
           nome: string
+          nome_fantasia?: string | null
+          numero?: string | null
           plano?: string
+          razao_social?: string | null
+          telefone?: string | null
+          uf?: string | null
           updated_at?: string
         }
         Update: {
           ativa?: boolean
+          bairro?: string | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
           codigo?: string
+          complemento?: string | null
           cor_primaria?: string | null
           cor_secundaria?: string | null
           created_at?: string
           dominio?: string | null
+          email?: string | null
+          endereco?: string | null
           id?: string
           logo_url?: string | null
           nome?: string
+          nome_fantasia?: string | null
+          numero?: string | null
           plano?: string
+          razao_social?: string | null
+          telefone?: string | null
+          uf?: string | null
           updated_at?: string
         }
         Relationships: []

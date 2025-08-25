@@ -36,7 +36,19 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
     dominio: '',
     cor_primaria: '#3B82F6',
     cor_secundaria: '#1E40AF',
-    plano: 'basico'
+    plano: 'basico',
+    nome_fantasia: '',
+    razao_social: '',
+    telefone: '',
+    celular: '',
+    endereco: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    uf: '',
+    cep: '',
+    email: ''
   });
 
   const handleCreateSchool = async () => {
@@ -51,7 +63,19 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
         dominio: '',
         cor_primaria: '#3B82F6',
         cor_secundaria: '#1E40AF',
-        plano: 'basico'
+        plano: 'basico',
+        nome_fantasia: '',
+        razao_social: '',
+        telefone: '',
+        celular: '',
+        endereco: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cidade: '',
+        uf: '',
+        cep: '',
+        email: ''
       });
       setShowCreateDialog(false);
     } catch (error) {
@@ -115,65 +139,200 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
               Nova Escola
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Criar Nova Escola</DialogTitle>
               <DialogDescription>
                 Adicione uma nova escola ao sistema SAAS
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome da Escola</Label>
-                <Input
-                  id="nome"
-                  value={newSchool.nome}
-                  onChange={(e) => setNewSchool(prev => ({ ...prev, nome: e.target.value }))}
-                  placeholder="Ex: Colégio São José"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="codigo">Código Único</Label>
-                <Input
-                  id="codigo"
-                  value={newSchool.codigo}
-                  onChange={(e) => setNewSchool(prev => ({ ...prev, codigo: e.target.value }))}
-                  placeholder="Ex: sao-jose"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dominio">Domínio (Opcional)</Label>
-                <Input
-                  id="dominio"
-                  value={newSchool.dominio}
-                  onChange={(e) => setNewSchool(prev => ({ ...prev, dominio: e.target.value }))}
-                  placeholder="Ex: colegiosojose.com.br"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            <Tabs defaultValue="basic" className="mt-4">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="basic">Informações Básicas</TabsTrigger>
+                <TabsTrigger value="contact">Contato & Endereço</TabsTrigger>
+                <TabsTrigger value="branding">Visual</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="nome">Nome da Escola *</Label>
+                    <Input
+                      id="nome"
+                      value={newSchool.nome}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, nome: e.target.value }))}
+                      placeholder="Ex: Colégio São José"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
+                    <Input
+                      id="nome_fantasia"
+                      value={newSchool.nome_fantasia}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, nome_fantasia: e.target.value }))}
+                      placeholder="Ex: São José"
+                    />
+                  </div>
+                </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cor_primaria">Cor Primária</Label>
+                  <Label htmlFor="razao_social">Razão Social</Label>
                   <Input
-                    id="cor_primaria"
-                    type="color"
-                    value={newSchool.cor_primaria}
-                    onChange={(e) => setNewSchool(prev => ({ ...prev, cor_primaria: e.target.value }))}
+                    id="razao_social"
+                    value={newSchool.razao_social}
+                    onChange={(e) => setNewSchool(prev => ({ ...prev, razao_social: e.target.value }))}
+                    placeholder="Ex: Colégio São José LTDA"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cor_secundaria">Cor Secundária</Label>
+                  <Label htmlFor="codigo">Código Único *</Label>
                   <Input
-                    id="cor_secundaria"
-                    type="color"
-                    value={newSchool.cor_secundaria}
-                    onChange={(e) => setNewSchool(prev => ({ ...prev, cor_secundaria: e.target.value }))}
+                    id="codigo"
+                    value={newSchool.codigo}
+                    onChange={(e) => setNewSchool(prev => ({ ...prev, codigo: e.target.value }))}
+                    placeholder="Ex: sao-jose"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dominio">Domínio (Opcional)</Label>
+                  <Input
+                    id="dominio"
+                    value={newSchool.dominio}
+                    onChange={(e) => setNewSchool(prev => ({ ...prev, dominio: e.target.value }))}
+                    placeholder="Ex: colegiosojose.com.br"
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="contact" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="telefone">Telefone</Label>
+                    <Input
+                      id="telefone"
+                      value={newSchool.telefone}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, telefone: e.target.value }))}
+                      placeholder="Ex: (11) 3456-7890"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="celular">Celular</Label>
+                    <Input
+                      id="celular"
+                      value={newSchool.celular}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, celular: e.target.value }))}
+                      placeholder="Ex: (11) 99999-9999"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newSchool.email}
+                    onChange={(e) => setNewSchool(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Ex: contato@colegiosojose.com.br"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="endereco">Endereço</Label>
+                    <Input
+                      id="endereco"
+                      value={newSchool.endereco}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, endereco: e.target.value }))}
+                      placeholder="Ex: Rua das Flores"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="numero">Número</Label>
+                    <Input
+                      id="numero"
+                      value={newSchool.numero}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, numero: e.target.value }))}
+                      placeholder="Ex: 123"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="complemento">Complemento</Label>
+                  <Input
+                    id="complemento"
+                    value={newSchool.complemento}
+                    onChange={(e) => setNewSchool(prev => ({ ...prev, complemento: e.target.value }))}
+                    placeholder="Ex: Sala 101"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bairro">Bairro</Label>
+                    <Input
+                      id="bairro"
+                      value={newSchool.bairro}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, bairro: e.target.value }))}
+                      placeholder="Ex: Centro"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cidade">Cidade</Label>
+                    <Input
+                      id="cidade"
+                      value={newSchool.cidade}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, cidade: e.target.value }))}
+                      placeholder="Ex: São Paulo"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="uf">UF</Label>
+                    <Input
+                      id="uf"
+                      value={newSchool.uf}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, uf: e.target.value }))}
+                      placeholder="Ex: SP"
+                      maxLength={2}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cep">CEP</Label>
+                  <Input
+                    id="cep"
+                    value={newSchool.cep}
+                    onChange={(e) => setNewSchool(prev => ({ ...prev, cep: e.target.value }))}
+                    placeholder="Ex: 01234-567"
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="branding" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cor_primaria">Cor Primária</Label>
+                    <Input
+                      id="cor_primaria"
+                      type="color"
+                      value={newSchool.cor_primaria}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, cor_primaria: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cor_secundaria">Cor Secundária</Label>
+                    <Input
+                      id="cor_secundaria"
+                      type="color"
+                      value={newSchool.cor_secundaria}
+                      onChange={(e) => setNewSchool(prev => ({ ...prev, cor_secundaria: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <div className="flex justify-end pt-4">
+                <Button onClick={handleCreateSchool} className="w-full">
+                  Criar Escola
+                </Button>
               </div>
-              <Button onClick={handleCreateSchool} className="w-full">
-                Criar Escola
-              </Button>
-            </div>
+            </Tabs>
           </DialogContent>
         </Dialog>
       </div>
@@ -334,7 +493,7 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
 
       {/* Diálogo de edição */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Escola</DialogTitle>
             <DialogDescription>
@@ -342,55 +501,202 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
             </DialogDescription>
           </DialogHeader>
           {selectedSchool && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-nome">Nome da Escola</Label>
-                <Input
-                  id="edit-nome"
-                  value={selectedSchool.nome}
-                  onChange={(e) => setSelectedSchool(prev => 
-                    prev ? { ...prev, nome: e.target.value } : null
-                  )}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-dominio">Domínio</Label>
-                <Input
-                  id="edit-dominio"
-                  value={selectedSchool.dominio || ''}
-                  onChange={(e) => setSelectedSchool(prev => 
-                    prev ? { ...prev, dominio: e.target.value } : null
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            <Tabs defaultValue="basic" className="mt-4">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="basic">Informações Básicas</TabsTrigger>
+                <TabsTrigger value="contact">Contato & Endereço</TabsTrigger>
+                <TabsTrigger value="branding">Visual</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-nome">Nome da Escola *</Label>
+                    <Input
+                      id="edit-nome"
+                      value={selectedSchool.nome}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, nome: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-nome-fantasia">Nome Fantasia</Label>
+                    <Input
+                      id="edit-nome-fantasia"
+                      value={selectedSchool.nome_fantasia || ''}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, nome_fantasia: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-cor-primaria">Cor Primária</Label>
+                  <Label htmlFor="edit-razao-social">Razão Social</Label>
                   <Input
-                    id="edit-cor-primaria"
-                    type="color"
-                    value={selectedSchool.cor_primaria}
+                    id="edit-razao-social"
+                    value={selectedSchool.razao_social || ''}
                     onChange={(e) => setSelectedSchool(prev => 
-                      prev ? { ...prev, cor_primaria: e.target.value } : null
+                      prev ? { ...prev, razao_social: e.target.value } : null
                     )}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-cor-secundaria">Cor Secundária</Label>
+                  <Label htmlFor="edit-dominio">Domínio</Label>
                   <Input
-                    id="edit-cor-secundaria"
-                    type="color"
-                    value={selectedSchool.cor_secundaria}
+                    id="edit-dominio"
+                    value={selectedSchool.dominio || ''}
                     onChange={(e) => setSelectedSchool(prev => 
-                      prev ? { ...prev, cor_secundaria: e.target.value } : null
+                      prev ? { ...prev, dominio: e.target.value } : null
                     )}
                   />
                 </div>
+              </TabsContent>
+              
+              <TabsContent value="contact" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-telefone">Telefone</Label>
+                    <Input
+                      id="edit-telefone"
+                      value={selectedSchool.telefone || ''}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, telefone: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-celular">Celular</Label>
+                    <Input
+                      id="edit-celular"
+                      value={selectedSchool.celular || ''}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, celular: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-email">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={selectedSchool.email || ''}
+                    onChange={(e) => setSelectedSchool(prev => 
+                      prev ? { ...prev, email: e.target.value } : null
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="edit-endereco">Endereço</Label>
+                    <Input
+                      id="edit-endereco"
+                      value={selectedSchool.endereco || ''}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, endereco: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-numero">Número</Label>
+                    <Input
+                      id="edit-numero"
+                      value={selectedSchool.numero || ''}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, numero: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-complemento">Complemento</Label>
+                  <Input
+                    id="edit-complemento"
+                    value={selectedSchool.complemento || ''}
+                    onChange={(e) => setSelectedSchool(prev => 
+                      prev ? { ...prev, complemento: e.target.value } : null
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-bairro">Bairro</Label>
+                    <Input
+                      id="edit-bairro"
+                      value={selectedSchool.bairro || ''}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, bairro: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-cidade">Cidade</Label>
+                    <Input
+                      id="edit-cidade"
+                      value={selectedSchool.cidade || ''}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, cidade: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-uf">UF</Label>
+                    <Input
+                      id="edit-uf"
+                      value={selectedSchool.uf || ''}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, uf: e.target.value } : null
+                      )}
+                      maxLength={2}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-cep">CEP</Label>
+                  <Input
+                    id="edit-cep"
+                    value={selectedSchool.cep || ''}
+                    onChange={(e) => setSelectedSchool(prev => 
+                      prev ? { ...prev, cep: e.target.value } : null
+                    )}
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="branding" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-cor-primaria">Cor Primária</Label>
+                    <Input
+                      id="edit-cor-primaria"
+                      type="color"
+                      value={selectedSchool.cor_primaria}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, cor_primaria: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-cor-secundaria">Cor Secundária</Label>
+                    <Input
+                      id="edit-cor-secundaria"
+                      type="color"
+                      value={selectedSchool.cor_secundaria}
+                      onChange={(e) => setSelectedSchool(prev => 
+                        prev ? { ...prev, cor_secundaria: e.target.value } : null
+                      )}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <div className="flex justify-end pt-4">
+                <Button onClick={handleUpdateSchool} className="w-full">
+                  Salvar Alterações
+                </Button>
               </div>
-              <Button onClick={handleUpdateSchool} className="w-full">
-                Salvar Alterações
-              </Button>
-            </div>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>
