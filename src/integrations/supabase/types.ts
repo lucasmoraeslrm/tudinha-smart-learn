@@ -137,6 +137,7 @@ export type Database = {
           id: string
           nome: string
           password_hash: string
+          permissoes: Json | null
           updated_at: string
         }
         Insert: {
@@ -149,6 +150,7 @@ export type Database = {
           id?: string
           nome: string
           password_hash: string
+          permissoes?: Json | null
           updated_at?: string
         }
         Update: {
@@ -161,6 +163,7 @@ export type Database = {
           id?: string
           nome?: string
           password_hash?: string
+          permissoes?: Json | null
           updated_at?: string
         }
         Relationships: [
@@ -767,6 +770,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      series_anos_letivos: {
+        Row: {
+          ano_letivo: string
+          ativo: boolean
+          created_at: string
+          escola_id: string
+          id: string
+          serie: string
+          updated_at: string
+        }
+        Insert: {
+          ano_letivo: string
+          ativo?: boolean
+          created_at?: string
+          escola_id: string
+          id?: string
+          serie: string
+          updated_at?: string
+        }
+        Update: {
+          ano_letivo?: string
+          ativo?: boolean
+          created_at?: string
+          escola_id?: string
+          id?: string
+          serie?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       student_answers: {
         Row: {

@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSchools } from '@/hooks/useSchools';
+import SchoolStudentsCRUD from '@/components/SchoolStudentsCRUD';
+import SchoolProfessorsCRUD from '@/components/SchoolProfessorsCRUD';
+import SchoolCoordinatorsCRUD from '@/components/SchoolCoordinatorsCRUD';
 import { 
   ArrowLeft, 
   Edit, 
@@ -271,79 +274,9 @@ export default function LaunsEscolaDetails() {
 
           {/* Usuários */}
           <TabsContent value="users" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <GraduationCap className="w-5 h-5" />
-                    Alunos
-                  </CardTitle>
-                  <CardDescription>
-                    Gerencie os alunos da escola
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center py-4">
-                      <Users className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground mb-4">Funcionalidade em desenvolvimento</p>
-                    </div>
-                    <Button className="w-full" disabled>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Cadastrar Aluno
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Professores
-                  </CardTitle>
-                  <CardDescription>
-                    Gerencie os professores da escola
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center py-4">
-                      <Users className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground mb-4">Funcionalidade em desenvolvimento</p>
-                    </div>
-                    <Button className="w-full" disabled>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Cadastrar Professor
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    Coordenadores
-                  </CardTitle>
-                  <CardDescription>
-                    Gerencie a direção/coordenação
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center py-4">
-                      <UserCheck className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground mb-4">Funcionalidade em desenvolvimento</p>
-                    </div>
-                    <Button className="w-full" disabled>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Cadastrar Coordenador
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <SchoolStudentsCRUD schoolId={school.id} />
+            <SchoolProfessorsCRUD schoolId={school.id} />
+            <SchoolCoordinatorsCRUD schoolId={school.id} />
           </TabsContent>
 
           {/* Acessos */}
