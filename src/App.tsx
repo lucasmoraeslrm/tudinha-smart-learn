@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { ProtectedLaunsRoute } from "./components/ProtectedLaunsRoute";
 import Index from "./pages/Index";
 import DashboardPage from "./pages/DashboardPage";
 import JornadaPage from "./pages/JornadaPage";
@@ -96,45 +97,46 @@ const App = () => (
             
             {/* Launs/Developer Routes */}
             <Route path="/launs" element={<LaunsLogin />} />
+            <Route path="/launs/login" element={<LaunsLogin />} />
             <Route path="/launs/dashboard" element={
-              <ProtectedRoute requireLauns>
+              <ProtectedLaunsRoute>
                 <LaunsDashboard />
-              </ProtectedRoute>
+              </ProtectedLaunsRoute>
             } />
             <Route path="/launs/escolas" element={
-              <ProtectedRoute requireLauns>
+              <ProtectedLaunsRoute>
                 <LaunsEscolas />
-              </ProtectedRoute>
+              </ProtectedLaunsRoute>
             } />
             <Route path="/launs/escolas/nova" element={
-              <ProtectedRoute requireLauns>
+              <ProtectedLaunsRoute>
                 <LaunsEscolaForm />
-              </ProtectedRoute>
+              </ProtectedLaunsRoute>
             } />
             <Route path="/launs/escolas/editar/:id" element={
-              <ProtectedRoute requireLauns>
+              <ProtectedLaunsRoute>
                 <LaunsEscolaForm />
-              </ProtectedRoute>
+              </ProtectedLaunsRoute>
             } />
             <Route path="/launs/escolas/detalhes/:id" element={
-              <ProtectedRoute requireLauns>
+              <ProtectedLaunsRoute>
                 <LaunsEscolaDetails />
-              </ProtectedRoute>
+              </ProtectedLaunsRoute>
             } />
             <Route path="/launs/exercicios" element={
-              <ProtectedRoute requireLauns>
+              <ProtectedLaunsRoute>
                 <LaunsExercicios />
-              </ProtectedRoute>
+              </ProtectedLaunsRoute>
             } />
             <Route path="/launs/webhooks" element={
-              <ProtectedRoute requireLauns>
+              <ProtectedLaunsRoute>
                 <LaunsWebhooks />
-              </ProtectedRoute>
+              </ProtectedLaunsRoute>
             } />
             <Route path="/launs/usuarios" element={
-              <ProtectedRoute requireLauns>
+              <ProtectedLaunsRoute>
                 <LaunsUsuarios />
-              </ProtectedRoute>
+              </ProtectedLaunsRoute>
             } />
             
             
