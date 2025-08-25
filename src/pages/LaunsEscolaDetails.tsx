@@ -91,7 +91,7 @@ export default function LaunsEscolaDetails() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <Building className="w-8 h-8 text-primary" />
-                <h1 className="text-3xl font-bold text-white">{school.nome}</h1>
+                <h1 className="text-3xl font-bold text-foreground">{school.nome}</h1>
                 <Badge variant={school.ativa ? "default" : "secondary"} 
                        className={school.ativa ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground"}>
                   {school.ativa ? "Ativa" : "Inativa"}
