@@ -86,23 +86,23 @@ export default function LaunsEscolaForm() {
 
   return (
     <LaunsLayout>
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-6 max-w-6xl mx-auto">
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => navigate('/launs/escolas')}
-              className="text-white hover:bg-white/10"
+              className="text-foreground hover:bg-accent"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar
             </Button>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             {isEditing ? 'Editar Escola' : 'Nova Escola'}
           </h1>
-          <p className="text-white/80">
+          <p className="text-muted-foreground">
             {isEditing ? 'Atualize as informações da escola' : 'Cadastre uma nova escola na plataforma'}
           </p>
         </div>
@@ -124,8 +124,8 @@ export default function LaunsEscolaForm() {
                 <TabsTrigger value="branding">Visual</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="basic" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <TabsContent value="basic" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="nome">Nome da Escola *</Label>
                     <Input
@@ -154,7 +154,7 @@ export default function LaunsEscolaForm() {
                     placeholder="Ex: Colégio São José LTDA"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="codigo">Código Único *</Label>
                     <Input
@@ -176,8 +176,8 @@ export default function LaunsEscolaForm() {
                 </div>
               </TabsContent>
               
-              <TabsContent value="contact" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <TabsContent value="contact" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="telefone">Telefone</Label>
                     <Input
@@ -207,8 +207,8 @@ export default function LaunsEscolaForm() {
                     placeholder="Ex: contato@colegiosojose.com.br"
                   />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="col-span-2 space-y-2">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2 space-y-2">
                     <Label htmlFor="endereco">Endereço</Label>
                     <Input
                       id="endereco"
@@ -236,7 +236,7 @@ export default function LaunsEscolaForm() {
                     placeholder="Ex: Sala 101"
                   />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="bairro">Bairro</Label>
                     <Input
@@ -277,8 +277,8 @@ export default function LaunsEscolaForm() {
                 </div>
               </TabsContent>
               
-              <TabsContent value="branding" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <TabsContent value="branding" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="cor_primaria">Cor Primária</Label>
                     <Input

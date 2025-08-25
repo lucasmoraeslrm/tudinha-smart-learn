@@ -56,8 +56,8 @@ export default function LaunsEscolaDetails() {
       <LaunsLayout>
         <div className="p-6">
           <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-white mb-2">Escola não encontrada</h3>
-            <p className="text-white/80 mb-6">A escola solicitada não foi encontrada ou não existe.</p>
+            <h3 className="text-xl font-semibold text-foreground mb-2">Escola não encontrada</h3>
+            <p className="text-muted-foreground mb-6">A escola solicitada não foi encontrada ou não existe.</p>
             <Button 
               onClick={() => navigate('/launs/escolas')}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -80,7 +80,7 @@ export default function LaunsEscolaDetails() {
               variant="ghost" 
               size="sm"
               onClick={() => navigate('/launs/escolas')}
-              className="text-white hover:bg-white/10"
+              className="text-foreground hover:bg-accent"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar
@@ -97,7 +97,7 @@ export default function LaunsEscolaDetails() {
                   {school.ativa ? "Ativa" : "Inativa"}
                 </Badge>
               </div>
-              <p className="text-white/80">
+              <p className="text-muted-foreground">
                 {school.nome_fantasia && `${school.nome_fantasia} • `}
                 Código: {school.codigo}
               </p>
