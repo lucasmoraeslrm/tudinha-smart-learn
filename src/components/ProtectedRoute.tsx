@@ -6,18 +6,58 @@ import { Loader2 } from 'lucide-react';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requireLauns?: boolean;
+  requireParent?: boolean;
+  requireProfessor?: boolean;
 }
 
-export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+export default function ProtectedRoute({ 
+  children, 
+  requireAdmin = false,
+  requireLauns = false,
+  requireParent = false,
+  requireProfessor = false
+}: ProtectedRouteProps) {
   const { user, profile, studentSession, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading) {
+      // Check for specific role requirements
+      if (requireLauns) {
+        if (!user || !profile || profile.role !== 'admin') {
+          navigate('/launs');
+          return;
+        }
+      }
+      
+      if (requireParent) {
+        const parentSession = localStorage.getItem('parentSession');
+        if (!parentSession) {
+          navigate('/pais');
+          return;
+        }
+      }
+      
+      if (requireProfessor) {
+        const professorSession = localStorage.getItem('professorSession');
+        if (!professorSession) {
+          navigate('/professor');
+          return;
+        }
+      }
+      
+      if (requireAdmin) {
+        if (!user || !profile || profile.role !== 'admin') {
+          navigate('/admin');
+          return;
+        }
+      }
+
       // Check admin authentication
       if (user && profile) {
         if (requireAdmin && profile.role !== 'admin') {
-          navigate('/');
+          navigate('/admin');
           return;
         }
         // Allow admin access to student areas
@@ -26,20 +66,24 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
 
       // Check student authentication
       if (studentSession) {
-        if (requireAdmin) {
+        if (requireAdmin || requireLauns || requireParent || requireProfessor) {
           navigate('/');
           return;
         }
-        // Student is logged in and doesn't need admin - allow access
+        // Student is logged in and doesn't need special access - allow access
         return;
       }
 
       // No authentication found
       if (!user && !studentSession) {
-        navigate(requireAdmin ? '/admin' : '/');
+        if (requireLauns) navigate('/launs');
+        else if (requireParent) navigate('/pais');
+        else if (requireProfessor) navigate('/professor');
+        else if (requireAdmin) navigate('/admin');
+        else navigate('/');
       }
     }
-  }, [user, profile, studentSession, loading, navigate, requireAdmin]);
+  }, [user, profile, studentSession, loading, navigate, requireAdmin, requireLauns, requireParent, requireProfessor]);
 
   if (loading) {
     return (
@@ -52,19 +96,41 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     );
   }
 
-  // Check if user is authenticated (either admin or student)
-  const isAuthenticated = (user && profile) || studentSession;
+  // Check authentication based on requirements
+  if (requireLauns) {
+    if (!user || !profile || profile.role !== 'admin') {
+      return null;
+    }
+  }
+  
+  if (requireParent) {
+    const parentSession = localStorage.getItem('parentSession');
+    if (!parentSession) {
+      return null;
+    }
+  }
+  
+  if (requireProfessor) {
+    const professorSession = localStorage.getItem('professorSession');
+    if (!professorSession) {
+      return null;
+    }
+  }
+  
+  if (requireAdmin) {
+    if (!user || !profile || profile.role !== 'admin') {
+      return null;
+    }
+  }
+
+  // Check if user is authenticated (admin, student, parent, or professor)
+  const parentSession = localStorage.getItem('parentSession');
+  const professorSession = localStorage.getItem('professorSession');
+  const isAuthenticated = (user && profile) || studentSession || parentSession || professorSession;
   
   if (!isAuthenticated) {
     return null; // Será redirecionado
   }
-
-  // Check admin requirements
-  if (requireAdmin && profile?.role !== 'admin') {
-    return null; // Será redirecionado
-  }
-
-  // Allow admins to access student areas if needed
 
   return <>{children}</>;
 }

@@ -1,35 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import StudentDashboard from '@/components/StudentDashboard';
 import StudentLogin from './StudentLogin';
-import UserTypeSelector from '@/components/UserTypeSelector';
-import ProfessorLogin from '@/components/ProfessorLogin';
-import CoordenadorLogin from '@/components/CoordenadorLogin';
-import ProfessorDashboard from '@/components/ProfessorDashboard';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Index = () => {
   const { user, profile, studentSession, loading } = useAuth();
   const navigate = useNavigate();
-  const [currentView, setCurrentView] = useState<'selector' | 'student' | 'professor' | 'coordenador'>('selector');
-  const [professorData, setProfessorData] = useState<any>(null);
-  const [coordenadorData, setCoordenadorData] = useState<any>(null);
 
   useEffect(() => {
     const initializeApp = async () => {
-      console.log('Index: Loading status:', loading);
-      console.log('Index: User:', user);
-      console.log('Index: Profile:', profile);
-      console.log('Index: Student session:', studentSession);
-      console.log('Index: LocalStorage keys:', Object.keys(localStorage));
-      
       if (loading) return;
       
-      // FORÇAR LIMPEZA DE SESSÕES ADMIN INVÁLIDAS
       // Se há user mas não há profile, limpar tudo
       if (user && !profile) {
-        console.log('Clearing invalid admin session');
         await supabase.auth.signOut();
         localStorage.clear();
         window.location.reload();
@@ -38,33 +24,28 @@ const Index = () => {
       
       // Se há sessão de aluno ativa, redireciona para dashboard do aluno
       if (studentSession) {
-        console.log('Student session found, redirecting to dashboard');
         navigate('/dashboard');
         return;
       }
 
-      // Se há usuário admin autenticado E tem profile válido, redireciona para admin
+      // Se há usuário admin autenticado, redireciona para admin
       if (user && profile?.role === 'admin') {
-        console.log('Valid admin session found, redirecting to admin dashboard');
         navigate('/admin/dashboard');
         return;
       }
 
-      // Verificar se há sessão de professor ou coordenador salva
+      // Verificar sessões de outros tipos de usuário
       const savedProfessorSession = localStorage.getItem('professorSession');
-      const savedCoordenadorSession = localStorage.getItem('coordenadorSession');
+      const savedParentSession = localStorage.getItem('parentSession');
       
       if (savedProfessorSession) {
-        const professorSession = JSON.parse(savedProfessorSession);
-        setProfessorData(professorSession);
-        setCurrentView('professor');
-      } else if (savedCoordenadorSession) {
-        const coordenadorSession = JSON.parse(savedCoordenadorSession);
-        setCoordenadorData(coordenadorSession);
-        setCurrentView('coordenador');
-      } else {
-        console.log('No active sessions, showing selector');
-        setCurrentView('selector');
+        navigate('/professor/dashboard');
+        return;
+      }
+      
+      if (savedParentSession) {
+        navigate('/pais/dashboard');
+        return;
       }
     };
     
@@ -72,103 +53,99 @@ const Index = () => {
   }, [user, profile, studentSession, loading, navigate]);
 
 
-
-  const handleUserTypeSelect = (type: 'student' | 'professor' | 'coordenador') => {
-    setCurrentView(type);
-  };
-
-  const handleBackToSelector = () => {
-    setCurrentView('selector');
-    setProfessorData(null);
-    setCoordenadorData(null);
-  };
-
-  const handleProfessorSuccess = (data: any) => {
-    setProfessorData(data);
-    setCurrentView('professor');
-  };
-
-  const handleCoordenadorSuccess = (data: any) => {
-    setCoordenadorData(data);
-    setCurrentView('coordenador');
-  };
-
-  const handleProfessorLogout = () => {
-    setProfessorData(null);
-    setCurrentView('selector');
-  };
-
-  const handleCoordenadorLogout = () => {
-    setCoordenadorData(null);
-    setCurrentView('selector');
-  };
-
   const handleClearAllSessions = async () => {
-    // Limpar todas as sessões
     await supabase.auth.signOut();
     localStorage.clear();
-    setCurrentView('selector');
-    setProfessorData(null);
-    setCoordenadorData(null);
     window.location.reload();
   };
 
-  // Se há carregamento, mostrar tela de loading
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-main flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center text-white">
           <div className="w-16 h-16 mx-auto mb-4">
             <img 
-              src="https://storange.tudinha.com.br/colag.png" 
+              src="/src/assets/tudinha-mascot.png" 
               alt="Carregando..." 
               className="w-full h-full object-contain animate-pulse"
             />
           </div>
-          <p className="text-muted-foreground">Carregando...</p>
-          <button 
+          <p className="text-white/80">Carregando...</p>
+          <Button 
+            variant="ghost"
             onClick={handleClearAllSessions}
-            className="mt-4 text-sm text-muted-foreground underline"
+            className="mt-4 text-sm text-white/60 hover:text-white"
           >
             Limpar sessões
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
-  // Renderizar baseado na visualização atual
-  switch (currentView) {
-    case 'student':
-      if (studentSession) {
-        return <StudentDashboard />;
-      }
-      return <StudentLogin onBack={handleBackToSelector} />;
-    
-    case 'professor':
-      navigate('/professor');
-      return null;
-    
-    case 'coordenador':
-      if (coordenadorData) {
-        // TODO: Implementar CoordenadorDashboard
-        return (
-          <div className="min-h-screen bg-gradient-main flex items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold mb-4">Painel da Coordenação</h1>
-              <p className="mb-4">Bem-vindo, {coordenadorData.nome}</p>
-              <button onClick={handleCoordenadorLogout} className="bg-red-500 text-white px-4 py-2 rounded">
-                Sair
-              </button>
-            </div>
+  // Student Login Page
+  return (
+    <div className="min-h-screen bg-gradient-main">
+      <div className="container mx-auto p-6">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 mx-auto mb-4">
+            <img 
+              src="/src/assets/tudinha-mascot.png" 
+              alt="Tudinha" 
+              className="w-full h-full object-contain"
+            />
           </div>
-        );
-      }
-      return <CoordenadorLogin onBack={handleBackToSelector} onSuccess={handleCoordenadorSuccess} />;
-    
-    default:
-      return <UserTypeSelector onSelectUserType={handleUserTypeSelect} />;
-  }
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Tudinha
+          </h1>
+          <p className="text-white/80 text-lg">
+            Sua plataforma de aprendizado inteligente
+          </p>
+        </div>
+
+        {/* Student Login */}
+        <div className="max-w-md mx-auto mb-8">
+          <StudentLogin />
+        </div>
+
+        {/* Quick Access Links */}
+        <div className="text-center space-y-4">
+          <p className="text-white/60 text-sm">Acesso para outros usuários:</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/admin')}
+              className="text-white/80 hover:text-white hover:bg-white/10"
+            >
+              Direção/Coordenação
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/professor')}
+              className="text-white/80 hover:text-white hover:bg-white/10"
+            >
+              Professor
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/pais')}
+              className="text-white/80 hover:text-white hover:bg-white/10"
+            >
+              Pais/Responsáveis
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/launs')}
+              className="text-white/80 hover:text-white hover:bg-white/10"
+            >
+              Desenvolvedores
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Index;

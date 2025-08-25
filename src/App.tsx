@@ -24,7 +24,11 @@ import AdminExercises from "./pages/AdminExercises";
 import AdminLists from "./pages/AdminLists";
 import AdminProfessores from "./pages/AdminProfessores";
 import ProfessorLayout from "./components/ProfessorLayout";
-import ProfessorDashboard from "./components/ProfessorDashboard";
+import ProfessorDashboardPage from "./pages/ProfessorDashboardPage";
+import LaunsLogin from "./pages/LaunsLogin";
+import LaunsDashboard from "./pages/LaunsDashboard";
+import ParentLogin from "./pages/ParentLogin";
+import ParentDashboard from "./pages/ParentDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +41,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Main Student Access */}
             <Route path="/" element={<Index />} />
             
             {/* Student Routes with Layout */}
@@ -83,9 +88,16 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Admin Routes with Layout */}
+            {/* Launs/Developer Routes */}
+            <Route path="/launs" element={<LaunsLogin />} />
+            <Route path="/launs/dashboard" element={
+              <ProtectedRoute requireLauns>
+                <LaunsDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin/Direção/Coordenação Routes */}
             <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={
               <ProtectedRoute requireAdmin>
                 <AdminLayout>
@@ -138,8 +150,21 @@ const App = () => (
             
             {/* Professor Routes */}
             <Route path="/professor" element={<ProfessorLayout />} />
+            <Route path="/professor/dashboard" element={
+              <ProtectedRoute requireProfessor>
+                <ProfessorDashboardPage />
+              </ProtectedRoute>
+            } />
             
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Parent Routes */}
+            <Route path="/pais" element={<ParentLogin />} />
+            <Route path="/pais/dashboard" element={
+              <ProtectedRoute requireParent>
+                <ParentDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
