@@ -132,6 +132,7 @@ export type Database = {
           codigo: string
           created_at: string
           email: string | null
+          escola_id: string | null
           funcao: string
           id: string
           nome: string
@@ -143,6 +144,7 @@ export type Database = {
           codigo: string
           created_at?: string
           email?: string | null
+          escola_id?: string | null
           funcao: string
           id?: string
           nome: string
@@ -154,10 +156,103 @@ export type Database = {
           codigo?: string
           created_at?: string
           email?: string | null
+          escola_id?: string | null
           funcao?: string
           id?: string
           nome?: string
           password_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coordenadores_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escola_modulos: {
+        Row: {
+          ativo: boolean
+          configuracoes: Json | null
+          created_at: string
+          escola_id: string
+          id: string
+          modulo_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          configuracoes?: Json | null
+          created_at?: string
+          escola_id: string
+          id?: string
+          modulo_id: string
+        }
+        Update: {
+          ativo?: boolean
+          configuracoes?: Json | null
+          created_at?: string
+          escola_id?: string
+          id?: string
+          modulo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escola_modulos_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escola_modulos_modulo_id_fkey"
+            columns: ["modulo_id"]
+            isOneToOne: false
+            referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escolas: {
+        Row: {
+          ativa: boolean
+          codigo: string
+          cor_primaria: string | null
+          cor_secundaria: string | null
+          created_at: string
+          dominio: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          plano: string
+          updated_at: string
+        }
+        Insert: {
+          ativa?: boolean
+          codigo: string
+          cor_primaria?: string | null
+          cor_secundaria?: string | null
+          created_at?: string
+          dominio?: string | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          plano?: string
+          updated_at?: string
+        }
+        Update: {
+          ativa?: boolean
+          codigo?: string
+          cor_primaria?: string | null
+          cor_secundaria?: string | null
+          created_at?: string
+          dominio?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          plano?: string
           updated_at?: string
         }
         Relationships: []
@@ -503,12 +598,43 @@ export type Database = {
           },
         ]
       }
+      modulos: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          created_at: string
+          descricao: string | null
+          icone: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          created_at?: string
+          descricao?: string | null
+          icone?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          created_at?: string
+          descricao?: string | null
+          icone?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       professores: {
         Row: {
           ativo: boolean | null
           codigo: string
           created_at: string
           email: string | null
+          escola_id: string | null
           id: string
           materias: string[] | null
           nome: string
@@ -520,6 +646,7 @@ export type Database = {
           codigo: string
           created_at?: string
           email?: string | null
+          escola_id?: string | null
           id?: string
           materias?: string[] | null
           nome: string
@@ -531,19 +658,29 @@ export type Database = {
           codigo?: string
           created_at?: string
           email?: string | null
+          escola_id?: string | null
           id?: string
           materias?: string[] | null
           nome?: string
           password_hash?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "professores_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
           ano_letivo: string | null
           codigo: string | null
           created_at: string
+          escola_id: string | null
           full_name: string | null
           id: string
           role: string
@@ -556,6 +693,7 @@ export type Database = {
           ano_letivo?: string | null
           codigo?: string | null
           created_at?: string
+          escola_id?: string | null
           full_name?: string | null
           id?: string
           role?: string
@@ -568,6 +706,7 @@ export type Database = {
           ano_letivo?: string | null
           codigo?: string | null
           created_at?: string
+          escola_id?: string | null
           full_name?: string | null
           id?: string
           role?: string
@@ -577,6 +716,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_student_id_fkey"
             columns: ["student_id"]
@@ -680,6 +826,7 @@ export type Database = {
           codigo: string | null
           created_at: string
           email: string | null
+          escola_id: string | null
           id: string
           maquina_padrao: string | null
           name: string
@@ -692,6 +839,7 @@ export type Database = {
           codigo?: string | null
           created_at?: string
           email?: string | null
+          escola_id?: string | null
           id?: string
           maquina_padrao?: string | null
           name: string
@@ -704,13 +852,22 @@ export type Database = {
           codigo?: string | null
           created_at?: string
           email?: string | null
+          escola_id?: string | null
           id?: string
           maquina_padrao?: string | null
           name?: string
           turma?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
