@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Code2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function LaunsLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [isSignup, setIsSignup] = useState(false);
+  const { signIn, signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -20,25 +23,48 @@ export default function LaunsLogin() {
     setLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro no login",
-          description: error.message || "Credenciais inválidas"
-        });
+      if (isSignup) {
+        const { error } = await signUp(
+          email,
+          password,
+          fullName || (email.split('@')[0] || 'Admin Launs'),
+          'admin'
+        );
+        if (error) {
+          toast({
+            variant: "destructive",
+            title: "Erro no cadastro",
+            description: error.message || "Não foi possível criar a conta"
+          });
+        } else {
+          toast({
+            title: "Conta criada",
+            description: "Faça login agora com seu email e senha"
+          });
+          setIsSignup(false);
+        }
       } else {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Redirecionando para o painel..."
-        });
-        navigate('/launs/dashboard');
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast({
+            variant: "destructive",
+            title: "Erro no login",
+            description: error.message || "Credenciais inválidas"
+          });
+        } else {
+          // Garante que o usuário tenha permissão de admin
+          await supabase.rpc('promote_to_admin', { user_email: email });
+          toast({
+            title: "Login realizado com sucesso",
+            description: "Redirecionando para o painel..."
+          });
+          navigate('/launs/dashboard');
+        }
       }
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Erro no login",
+        title: isSignup ? "Erro no cadastro" : "Erro no login",
         description: "Ocorreu um erro inesperado"
       });
     } finally {
@@ -74,6 +100,21 @@ export default function LaunsLogin() {
                 disabled={loading}
               />
             </div>
+            {isSignup && (
+              <div className="space-y-2">
+                <label htmlFor="fullName" className="text-sm font-medium">
+                  Nome completo
+                </label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="Seu nome"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
                 Senha
@@ -92,15 +133,22 @@ export default function LaunsLogin() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Entrando...
+                  {isSignup ? 'Criando...' : 'Entrando...'}
                 </>
               ) : (
-                'Entrar'
+                isSignup ? 'Criar conta' : 'Entrar'
               )}
             </Button>
           </form>
           
-          <div className="mt-6 text-center">
+          <div className="mt-6 flex items-center justify-between">
+            <Button 
+              variant="ghost"
+              onClick={() => setIsSignup((v) => !v)}
+              className="text-sm"
+            >
+              {isSignup ? 'Já tem conta? Entrar' : 'Não tem conta? Criar conta'}
+            </Button>
             <Button 
               variant="ghost" 
               onClick={() => navigate('/')} 
