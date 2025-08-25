@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SchoolManager from '@/components/SchoolManager';
 import SchoolUsersView from '@/components/SchoolUsersView';
+import { LaunsLayout } from '@/components/LaunsLayout';
 import { School, useSchools } from '@/hooks/useSchools';
 import { 
   Code2, 
@@ -50,31 +51,33 @@ export default function LaunsDashboard() {
 
   if (selectedSchool) {
     return (
-      <div className="min-h-screen bg-gradient-main">
-        <div className="container mx-auto p-6">
+      <LaunsLayout>
+        <div className="p-6">
           <SchoolUsersView 
             school={selectedSchool} 
             onBack={() => setSelectedSchool(null)} 
           />
         </div>
-      </div>
+      </LaunsLayout>
     );
   }
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white/70">Carregando painel...</p>
+      <LaunsLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white/70">Carregando painel...</p>
+          </div>
         </div>
-      </div>
+      </LaunsLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-main">
-      <div className="container mx-auto p-6">
+    <LaunsLayout>
+      <div className="p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -90,15 +93,6 @@ export default function LaunsDashboard() {
               <Code2 className="w-4 h-4 mr-2" />
               Dev Mode
             </Badge>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleLogout}
-              className="text-white hover:bg-white/10"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
           </div>
         </div>
 
@@ -126,7 +120,7 @@ export default function LaunsDashboard() {
           })}
         </div>
 
-        {/* Main SAAS Dashboard */}
+        {/* Main Content */}
         <Tabs defaultValue="schools" className="space-y-6">
           <TabsList className="bg-white/10 border-white/20">
             <TabsTrigger value="schools" className="text-white data-[state=active]:bg-white/20">
@@ -169,7 +163,6 @@ export default function LaunsDashboard() {
           </TabsContent>
 
           <TabsContent value="system" className="space-y-6">
-            {/* System Status */}
             <Card className="bg-white/10 border-white/20 text-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -197,6 +190,6 @@ export default function LaunsDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </LaunsLayout>
   );
 }

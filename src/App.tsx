@@ -27,6 +27,10 @@ import ProfessorLayout from "./components/ProfessorLayout";
 import ProfessorDashboardPage from "./pages/ProfessorDashboardPage";
 import LaunsLogin from "./pages/LaunsLogin";
 import LaunsDashboard from "./pages/LaunsDashboard";
+import LaunsEscolas from "./pages/LaunsEscolas";
+import LaunsExercicios from "./pages/LaunsExercicios";
+import LaunsWebhooks from "./pages/LaunsWebhooks";
+import LaunsUsuarios from "./pages/LaunsUsuarios";
 import ParentLogin from "./pages/ParentLogin";
 import ParentDashboard from "./pages/ParentDashboard";
 import NotFound from "./pages/NotFound";
@@ -95,6 +99,27 @@ const App = () => (
                 <LaunsDashboard />
               </ProtectedRoute>
             } />
+            <Route path="/launs/escolas" element={
+              <ProtectedRoute requireLauns>
+                <LaunsEscolas />
+              </ProtectedRoute>
+            } />
+            <Route path="/launs/exercicios" element={
+              <ProtectedRoute requireLauns>
+                <LaunsExercicios />
+              </ProtectedRoute>
+            } />
+            <Route path="/launs/webhooks" element={
+              <ProtectedRoute requireLauns>
+                <LaunsWebhooks />
+              </ProtectedRoute>
+            } />
+            <Route path="/launs/usuarios" element={
+              <ProtectedRoute requireLauns>
+                <LaunsUsuarios />
+              </ProtectedRoute>
+            } />
+            
             
             {/* Admin/Direção/Coordenação Routes */}
             <Route path="/admin" element={<AdminLogin />} />
