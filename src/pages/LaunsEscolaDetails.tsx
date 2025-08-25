@@ -10,10 +10,10 @@ import {
   ArrowLeft, 
   Edit, 
   Settings,
-  FileText,
-  Mail,
-  Forward,
-  Key,
+  Users,
+  GraduationCap,
+  UserPlus,
+  BookOpen,
   Shield,
   Activity
 } from 'lucide-react';
@@ -195,41 +195,46 @@ export default function LaunsEscolaDetails() {
               <Button 
                 variant="outline"
                 className="border-slate-600 text-slate-600 hover:bg-slate-50"
+                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users&section=professores`)}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add Professor
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="border-slate-600 text-slate-600 hover:bg-slate-50"
+                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users&section=turmas`)}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Add Turma
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="border-slate-600 text-slate-600 hover:bg-slate-50"
+                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users&section=alunos`)}
+              >
+                <GraduationCap className="w-4 h-4 mr-2" />
+                Add Aluno
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="border-slate-600 text-slate-600 hover:bg-slate-50"
+                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users&section=materias`)}
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Add Matéria
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="border-slate-600 text-slate-600 hover:bg-slate-50"
+                onClick={() => navigate(`/launs/escolas/config/${school.id}`)}
               >
                 <Settings className="w-4 h-4 mr-2" />
-                Alterar Status
-              </Button>
-              
-              <Button 
-                variant="outline"
-                className="border-slate-600 text-slate-600 hover:bg-slate-50"
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Documentos
-              </Button>
-              
-              <Button 
-                variant="outline"
-                className="border-slate-600 text-slate-600 hover:bg-slate-50"
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                Criar E-mail
-              </Button>
-              
-              <Button 
-                variant="outline"
-                className="border-slate-600 text-slate-600 hover:bg-slate-50"
-              >
-                <Forward className="w-4 h-4 mr-2" />
-                Redirecionar E-mail
-              </Button>
-              
-              <Button 
-                variant="outline"
-                className="border-slate-600 text-slate-600 hover:bg-slate-50"
-              >
-                <Key className="w-4 h-4 mr-2" />
-                Alterar Senha do E-mail
+                Configurações
               </Button>
               
               <Button 
@@ -237,32 +242,31 @@ export default function LaunsEscolaDetails() {
                 className="border-slate-600 text-slate-600 hover:bg-slate-50"
               >
                 <Shield className="w-4 h-4 mr-2" />
-                Autorização Token
+                Permissões
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Additional Actions */}
+        {/* Management Actions */}
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-3">
-              <Button 
-                onClick={() => navigate(`/launs/escolas/config/${school.id}`)}
-                variant="outline"
-                className="border-primary text-primary hover:bg-primary/10"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Configurações da Escola
-              </Button>
-              
               <Button 
                 onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users`)}
                 variant="outline"
                 className="border-primary text-primary hover:bg-primary/10"
               >
-                <Activity className="w-4 h-4 mr-2" />
+                <Users className="w-4 h-4 mr-2" />
                 Gerenciar Usuários
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="border-primary text-primary hover:bg-primary/10"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Relatórios
               </Button>
             </div>
           </CardContent>
