@@ -196,78 +196,79 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {schools.map((school) => (
-          <Card key={school.id} className="bg-white/10 border-white/20 text-white">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <SchoolIcon className="w-5 h-5" />
-                  <CardTitle className="text-lg">{school.nome}</CardTitle>
-                </div>
-                <Badge variant={school.ativa ? "default" : "secondary"}>
-                  {school.ativa ? "Ativa" : "Inativa"}
-                </Badge>
-              </div>
-              <CardDescription className="text-white/70">
-                Código: {school.codigo}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="w-4 h-4" />
-                  <span>{school.dominio || "Sem domínio personalizado"}</span>
-                </div>
-                
-                <div className="flex items-center gap-2 text-sm">
-                  <Palette className="w-4 h-4" />
-                  <div className="flex gap-2">
-                    <div 
-                      className="w-4 h-4 rounded-full border"
-                      style={{ backgroundColor: school.cor_primaria }}
-                    />
-                    <div 
-                      className="w-4 h-4 rounded-full border"
-                      style={{ backgroundColor: school.cor_secundaria }}
-                    />
+            <Card key={school.id} className="bg-white/10 border-white/20 text-white">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <SchoolIcon className="w-5 h-5 text-white" />
+                    <CardTitle className="text-lg text-white font-semibold">{school.nome}</CardTitle>
                   </div>
-                  <span className="text-xs">Cores da marca</span>
+                  <Badge variant={school.ativa ? "default" : "secondary"} 
+                         className={school.ativa ? "bg-green-500 text-white" : "bg-gray-500 text-white"}>
+                    {school.ativa ? "Ativa" : "Inativa"}
+                  </Badge>
                 </div>
-                
-                <div className="flex gap-2 pt-2">
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => handleViewSchool(school)}
-                    className="text-white hover:bg-white/10"
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    Ver
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => onViewUsers(school)}
-                    className="text-white hover:bg-white/10"
-                  >
-                    <Users className="w-4 h-4 mr-1" />
-                    Usuários
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => {
-                      setSelectedSchool(school);
-                      setShowEditDialog(true);
-                    }}
-                    className="text-white hover:bg-white/10"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Editar
-                  </Button>
+                <CardDescription className="text-white/80">
+                  Código: {school.codigo}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-white">
+                    <Globe className="w-4 h-4 text-white/70" />
+                    <span className="text-white">{school.dominio || "Sem domínio personalizado"}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm text-white">
+                    <Palette className="w-4 h-4 text-white/70" />
+                    <div className="flex gap-2">
+                      <div 
+                        className="w-4 h-4 rounded-full border border-white/30"
+                        style={{ backgroundColor: school.cor_primaria }}
+                      />
+                      <div 
+                        className="w-4 h-4 rounded-full border border-white/30"
+                        style={{ backgroundColor: school.cor_secundaria }}
+                      />
+                    </div>
+                    <span className="text-xs text-white">Cores da marca</span>
+                  </div>
+                  
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => handleViewSchool(school)}
+                      className="text-white hover:bg-white/10 border border-white/20"
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      <span className="text-white">Ver</span>
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => onViewUsers(school)}
+                      className="text-white hover:bg-white/10 border border-white/20"
+                    >
+                      <Users className="w-4 h-4 mr-1" />
+                      <span className="text-white">Usuários</span>
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => {
+                        setSelectedSchool(school);
+                        setShowEditDialog(true);
+                      }}
+                      className="text-white hover:bg-white/10 border border-white/20"
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      <span className="text-white">Editar</span>
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
