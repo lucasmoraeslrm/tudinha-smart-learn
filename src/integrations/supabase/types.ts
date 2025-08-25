@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -95,6 +95,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      chats: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          last_message_at: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       coordenadores: {
         Row: {
@@ -428,6 +458,10 @@ export type Database = {
       }
       messages: {
         Row: {
+          attachment_name: string | null
+          attachment_type: string | null
+          attachment_url: string | null
+          chat_id: string | null
           created_at: string
           id: string
           message: string
@@ -436,6 +470,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          chat_id?: string | null
           created_at?: string
           id?: string
           message: string
@@ -444,6 +482,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          chat_id?: string | null
           created_at?: string
           id?: string
           message?: string
@@ -451,7 +493,15 @@ export type Database = {
           session_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       professores: {
         Row: {
