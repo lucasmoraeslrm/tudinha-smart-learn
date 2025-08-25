@@ -93,8 +93,8 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white/70">Carregando escolas...</p>
+          <div className="w-8 h-8 border-4 border-muted-foreground/20 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando escolas...</p>
         </div>
       </div>
     );
@@ -104,13 +104,13 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-white">Gerenciar Escolas</h2>
-          <p className="text-white/70">Controle todas as escolas cadastradas no sistema</p>
+          <h2 className="text-2xl font-bold text-foreground">Gerenciar Escolas</h2>
+          <p className="text-muted-foreground">Controle todas as escolas cadastradas no sistema</p>
         </div>
         
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
-            <Button className="bg-white/10 text-white hover:bg-white/20">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               Nova Escola
             </Button>
@@ -180,14 +180,14 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
 
       {schools.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-full flex items-center justify-center">
-            <SchoolIcon className="w-8 h-8 text-white/60" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+            <SchoolIcon className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Nenhuma escola cadastrada</h3>
-          <p className="text-white/70 mb-6">Comece criando sua primeira escola no sistema SAAS</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">Nenhuma escola cadastrada</h3>
+          <p className="text-muted-foreground mb-6">Comece criando sua primeira escola no sistema SAAS</p>
           <Button 
             onClick={() => setShowCreateDialog(true)}
-            className="bg-white/10 text-white hover:bg-white/20"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <Plus className="w-4 h-4 mr-2" />
             Criar primeira escola
@@ -196,74 +196,71 @@ export default function SchoolManager({ onViewUsers }: SchoolManagerProps) {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {schools.map((school) => (
-            <Card key={school.id} className="bg-white/10 border-white/20 text-white">
+            <Card key={school.id} className="border shadow-soft">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <SchoolIcon className="w-5 h-5 text-white" />
-                    <CardTitle className="text-lg text-white font-semibold">{school.nome}</CardTitle>
+                    <SchoolIcon className="w-5 h-5 text-primary" />
+                    <CardTitle className="text-lg text-foreground font-semibold">{school.nome}</CardTitle>
                   </div>
                   <Badge variant={school.ativa ? "default" : "secondary"} 
-                         className={school.ativa ? "bg-green-500 text-white" : "bg-gray-500 text-white"}>
+                         className={school.ativa ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground"}>
                     {school.ativa ? "Ativa" : "Inativa"}
                   </Badge>
                 </div>
-                <CardDescription className="text-white/80">
+                <CardDescription className="text-muted-foreground">
                   Código: {school.codigo}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-white">
-                    <Globe className="w-4 h-4 text-white/70" />
-                    <span className="text-white">{school.dominio || "Sem domínio personalizado"}</span>
+                  <div className="flex items-center gap-2 text-sm text-foreground">
+                    <Globe className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-foreground">{school.dominio || "Sem domínio personalizado"}</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-sm text-white">
-                    <Palette className="w-4 h-4 text-white/70" />
+                  <div className="flex items-center gap-2 text-sm text-foreground">
+                    <Palette className="w-4 h-4 text-muted-foreground" />
                     <div className="flex gap-2">
                       <div 
-                        className="w-4 h-4 rounded-full border border-white/30"
+                        className="w-4 h-4 rounded-full border border-border"
                         style={{ backgroundColor: school.cor_primaria }}
                       />
                       <div 
-                        className="w-4 h-4 rounded-full border border-white/30"
+                        className="w-4 h-4 rounded-full border border-border"
                         style={{ backgroundColor: school.cor_secundaria }}
                       />
                     </div>
-                    <span className="text-xs text-white">Cores da marca</span>
+                    <span className="text-xs text-muted-foreground">Cores da marca</span>
                   </div>
                   
                   <div className="flex gap-2 pt-2">
                     <Button 
                       size="sm" 
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => handleViewSchool(school)}
-                      className="text-white hover:bg-white/10 border border-white/20"
                     >
                       <Eye className="w-4 h-4 mr-1" />
-                      <span className="text-white">Ver</span>
+                      Ver
                     </Button>
                     <Button 
                       size="sm" 
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => onViewUsers(school)}
-                      className="text-white hover:bg-white/10 border border-white/20"
                     >
                       <Users className="w-4 h-4 mr-1" />
-                      <span className="text-white">Usuários</span>
+                      Usuários
                     </Button>
                     <Button 
                       size="sm" 
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => {
                         setSelectedSchool(school);
                         setShowEditDialog(true);
                       }}
-                      className="text-white hover:bg-white/10 border border-white/20"
                     >
                       <Edit className="w-4 h-4 mr-1" />
-                      <span className="text-white">Editar</span>
+                      Editar
                     </Button>
                   </div>
                 </div>
