@@ -10,6 +10,10 @@ export interface School {
   logo_url?: string;
   cor_primaria: string;
   cor_secundaria: string;
+  cor_primaria_texto?: string;
+  cor_secundaria_texto?: string;
+  cor_primaria_bg?: string;
+  cor_secundaria_bg?: string;
   ativa: boolean;
   plano: string;
   created_at: string;
