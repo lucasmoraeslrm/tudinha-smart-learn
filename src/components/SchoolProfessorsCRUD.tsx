@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, UserPlus, Edit, Trash2, Search } from 'lucide-react';
+import { BookOpen, UserPlus, Edit, Trash2, Search, X } from 'lucide-react';
 
 interface Professor {
   id: string;
@@ -214,21 +214,13 @@ useEffect(() => {
     }
   };
 
-  const addMateria = () => {
-    if (currentMateria.trim() && !formData.materias.includes(currentMateria.trim())) {
-      setFormData({
-        ...formData,
-        materias: [...formData.materias, currentMateria.trim()]
-      });
-      setCurrentMateria('');
-    }
-  };
-
-  const removeMateria = (materia: string) => {
-    setFormData({
-      ...formData,
-      materias: formData.materias.filter(m => m !== materia)
-    });
+  const handleMateriaToggle = (materiaId: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      materiasSelectedIds: checked 
+        ? [...prev.materiasSelectedIds, materiaId]
+        : prev.materiasSelectedIds.filter(id => id !== materiaId)
+    }));
   };
 
   const filteredProfessors = professors.filter(professor =>
@@ -308,28 +300,30 @@ useEffect(() => {
                 </div>
                 <div>
                   <Label>Matérias</Label>
-                  <div className="flex gap-2 mb-2">
-                    <Input
-                      value={currentMateria}
-                      onChange={(e) => setCurrentMateria(e.target.value)}
-                      placeholder="Digite uma matéria"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addMateria())}
-                    />
-                    <Button type="button" onClick={addMateria} size="sm">
-                      Adicionar
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.materias.map((materia) => (
-                      <Badge key={materia} variant="secondary" className="flex items-center gap-1">
-                        {materia}
-                        <X
-                          className="w-3 h-3 cursor-pointer"
-                          onClick={() => removeMateria(materia)}
+                  <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2">
+                    {materiasOptions.map((materia) => (
+                      <div key={materia.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`materia-${materia.id}`}
+                          checked={formData.materiasSelectedIds.includes(materia.id)}
+                          onCheckedChange={(checked) => 
+                            handleMateriaToggle(materia.id, !!checked)
+                          }
                         />
-                      </Badge>
+                        <Label 
+                          htmlFor={`materia-${materia.id}`} 
+                          className="text-sm font-normal cursor-pointer"
+                        >
+                          {materia.nome}
+                        </Label>
+                      </div>
                     ))}
                   </div>
+                  {materiasOptions.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Cadastre matérias primeiro na aba Matérias
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -393,9 +387,9 @@ useEffect(() => {
                     <TableCell>{professor.email || '-'}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {professor.materias?.map((materia) => (
-                          <Badge key={materia} variant="outline" className="text-xs">
-                            {materia}
+                        {(profMateriasMap[professor.id] || []).map((materiaId) => (
+                          <Badge key={materiaId} variant="outline" className="text-xs">
+                            {materiaNameById[materiaId] || materiaId}
                           </Badge>
                         )) || '-'}
                       </div>
