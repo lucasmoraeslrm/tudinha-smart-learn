@@ -12,10 +12,10 @@ export function LaunsLayout({ children }: LaunsLayoutProps) {
       <div className="launs-theme min-h-screen flex w-full bg-gradient-main">
         <LaunsSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-16 flex items-center justify-between px-6 bg-white/10 border-b border-white/20 backdrop-blur-sm">
-            <SidebarTrigger className="text-white hover:bg-white/20 p-2 rounded-lg border border-white/20 hover:border-white/40 transition-all" />
+          <header className="h-16 flex items-center justify-between px-6 bg-white/95 border-b border-gray-200 backdrop-blur-sm shadow-sm">
+            <SidebarTrigger className="text-gray-700 hover:bg-gray-100 p-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-all" />
             <div className="flex items-center gap-4">
-              <span className="text-white font-semibold text-sm bg-white/10 px-3 py-1 rounded-full border border-white/20">
+              <span className="text-gray-700 font-semibold text-sm bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
                 Launs Platform
               </span>
             </div>

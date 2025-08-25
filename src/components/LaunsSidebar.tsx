@@ -65,31 +65,31 @@ export function LaunsSidebar() {
   };
 
   return (
-    <Sidebar className={`${collapsed ? 'w-16' : 'w-64'} border-r border-white/20 bg-primary/95 backdrop-blur-sm`}>
-      <SidebarHeader className="p-4 border-b border-white/10">
+    <Sidebar className={`${collapsed ? 'w-16' : 'w-64'} border-r border-sidebar-border bg-sidebar shadow-sm`}>
+      <SidebarHeader className="p-4 border-b border-sidebar-border bg-sidebar">
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border border-white/30">
+            <div className="w-10 h-10 bg-primary/90 rounded-xl flex items-center justify-center border border-primary/20 shadow-sm">
               <span className="text-white font-bold text-lg">L</span>
             </div>
             <div>
-              <h2 className="text-white font-bold text-lg">Launs</h2>
-              <p className="text-white/70 text-sm font-medium">Admin Panel</p>
+              <h2 className="text-sidebar-foreground font-bold text-lg">Launs</h2>
+              <p className="text-sidebar-foreground/70 text-sm font-medium">Admin Panel</p>
             </div>
           </div>
         )}
         {collapsed && (
           <div className="flex justify-center">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border border-white/30">
+            <div className="w-10 h-10 bg-primary/90 rounded-xl flex items-center justify-center border border-primary/20 shadow-sm">
               <span className="text-white font-bold text-lg">L</span>
             </div>
           </div>
         )}
       </SidebarHeader>
 
-      <SidebarContent className="px-2 py-4">
+      <SidebarContent className="px-2 py-4 bg-sidebar">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/70 text-xs uppercase tracking-wider font-semibold px-3 mb-2">
+          <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider font-semibold px-3 mb-2">
             {!collapsed ? 'Navegação' : ''}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -102,8 +102,8 @@ export function LaunsSidebar() {
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
                           isActive
-                            ? 'bg-white/20 text-white font-semibold border border-white/30 shadow-lg'
-                            : 'text-white/90 hover:bg-white/10 hover:text-white font-medium'
+                            ? 'bg-primary/10 text-primary font-semibold border border-primary/20 shadow-sm'
+                            : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium'
                         }`
                       }
                     >
@@ -118,13 +118,13 @@ export function LaunsSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-white/10 mt-auto">
+      <SidebarFooter className="p-4 border-t border-sidebar-border mt-auto bg-sidebar">
         {!collapsed && profile && (
-          <div className="mb-4 p-3 bg-white/10 rounded-lg border border-white/20">
-            <p className="text-white text-sm font-semibold truncate">
+          <div className="mb-4 p-3 bg-primary/5 rounded-lg border border-primary/10">
+            <p className="text-sidebar-foreground text-sm font-semibold truncate">
               {profile.full_name || 'Admin'}
             </p>
-            <p className="text-white/70 text-xs truncate font-medium">
+            <p className="text-sidebar-foreground/60 text-xs truncate font-medium">
               Administrador
             </p>
           </div>
@@ -134,7 +134,7 @@ export function LaunsSidebar() {
           <Button
             variant="ghost"
             size={collapsed ? "icon" : "sm"}
-            className="text-white/90 hover:bg-white/20 hover:text-white font-medium border border-white/20 hover:border-white/40 transition-all"
+            className="text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium border border-sidebar-border hover:border-primary/30 transition-all"
           >
             <Settings className="h-4 w-4" />
             {!collapsed && <span className="ml-2 text-sm">Configurações</span>}
@@ -144,7 +144,7 @@ export function LaunsSidebar() {
             variant="ghost"
             size={collapsed ? "icon" : "sm"}
             onClick={handleLogout}
-            className="text-white/90 hover:bg-red-500/80 hover:text-white font-medium border border-white/20 hover:border-red-400/60 transition-all"
+            className="text-sidebar-foreground/80 hover:bg-red-50 hover:text-red-600 font-medium border border-sidebar-border hover:border-red-200 transition-all"
           >
             <LogOut className="h-4 w-4" />
             {!collapsed && <span className="ml-2 text-sm">Sair</span>}
