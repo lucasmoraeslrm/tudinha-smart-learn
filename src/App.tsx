@@ -31,6 +31,7 @@ import LaunsDashboard from "./pages/LaunsDashboard";
 import LaunsEscolas from "./pages/LaunsEscolas";
 import LaunsEscolaForm from "./pages/LaunsEscolaForm";
 import LaunsEscolaDetails from "./pages/LaunsEscolaDetails";
+import LaunsEscolaConfig from "./pages/LaunsEscolaConfig";
 import LaunsExercicios from "./pages/LaunsExercicios";
 import LaunsWebhooks from "./pages/LaunsWebhooks";
 import LaunsUsuarios from "./pages/LaunsUsuarios";
@@ -121,6 +122,11 @@ const App = () => (
             <Route path="/launs/escolas/detalhes/:id" element={
               <ProtectedLaunsRoute>
                 <LaunsEscolaDetails />
+              </ProtectedLaunsRoute>
+            } />
+            <Route path="/launs/escolas/config/:id" element={
+              <ProtectedLaunsRoute>
+                <LaunsEscolaConfig />
               </ProtectedLaunsRoute>
             } />
             <Route path="/launs/exercicios" element={

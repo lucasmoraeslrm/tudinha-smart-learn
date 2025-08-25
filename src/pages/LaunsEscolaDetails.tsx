@@ -103,13 +103,22 @@ export default function LaunsEscolaDetails() {
               </p>
             </div>
             
-            <Button 
-              onClick={() => navigate(`/launs/escolas/editar/${school.id}`)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Editar Escola
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => navigate(`/launs/escolas/editar/${school.id}`)}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Editar Escola
+              </Button>
+              <Button 
+                onClick={() => navigate(`/launs/escolas/config/${school.id}`)}
+                variant="outline"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Configurações
+              </Button>
+            </div>
           </div>
         </div>
 
