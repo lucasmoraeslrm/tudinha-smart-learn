@@ -6,6 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { useSchools } from '@/hooks/useSchools';
+import SchoolStudentsCRUD from '@/components/SchoolStudentsCRUD';
+import SchoolProfessorsCRUD from '@/components/SchoolProfessorsCRUD';
+import SchoolMateriasCRUD from '@/components/SchoolMateriasCRUD';
+import SchoolTurmasCRUD from '@/components/SchoolTurmasCRUD';
+import SchoolTutoresCRUD from '@/components/SchoolTutoresCRUD';
+import SchoolCoordinatorsCRUD from '@/components/SchoolCoordinatorsCRUD';
 import { 
   ArrowLeft, 
   Edit, 
@@ -23,6 +29,7 @@ export default function LaunsEscolaDetails() {
   const { id } = useParams();
   const { schools, loading } = useSchools();
   const [school, setSchool] = useState(null);
+  const [activeSection, setActiveSection] = useState('overview');
 
   useEffect(() => {
     if (schools.length > 0 && id) {
@@ -195,37 +202,37 @@ export default function LaunsEscolaDetails() {
               <Button 
                 variant="outline"
                 className="border-slate-600 text-slate-600 hover:bg-slate-50"
-                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users&section=professores`)}
+                onClick={() => setActiveSection('professores')}
               >
                 <UserPlus className="w-4 h-4 mr-2" />
-                Add Professor
+                Professores
               </Button>
               
               <Button 
                 variant="outline"
                 className="border-slate-600 text-slate-600 hover:bg-slate-50"
-                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users&section=turmas`)}
+                onClick={() => setActiveSection('turmas')}
               >
                 <Users className="w-4 h-4 mr-2" />
-                Add Turma
+                Turmas
               </Button>
               
               <Button 
                 variant="outline"
                 className="border-slate-600 text-slate-600 hover:bg-slate-50"
-                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users&section=alunos`)}
+                onClick={() => setActiveSection('alunos')}
               >
                 <GraduationCap className="w-4 h-4 mr-2" />
-                Add Aluno
+                Alunos
               </Button>
               
               <Button 
                 variant="outline"
                 className="border-slate-600 text-slate-600 hover:bg-slate-50"
-                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users&section=materias`)}
+                onClick={() => setActiveSection('materias')}
               >
                 <BookOpen className="w-4 h-4 mr-2" />
-                Add Matéria
+                Matérias
               </Button>
               
               <Button 
@@ -240,9 +247,10 @@ export default function LaunsEscolaDetails() {
               <Button 
                 variant="outline"
                 className="border-slate-600 text-slate-600 hover:bg-slate-50"
+                onClick={() => setActiveSection('tutores')}
               >
                 <Shield className="w-4 h-4 mr-2" />
-                Permissões
+                Tutores
               </Button>
             </div>
           </CardContent>
@@ -253,36 +261,87 @@ export default function LaunsEscolaDetails() {
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-3">
               <Button 
-                onClick={() => navigate(`/launs/escolas/detalhes/${school.id}?tab=users`)}
+                onClick={() => setActiveSection('overview')}
+                variant={activeSection === 'overview' ? 'default' : 'outline'}
+                className={activeSection === 'overview' ? '' : 'border-primary text-primary hover:bg-primary/10'}
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Visão Geral
+              </Button>
+              
+              <Button 
+                onClick={() => setActiveSection('coordenadores')}
                 variant="outline"
                 className="border-primary text-primary hover:bg-primary/10"
               >
                 <Users className="w-4 h-4 mr-2" />
-                Gerenciar Usuários
-              </Button>
-              
-              <Button 
-                variant="outline"
-                className="border-primary text-primary hover:bg-primary/10"
-              >
-                <Activity className="w-4 h-4 mr-2" />
-                Relatórios
+                Coordenadores
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Logs Section */}
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Logs da Escola</h3>
-            <div className="text-center py-8 text-muted-foreground">
-              <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p>Sistema de logs em desenvolvimento</p>
-              <p className="text-sm">Aqui serão exibidos os logs de atividade da escola</p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Dynamic Content Based on Active Section */}
+        {activeSection === 'overview' && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Logs da Escola</h3>
+              <div className="text-center py-8 text-muted-foreground">
+                <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p>Sistema de logs em desenvolvimento</p>
+                <p className="text-sm">Aqui serão exibidos os logs de atividade da escola</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'materias' && (
+          <Card>
+            <CardContent className="p-6">
+              <SchoolMateriasCRUD schoolId={school.id} />
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'turmas' && (
+          <Card>
+            <CardContent className="p-6">
+              <SchoolTurmasCRUD schoolId={school.id} />
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'alunos' && (
+          <Card>
+            <CardContent className="p-6">
+              <SchoolStudentsCRUD schoolId={school.id} />
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'professores' && (
+          <Card>
+            <CardContent className="p-6">
+              <SchoolProfessorsCRUD schoolId={school.id} />
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'tutores' && (
+          <Card>
+            <CardContent className="p-6">
+              <SchoolTutoresCRUD schoolId={school.id} />
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'coordenadores' && (
+          <Card>
+            <CardContent className="p-6">
+              <SchoolCoordinatorsCRUD schoolId={school.id} />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </LaunsLayout>
   );
