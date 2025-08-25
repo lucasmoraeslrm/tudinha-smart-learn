@@ -874,6 +874,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      promote_to_admin: {
+        Args: { user_email: string }
+        Returns: Json
+      }
       verify_coordenador_password: {
         Args: { input_codigo: string; input_password: string }
         Returns: {
