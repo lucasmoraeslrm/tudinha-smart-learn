@@ -100,10 +100,10 @@ export function LaunsSidebar() {
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
+                        `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 border ${
                           isActive
-                            ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium'
+                            ? 'bg-primary text-primary-foreground border-primary font-semibold shadow-sm'
+                            : 'text-primary border-primary bg-transparent hover:bg-primary hover:text-primary-foreground font-medium'
                         }`
                       }
                     >
