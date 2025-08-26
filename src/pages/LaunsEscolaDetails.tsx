@@ -341,8 +341,8 @@ export default function LaunsEscolaDetails() {
               </Button>
               
               <Button 
-                onClick={() => setSection('todos-usuarios')}
-                className={activeSection === 'todos-usuarios' 
+                onClick={() => setSection('coordenadores')}
+                className={activeSection === 'coordenadores' 
                   ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                   : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
               >
@@ -512,14 +512,6 @@ export default function LaunsEscolaDetails() {
           <Card>
             <CardContent className="p-6">
               <SchoolCoordinatorsCRUD schoolId={school.id} />
-            </CardContent>
-          </Card>
-        )}
-
-        {activeSection === 'todos-usuarios' && (
-          <Card>
-            <CardContent className="p-6">
-              <SchoolUsersView schoolId={school.id} />
             </CardContent>
           </Card>
         )}
