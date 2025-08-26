@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { LaunsLayout } from '@/components/LaunsLayout';
+import { Button } from '@/components/ui/button';
 import SchoolManager from '@/components/SchoolManager';
 import SchoolUsersView from '@/components/SchoolUsersView';
 import { School } from '@/hooks/useSchools';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LaunsEscolas() {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
@@ -11,9 +13,18 @@ export default function LaunsEscolas() {
     return (
       <LaunsLayout>
         <div className="p-6">
+          <div className="mb-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => setSelectedSchool(null)}
+              className="text-foreground hover:bg-accent"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+          </div>
           <SchoolUsersView 
-            school={selectedSchool} 
-            onBack={() => setSelectedSchool(null)} 
+            schoolId={selectedSchool.id} 
           />
         </div>
       </LaunsLayout>

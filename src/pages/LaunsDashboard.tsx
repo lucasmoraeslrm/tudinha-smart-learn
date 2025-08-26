@@ -21,7 +21,8 @@ import {
   Shield,
   School as SchoolIcon,
   Puzzle,
-  BarChart3
+  BarChart3,
+  ArrowLeft
 } from 'lucide-react';
 
 export default function LaunsDashboard() {
@@ -53,9 +54,18 @@ export default function LaunsDashboard() {
     return (
       <LaunsLayout>
         <div className="p-6">
+          <div className="mb-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => setSelectedSchool(null)}
+              className="text-foreground hover:bg-accent"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+          </div>
           <SchoolUsersView 
-            school={selectedSchool} 
-            onBack={() => setSelectedSchool(null)} 
+            schoolId={selectedSchool.id} 
           />
         </div>
       </LaunsLayout>
