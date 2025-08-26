@@ -1363,6 +1363,68 @@ export type Database = {
           },
         ]
       }
+      webhooks: {
+        Row: {
+          ativo: boolean
+          configuracoes: Json | null
+          created_at: string
+          escola_id: string | null
+          headers: Json | null
+          id: string
+          modo_producao: boolean
+          nome: string
+          tipo: string
+          total_disparos: number | null
+          ultimo_disparo: string | null
+          ultimo_status: string | null
+          updated_at: string
+          url_producao: string
+          url_teste: string
+        }
+        Insert: {
+          ativo?: boolean
+          configuracoes?: Json | null
+          created_at?: string
+          escola_id?: string | null
+          headers?: Json | null
+          id?: string
+          modo_producao?: boolean
+          nome: string
+          tipo: string
+          total_disparos?: number | null
+          ultimo_disparo?: string | null
+          ultimo_status?: string | null
+          updated_at?: string
+          url_producao: string
+          url_teste: string
+        }
+        Update: {
+          ativo?: boolean
+          configuracoes?: Json | null
+          created_at?: string
+          escola_id?: string | null
+          headers?: Json | null
+          id?: string
+          modo_producao?: boolean
+          nome?: string
+          tipo?: string
+          total_disparos?: number | null
+          ultimo_disparo?: string | null
+          ultimo_status?: string | null
+          updated_at?: string
+          url_producao?: string
+          url_teste?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhooks_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
