@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useEscola } from '@/hooks/useEscola';
 
 const formSchema = z.object({
   nome: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
@@ -38,6 +39,7 @@ interface Professor {
 }
 
 const AdminProfessores = () => {
+  const { escola } = useEscola();
   const [professores, setProfessores] = useState<Professor[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -62,10 +64,13 @@ const AdminProfessores = () => {
 
   const carregarProfessores = async () => {
     try {
-      const { data, error } = await supabase
-        .from('professores')
-        .select('*')
-        .order('nome');
+      let query = supabase.from('professores').select('*');
+      
+      if (escola?.id) {
+        query = query.eq('escola_id', escola.id);
+      }
+      
+      const { data, error } = await query.order('nome');
 
       if (error) throw error;
       setProfessores(data || []);
@@ -88,6 +93,7 @@ const AdminProfessores = () => {
         codigo: data.codigo,
         password_hash: data.password, // Em produção, deveria ser hash
         ativo: data.ativo,
+        escola_id: escola?.id || null,
       };
 
       if (editingProfessor) {

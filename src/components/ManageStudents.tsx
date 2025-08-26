@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEscola } from '@/hooks/useEscola';
 import { Loader2, UserPlus, Trash2, Users } from 'lucide-react';
 
 interface Profile {
@@ -22,6 +23,7 @@ interface Profile {
 }
 
 export function ManageStudents() {
+  const { escola } = useEscola();
   const [students, setStudents] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -51,12 +53,18 @@ export function ManageStudents() {
       if (profileError) throw profileError;
 
       // Carregar estudantes do novo sistema (com student_id)
-      const { data: newStudents, error: studentsError } = await supabase
+      let studentsQuery = supabase
         .from('students')
         .select(`
           *,
           profiles!student_id(*)
         `);
+      
+      if (escola?.id) {
+        studentsQuery = studentsQuery.eq('escola_id', escola.id);
+      }
+      
+      const { data: newStudents, error: studentsError } = await studentsQuery;
 
       if (studentsError) throw studentsError;
 

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useEscola } from '@/hooks/useEscola';
 import { 
   MapPin, 
   Plus, 
@@ -96,6 +97,7 @@ interface NovoExercicio {
 }
 
 export default function AdminJornadas() {
+  const { escola } = useEscola();
   const [series, setSeries] = useState<Serie[]>([]);
   const [professores, setProfessores] = useState<Professor[]>([]);
   const [jornadaExercises, setJornadaExercises] = useState<JornadaExercise[]>([]);
@@ -144,9 +146,15 @@ export default function AdminJornadas() {
       setLoading(true);
 
       // Carregar séries (agrupamento de estudantes por ano_letivo e turma)
-      const { data: studentsData } = await supabase
+      let studentsQuery = supabase
         .from('students')
-        .select('ano_letivo, turma')
+        .select('ano_letivo, turma');
+      
+      if (escola?.id) {
+        studentsQuery = studentsQuery.eq('escola_id', escola.id);
+      }
+      
+      const { data: studentsData } = await studentsQuery
         .order('ano_letivo')
         .order('turma');
 
@@ -168,11 +176,16 @@ export default function AdminJornadas() {
       });
 
       // Carregar professores ativos
-      const { data: professoresData } = await supabase
+      let professoresQuery = supabase
         .from('professores')
         .select('id, nome, codigo, ativo')
-        .eq('ativo', true)
-        .order('nome');
+        .eq('ativo', true);
+      
+      if (escola?.id) {
+        professoresQuery = professoresQuery.eq('escola_id', escola.id);
+      }
+      
+      const { data: professoresData } = await professoresQuery.order('nome');
 
       // Carregar exercícios específicos de jornada
       const { data: exercisesData } = await supabase
