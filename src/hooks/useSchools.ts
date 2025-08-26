@@ -156,9 +156,19 @@ export function useSchools() {
 
   const updateSchool = async (id: string, updates: Partial<School>) => {
     try {
+      const allowedFields = [
+        'nome','codigo','dominio','logo_url','cor_primaria','cor_secundaria','ativa','plano',
+        'nome_fantasia','razao_social','telefone','celular','endereco','numero','complemento','bairro','cidade','uf','cep','email'
+      ] as const;
+      const sanitizedUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([key]) =>
+          (allowedFields as readonly string[]).includes(key)
+        )
+      );
+
       const { data, error } = await supabase
         .from('escolas')
-        .update(updates)
+        .update(sanitizedUpdates)
         .eq('id', id)
         .select()
         .single();

@@ -108,12 +108,8 @@ export default function LaunsEscolaConfig() {
       setLoading(true);
       
       await updateSchool(id!, {
-        cor_primaria: configData.cor_primaria,
-        cor_secundaria: configData.cor_secundaria,
-        cor_primaria_texto: configData.cor_primaria_texto,
-        cor_secundaria_texto: configData.cor_secundaria_texto,
-        cor_primaria_bg: configData.cor_primaria_bg,
-        cor_secundaria_bg: configData.cor_secundaria_bg,
+        cor_primaria: configData.cor_primaria_bg,
+        cor_secundaria: configData.cor_secundaria_bg,
         logo_url: configData.logo_url,
         dominio: configData.dominio
       });
