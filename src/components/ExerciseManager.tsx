@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Edit, Trash2, Plus, BookOpen, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -42,6 +42,7 @@ interface ExerciseManagerProps {
 export default function ExerciseManager({ collectionId, onBack }: ExerciseManagerProps) {
   const [collection, setCollection] = useState<Collection | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedTopicId, setSelectedTopicId] = useState<string>('');
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [isTopicDialogOpen, setIsTopicDialogOpen] = useState(false);
@@ -89,6 +90,11 @@ export default function ExerciseManager({ collectionId, onBack }: ExerciseManage
       };
 
       setCollection(collectionWithTopics);
+      
+      // Set the first topic as selected by default
+      if (collectionWithTopics.topics.length > 0) {
+        setSelectedTopicId(collectionWithTopics.topics[0].id);
+      }
     } catch (error) {
       console.error('Error loading collection:', error);
       toast({
@@ -185,8 +191,8 @@ export default function ExerciseManager({ collectionId, onBack }: ExerciseManage
 
         if (error) throw error;
       } else {
-        // Create new exercise - need to know which topic
-        const selectedTopic = collection?.topics[0]; // For now, add to first topic
+        // Create new exercise - use selected topic
+        const selectedTopic = collection?.topics.find(t => t.id === selectedTopicId);
         if (!selectedTopic) {
           toast({
             title: "Erro",
@@ -402,64 +408,89 @@ export default function ExerciseManager({ collectionId, onBack }: ExerciseManage
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={collection.topics[0]?.id || 'empty'} className="w-full">
-            <TabsList className="w-full overflow-x-auto whitespace-nowrap flex gap-2 bg-transparent p-1">
-              {collection.topics.map((topic) => (
-                <TabsTrigger key={topic.id} value={topic.id} className="shrink-0 px-3 py-1.5 rounded-md data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
-                  {topic.assunto}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {collection.topics.map((topic) => (
-              <TabsContent key={topic.id} value={topic.id} className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-lg font-medium">{topic.assunto}</h3>
-                    <p className="text-sm text-muted-foreground">{topic.exercises.length} exercícios</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openTopicDialog(topic)}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => deleteTopic(topic.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" onClick={() => openExerciseDialog()}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Novo Exercício
-                    </Button>
-                  </div>
+          {collection.topics.length > 0 ? (
+            <div className="space-y-6">
+              {/* Topic Selector */}
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <Label htmlFor="topic-select">Selecionar Tópico</Label>
+                  <Select value={selectedTopicId} onValueChange={setSelectedTopicId}>
+                    <SelectTrigger className="w-full bg-background border-border z-50">
+                      <SelectValue placeholder="Selecione um tópico" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-border shadow-lg z-50">
+                      {collection.topics.map((topic) => (
+                        <SelectItem key={topic.id} value={topic.id} className="hover:bg-muted">
+                          {topic.assunto}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+              </div>
 
-                <div className="space-y-4">
-                  {topic.exercises.map((exercise, index) => (
-                    <Card key={exercise.id} className="border-l-4 border-l-primary">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-medium mb-2">Questão {index + 1}</h4>
-                            <p className="text-sm mb-2">{exercise.enunciado}</p>
-                            <div className="text-xs text-muted-foreground">
-                              Resposta correta: {exercise.resposta_correta}
+              {/* Selected Topic Content */}
+              {selectedTopicId && (() => {
+                const selectedTopic = collection.topics.find(t => t.id === selectedTopicId);
+                if (!selectedTopic) return null;
+
+                return (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-lg font-medium">{selectedTopic.assunto}</h3>
+                        <p className="text-sm text-muted-foreground">{selectedTopic.exercises.length} exercícios</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => openTopicDialog(selectedTopic)}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => deleteTopic(selectedTopic.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" onClick={() => openExerciseDialog()}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Novo Exercício
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {selectedTopic.exercises.map((exercise, index) => (
+                        <Card key={exercise.id} className="border-l-4 border-l-primary">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h4 className="font-medium mb-2">Questão {index + 1}</h4>
+                                <p className="text-sm mb-2">{exercise.enunciado}</p>
+                                <div className="text-xs text-muted-foreground">
+                                  Resposta correta: {exercise.resposta_correta}
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button variant="outline" size="sm" onClick={() => openExerciseDialog(exercise)}>
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={() => deleteExercise(exercise.id)}>
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => openExerciseDialog(exercise)}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => deleteExercise(exercise.id)}>
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">Nenhum tópico encontrado</p>
+              <p className="text-muted-foreground/60 text-sm">Crie um tópico primeiro para adicionar exercícios</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
