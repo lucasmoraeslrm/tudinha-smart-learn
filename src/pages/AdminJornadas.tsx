@@ -194,11 +194,20 @@ export default function AdminJornadas() {
         .order('subject')
         .order('ordem');
 
-      // Carregar jornadas
-      const { data: jornadasData } = await supabase
+      // Carregar jornadas filtradas por escola
+      let jornadasQuery = supabase
         .from('jornadas')
-        .select('*')
+        .select(`
+          *,
+          students!inner(escola_id)
+        `)
         .order('created_at', { ascending: false });
+      
+      if (escola?.id) {
+        jornadasQuery = jornadasQuery.eq('students.escola_id', escola.id);
+      }
+      
+      const { data: jornadasData } = await jornadasQuery;
 
       setSeries(Array.from(seriesMap.values()));
       setProfessores(professoresData || []);
