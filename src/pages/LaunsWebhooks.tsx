@@ -210,7 +210,7 @@ export default function LaunsWebhooks() {
     return (
       <LaunsLayout>
         <div className="p-6">
-          <div className="text-white">Carregando webhooks...</div>
+          <div className="text-foreground">Carregando webhooks...</div>
         </div>
       </LaunsLayout>
     );
@@ -221,10 +221,10 @@ export default function LaunsWebhooks() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               Webhooks
             </h1>
-            <p className="text-white/80">
+            <p className="text-muted-foreground">
               Configure e monitore webhooks para integração com sistemas externos
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function LaunsWebhooks() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button 
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground border-primary"
                 onClick={() => openDialog()}
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -336,50 +336,50 @@ export default function LaunsWebhooks() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <Card className="bg-white/10 border-white/20 text-white">
+          <Card className="bg-card border-border">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white/80">Total de Webhooks</p>
-                  <p className="text-2xl font-bold">{webhooks.length}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total de Webhooks</p>
+                  <p className="text-2xl font-bold text-foreground">{webhooks.length}</p>
                 </div>
-                <Webhook className="h-8 w-8 text-blue-400" />
+                <Webhook className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 border-white/20 text-white">
+          <Card className="bg-card border-border">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white/80">Ativos</p>
-                  <p className="text-2xl font-bold">{activeWebhooks}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Ativos</p>
+                  <p className="text-2xl font-bold text-foreground">{activeWebhooks}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-green-400" />
+                <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 border-white/20 text-white">
+          <Card className="bg-card border-border">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white/80">Com Erro</p>
-                  <p className="text-2xl font-bold">{errorWebhooks}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Com Erro</p>
+                  <p className="text-2xl font-bold text-foreground">{errorWebhooks}</p>
                 </div>
-                <AlertCircle className="h-8 w-8 text-red-400" />
+                <AlertCircle className="h-8 w-8 text-destructive" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Card className="bg-white/10 border-white/20 text-white">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               <Webhook className="h-5 w-5" />
               Webhooks Configurados
             </CardTitle>
-            <CardDescription className="text-white/70">
+            <CardDescription className="text-muted-foreground">
               Lista de todos os webhooks registrados no sistema
             </CardDescription>
           </CardHeader>
@@ -387,13 +387,13 @@ export default function LaunsWebhooks() {
             <div className="space-y-4">
               {webhooks.length === 0 ? (
                 <div className="text-center py-8">
-                  <Webhook className="h-12 w-12 text-white/40 mx-auto mb-4" />
-                  <p className="text-white/60">Nenhum webhook configurado ainda.</p>
-                  <p className="text-white/40 text-sm">Clique em "Novo Webhook" para começar.</p>
+                  <Webhook className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Nenhum webhook configurado ainda.</p>
+                  <p className="text-muted-foreground/60 text-sm">Clique em "Novo Webhook" para começar.</p>
                 </div>
               ) : (
                 webhooks.map((webhook) => (
-                  <div key={webhook.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                  <div key={webhook.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-medium text-foreground">{webhook.nome}</h3>
@@ -411,8 +411,8 @@ export default function LaunsWebhooks() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-sm text-white/80">Último disparo</p>
-                        <p className="text-xs text-white/60">{formatLastTrigger(webhook.ultimo_disparo)}</p>
+                        <p className="text-sm text-foreground">Último disparo</p>
+                        <p className="text-xs text-muted-foreground">{formatLastTrigger(webhook.ultimo_disparo)}</p>
                       </div>
                       {getStatusBadge(webhook)}
                       <div className="flex gap-2">
@@ -420,25 +420,25 @@ export default function LaunsWebhooks() {
                           size="sm"
                           variant="outline"
                           onClick={() => toggleWebhookStatus(webhook)}
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 border-border hover:bg-accent"
                         >
-                          <Activity className="h-4 w-4" />
+                          <Activity className="h-4 w-4 text-foreground" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => openDialog(webhook)}
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 border-border hover:bg-accent"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-4 w-4 text-foreground" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => deleteWebhook(webhook.id)}
-                          className="h-8 w-8 p-0 hover:bg-red-500/20 hover:border-red-500"
+                          className="h-8 w-8 p-0 border-border hover:bg-destructive/10 hover:border-destructive"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
                     </div>
