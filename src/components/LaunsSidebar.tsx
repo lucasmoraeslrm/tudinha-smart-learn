@@ -65,12 +65,12 @@ export function LaunsSidebar() {
   };
 
   return (
-    <Sidebar className={`${collapsed ? 'w-16' : 'w-64'} border-r border-sidebar-border bg-sidebar shadow-sm`}>
-      <SidebarHeader className="p-4 border-b border-sidebar-border bg-sidebar">
+    <Sidebar className={`${collapsed ? 'w-16' : 'w-64'} border-r bg-sidebar shadow-sm`} style={{ borderColor: 'hsl(var(--sidebar-border))' }}>
+      <SidebarHeader className="p-4 border-b bg-sidebar" style={{ borderColor: 'hsl(var(--sidebar-border))' }}>
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/90 rounded-xl flex items-center justify-center border border-primary/20 shadow-sm">
-              <span className="text-white font-bold text-lg">L</span>
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
+              <span className="text-primary-foreground font-bold text-lg">L</span>
             </div>
             <div>
               <h2 className="text-sidebar-foreground font-bold text-lg">Launs</h2>
@@ -80,8 +80,8 @@ export function LaunsSidebar() {
         )}
         {collapsed && (
           <div className="flex justify-center">
-            <div className="w-10 h-10 bg-primary/90 rounded-xl flex items-center justify-center border border-primary/20 shadow-sm">
-              <span className="text-white font-bold text-lg">L</span>
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
+              <span className="text-primary-foreground font-bold text-lg">L</span>
             </div>
           </div>
         )}
@@ -103,7 +103,7 @@ export function LaunsSidebar() {
                         `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
                           isActive
                             ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
-                            : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium'
                         }`
                       }
                     >
@@ -118,9 +118,9 @@ export function LaunsSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border mt-auto bg-sidebar">
+      <SidebarFooter className="p-4 border-t mt-auto bg-sidebar" style={{ borderColor: 'hsl(var(--sidebar-border))' }}>
         {!collapsed && profile && (
-          <div className="mb-4 p-3 bg-primary/5 rounded-lg border border-primary/10">
+          <div className="mb-4 p-3 bg-sidebar-accent rounded-lg border" style={{ borderColor: 'hsl(var(--sidebar-border))' }}>
             <p className="text-sidebar-foreground text-sm font-semibold truncate">
               {profile.full_name || 'Admin'}
             </p>
@@ -134,7 +134,8 @@ export function LaunsSidebar() {
           <Button
             variant="ghost"
             size={collapsed ? "icon" : "sm"}
-            className="text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium border border-sidebar-border hover:border-primary/30 transition-all"
+            className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium border hover:border-primary/30 transition-all"
+            style={{ borderColor: 'hsl(var(--sidebar-border))' }}
           >
             <Settings className="h-4 w-4" />
             {!collapsed && <span className="ml-2 text-sm">Configurações</span>}
@@ -144,7 +145,8 @@ export function LaunsSidebar() {
             variant="ghost"
             size={collapsed ? "icon" : "sm"}
             onClick={handleLogout}
-            className="text-sidebar-foreground/80 hover:bg-red-50 hover:text-red-600 font-medium border border-sidebar-border hover:border-red-200 transition-all"
+            className="text-sidebar-foreground hover:bg-red-50 hover:text-red-600 font-medium border hover:border-red-200 transition-all"
+            style={{ borderColor: 'hsl(var(--sidebar-border))' }}
           >
             <LogOut className="h-4 w-4" />
             {!collapsed && <span className="ml-2 text-sm">Sair</span>}

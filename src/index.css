@@ -120,14 +120,14 @@ All colors MUST be HSL.
 /* Theming scopes */
 .launs-theme {
   /* Light theme for the Launs admin sidebar */
-  --sidebar-background: 0 0% 100%;        /* white background */
-  --sidebar-foreground: 240 10% 15%;      /* dark gray/black text */
-  --sidebar-primary: 262 80% 60%;         /* purple accent */
+  --sidebar-background: 0 0% 98%;           /* light gray background */
+  --sidebar-foreground: 240 10% 20%;       /* dark gray text */
+  --sidebar-primary: 262 80% 60%;          /* purple accent */
   --sidebar-primary-foreground: 0 0% 100%; /* white on purple */
-  --sidebar-accent: 240 5% 96%;           /* very light gray hover */
-  --sidebar-accent-foreground: 240 10% 15%; /* dark text on hover */
-  --sidebar-border: 240 6% 90%;           /* light gray borders */
-  --sidebar-ring: 262 80% 65%;            /* purple focus ring */
+  --sidebar-accent: 240 5% 94%;            /* light gray hover */
+  --sidebar-accent-foreground: 240 10% 20%; /* dark text on hover */
+  --sidebar-border: 240 6% 85%;            /* gray borders */
+  --sidebar-ring: 262 80% 65%;             /* purple focus ring */
 }
 
 @layer base {
