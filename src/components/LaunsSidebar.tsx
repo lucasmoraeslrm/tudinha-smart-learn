@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar,
@@ -58,6 +58,9 @@ export function LaunsSidebar() {
   const collapsed = !open;
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const isActiveRoute = (url: string) => currentPath.startsWith(url);
 
   const handleLogout = async () => {
     await signOut();
@@ -96,17 +99,12 @@ export function LaunsSidebar() {
             <SidebarMenu className="space-y-1">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 border ${
-                          isActive
-                            ? 'bg-primary text-primary-foreground border-primary font-semibold shadow-sm'
-                            : 'text-primary border-primary bg-transparent hover:bg-primary hover:text-primary-foreground font-medium'
-                        }`
-                      }
-                    >
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActiveRoute(item.url)}
+                    className="border border-primary text-primary bg-transparent hover:bg-primary hover:text-primary-foreground data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:border-primary px-3 py-3 rounded-lg"
+                  >
+                    <NavLink to={item.url} className="flex items-center gap-3 w-full">
                       <item.icon className="h-5 w-5 flex-shrink-0" />
                       {!collapsed && <span className="text-sm">{item.title}</span>}
                     </NavLink>
