@@ -238,8 +238,18 @@ export default function LaunsEscolaDetails() {
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-3">
               <Button 
+                onClick={() => setActiveSection('overview')}
+                className={activeSection === 'overview' 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                  : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Dashboard
+              </Button>
+              
+              <Button 
                 onClick={() => navigate(`/launs/escolas/editar/${school.id}`)}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Editar
@@ -247,7 +257,7 @@ export default function LaunsEscolaDetails() {
               
               <Button 
                 onClick={() => navigate(`/launs/escolas/config/${school.id}`)}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Configurações
@@ -255,7 +265,9 @@ export default function LaunsEscolaDetails() {
               
               <Button 
                 onClick={() => setActiveSection('coordenadores')}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className={activeSection === 'coordenadores' 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                  : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
               >
                 <Shield className="w-4 h-4 mr-2" />
                 Direção
@@ -263,7 +275,9 @@ export default function LaunsEscolaDetails() {
               
               <Button 
                 onClick={() => setActiveSection('materias')}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className={activeSection === 'materias' 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                  : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Matérias
@@ -271,7 +285,9 @@ export default function LaunsEscolaDetails() {
               
               <Button 
                 onClick={() => setActiveSection('turmas')}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className={activeSection === 'turmas' 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                  : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
               >
                 <Users className="w-4 h-4 mr-2" />
                 Turmas
@@ -279,7 +295,9 @@ export default function LaunsEscolaDetails() {
               
               <Button 
                 onClick={() => setActiveSection('professores')}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className={activeSection === 'professores' 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                  : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
               >
                 <UserPlus className="w-4 h-4 mr-2" />
                 Professores
@@ -287,7 +305,9 @@ export default function LaunsEscolaDetails() {
               
               <Button 
                 onClick={() => setActiveSection('alunos')}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className={activeSection === 'alunos' 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                  : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
               >
                 <GraduationCap className="w-4 h-4 mr-2" />
                 Alunos
@@ -295,28 +315,12 @@ export default function LaunsEscolaDetails() {
               
               <Button 
                 onClick={() => setActiveSection('tutores')}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className={activeSection === 'tutores' 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                  : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
               >
                 <Shield className="w-4 h-4 mr-2" />
                 Responsável do Aluno
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Management Actions */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-wrap gap-3">
-              <Button 
-                onClick={() => setActiveSection('overview')}
-                variant={activeSection === 'overview' ? 'default' : 'outline'}
-                className={activeSection === 'overview' 
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                  : 'border-purple-600 text-purple-600 hover:bg-purple-50'}
-              >
-                <Activity className="w-4 h-4 mr-2" />
-                Dashboard
               </Button>
             </div>
           </CardContent>
