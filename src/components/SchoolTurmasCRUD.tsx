@@ -162,7 +162,6 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
 
   const filteredTurmas = turmas.filter(turma =>
     turma.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    turma.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     turma.serie.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -251,7 +250,7 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, código ou série..."
+              placeholder="Buscar por turma ou série..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -267,8 +266,7 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Código</TableHead>
+                <TableHead>Turma</TableHead>
                 <TableHead>Série</TableHead>
                 <TableHead>Ano Letivo</TableHead>
                 <TableHead>Status</TableHead>
@@ -278,24 +276,23 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
             <TableBody>
               {filteredTurmas.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     {searchTerm ? 'Nenhuma turma encontrada' : 'Nenhuma turma cadastrada'}
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredTurmas.map((turma) => (
-                  <TableRow key={turma.id}>
-                    <TableCell className="font-medium">{turma.nome}</TableCell>
-                    <TableCell>{turma.codigo}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{turma.serie}</Badge>
-                    </TableCell>
-                    <TableCell>{turma.ano_letivo}</TableCell>
-                    <TableCell>
-                      <Badge variant={turma.ativo ? "default" : "secondary"}>
-                        {turma.ativo ? "Ativa" : "Inativa"}
-                      </Badge>
-                    </TableCell>
+                 filteredTurmas.map((turma) => (
+                   <TableRow key={turma.id}>
+                     <TableCell className="font-medium">{turma.nome}</TableCell>
+                     <TableCell>
+                       <Badge variant="outline">{turma.serie}</Badge>
+                     </TableCell>
+                     <TableCell>{turma.ano_letivo}</TableCell>
+                     <TableCell>
+                       <Badge variant={turma.ativo ? "default" : "secondary"}>
+                         {turma.ativo ? "Ativa" : "Inativa"}
+                       </Badge>
+                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
