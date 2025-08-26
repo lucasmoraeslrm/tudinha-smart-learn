@@ -37,7 +37,6 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
 
   const [formData, setFormData] = useState({
     nome: '',
-    codigo: '',
     serie: '',
     ano_letivo: '',
     ativo: true
@@ -76,6 +75,7 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
     try {
       const turmaData = {
         ...formData,
+        codigo: `${formData.serie}${formData.nome}`,
         escola_id: schoolId
       };
 
@@ -120,7 +120,6 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
   const resetForm = () => {
     setFormData({
       nome: '',
-      codigo: '',
       serie: '',
       ano_letivo: '',
       ativo: true
@@ -131,7 +130,6 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
     setEditingTurma(turma);
     setFormData({
       nome: turma.nome,
-      codigo: turma.codigo,
       serie: turma.serie,
       ano_letivo: turma.ano_letivo,
       ativo: turma.ativo
@@ -199,22 +197,12 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="nome">Nome *</Label>
+                  <Label htmlFor="nome">Turma *</Label>
                   <Input
                     id="nome"
                     value={formData.nome}
                     onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                     placeholder="Ex: A, B, C"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="codigo">Código *</Label>
-                  <Input
-                    id="codigo"
-                    value={formData.codigo}
-                    onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
-                    placeholder="Ex: 1A, 2B, 3C"
                     required
                   />
                 </div>
