@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { LaunsLayout } from '@/components/LaunsLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +30,7 @@ export default function LaunsEscolaDetails() {
   const { id } = useParams();
   const { schools, loading } = useSchools();
   const [school, setSchool] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState('overview');
   const [dashboardMetrics, setDashboardMetrics] = useState({
     totalStudents: 0,
@@ -96,6 +97,21 @@ export default function LaunsEscolaDetails() {
         loading: false
       });
     }
+  };
+
+  // Sincroniza a seção ativa com a URL (?tab=...)
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && tab !== activeSection) {
+      setActiveSection(tab);
+    }
+  }, [searchParams]);
+
+  const setSection = (section: string) => {
+    setActiveSection(section);
+    const params = new URLSearchParams(searchParams);
+    params.set('tab', section);
+    setSearchParams(params);
   };
 
   if (loading) {
@@ -298,7 +314,7 @@ export default function LaunsEscolaDetails() {
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-3">
               <Button 
-                onClick={() => setActiveSection('overview')}
+                onClick={() => setSection('overview')}
                 className={activeSection === 'overview' 
                   ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                   : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
@@ -324,7 +340,7 @@ export default function LaunsEscolaDetails() {
               </Button>
               
               <Button 
-                onClick={() => setActiveSection('coordenadores')}
+                onClick={() => setSection('coordenadores')}
                 className={activeSection === 'coordenadores' 
                   ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                   : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
@@ -334,7 +350,7 @@ export default function LaunsEscolaDetails() {
               </Button>
               
               <Button 
-                onClick={() => setActiveSection('materias')}
+                onClick={() => setSection('materias')}
                 className={activeSection === 'materias' 
                   ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                   : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
@@ -344,7 +360,7 @@ export default function LaunsEscolaDetails() {
               </Button>
               
               <Button 
-                onClick={() => setActiveSection('turmas')}
+                onClick={() => setSection('turmas')}
                 className={activeSection === 'turmas' 
                   ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                   : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
@@ -354,7 +370,7 @@ export default function LaunsEscolaDetails() {
               </Button>
               
               <Button 
-                onClick={() => setActiveSection('professores')}
+                onClick={() => setSection('professores')}
                 className={activeSection === 'professores' 
                   ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                   : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
@@ -364,7 +380,7 @@ export default function LaunsEscolaDetails() {
               </Button>
               
               <Button 
-                onClick={() => setActiveSection('alunos')}
+                onClick={() => setSection('alunos')}
                 className={activeSection === 'alunos' 
                   ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                   : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
@@ -374,7 +390,7 @@ export default function LaunsEscolaDetails() {
               </Button>
               
               <Button 
-                onClick={() => setActiveSection('tutores')}
+                onClick={() => setSection('tutores')}
                 className={activeSection === 'tutores' 
                   ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                   : 'border border-purple-600 text-purple-600 hover:bg-purple-50 bg-transparent'}
