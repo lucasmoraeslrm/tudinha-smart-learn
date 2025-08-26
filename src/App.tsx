@@ -155,49 +155,49 @@ const App = () => (
             {/* Admin/Direção/Coordenação Routes */}
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={
-              <ProtectedRoute requireAdmin>
+              <ProtectedRoute requireSchoolAdmin>
                 <AdminLayout>
                   <AdminDashboard />
                 </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/chat" element={
-              <ProtectedRoute requireAdmin>
+              <ProtectedRoute requireSchoolAdmin>
                 <AdminLayout>
                   <AdminChat />
                 </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/students" element={
-              <ProtectedRoute requireAdmin>
+              <ProtectedRoute requireSchoolAdmin>
                 <AdminLayout>
                   <AdminStudents />
                 </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/jornadas" element={
-              <ProtectedRoute requireAdmin>
+              <ProtectedRoute requireSchoolAdmin>
                 <AdminLayout>
                   <AdminJornadas />
                 </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/exercises" element={
-              <ProtectedRoute requireAdmin>
+              <ProtectedRoute requireSchoolAdmin>
                 <AdminLayout>
                   <AdminExercises />
                 </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/lists" element={
-              <ProtectedRoute requireAdmin>
+              <ProtectedRoute requireSchoolAdmin>
                 <AdminLayout>
                   <AdminLists />
                 </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/professores" element={
-              <ProtectedRoute requireAdmin>
+              <ProtectedRoute requireSchoolAdmin>
                 <AdminLayout>
                   <AdminProfessores />
                 </AdminLayout>

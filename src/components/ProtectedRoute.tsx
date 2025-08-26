@@ -7,6 +7,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
   requireLauns?: boolean;
+  requireSchoolAdmin?: boolean;
   requireParent?: boolean;
   requireProfessor?: boolean;
 }
@@ -15,6 +16,7 @@ export default function ProtectedRoute({
   children, 
   requireAdmin = false,
   requireLauns = false,
+  requireSchoolAdmin = false,
   requireParent = false,
   requireProfessor = false
 }: ProtectedRouteProps) {
@@ -31,10 +33,17 @@ export default function ProtectedRoute({
         }
       }
       
+      if (requireSchoolAdmin) {
+        if (!user || !profile || !['school_admin', 'coordinator'].includes(profile.role)) {
+          navigate('/admin');
+          return;
+        }
+      }
+      
       if (requireParent) {
         const parentSession = localStorage.getItem('parentSession');
         if (!parentSession) {
-          navigate('/pais');
+          navigate('/admin');
           return;
         }
       }
@@ -42,7 +51,7 @@ export default function ProtectedRoute({
       if (requireProfessor) {
         const professorSession = localStorage.getItem('professorSession');
         if (!professorSession) {
-          navigate('/professor');
+          navigate('/admin');
           return;
         }
       }
@@ -54,36 +63,52 @@ export default function ProtectedRoute({
         }
       }
 
-      // Check admin authentication
+      // Check authentication and redirect based on role
       if (user && profile) {
+        if (requireLauns && profile.role !== 'admin') {
+          navigate('/launs');
+          return;
+        }
+        if (requireSchoolAdmin && !['school_admin', 'coordinator'].includes(profile.role)) {
+          navigate('/admin');
+          return;
+        }
         if (requireAdmin && profile.role !== 'admin') {
           navigate('/admin');
           return;
         }
-        // Allow admin access to student areas
         return;
       }
 
       // Check student authentication
       if (studentSession) {
-        if (requireAdmin || requireLauns || requireParent || requireProfessor) {
-          navigate('/');
+        if (requireAdmin || requireLauns || requireSchoolAdmin || requireParent || requireProfessor) {
+          navigate('/admin');
           return;
         }
-        // Student is logged in and doesn't need special access - allow access
+        return;
+      }
+
+      // Check professor session
+      const professorSession = localStorage.getItem('professorSession');
+      if (professorSession && !requireProfessor && (requireAdmin || requireLauns || requireSchoolAdmin)) {
+        navigate('/admin');
+        return;
+      }
+
+      // Check parent session  
+      const parentSession = localStorage.getItem('parentSession');
+      if (parentSession && !requireParent && (requireAdmin || requireLauns || requireSchoolAdmin)) {
+        navigate('/admin');
         return;
       }
 
       // No authentication found
-      if (!user && !studentSession) {
-        if (requireLauns) navigate('/launs');
-        else if (requireParent) navigate('/pais');
-        else if (requireProfessor) navigate('/professor');
-        else if (requireAdmin) navigate('/admin');
-        else navigate('/');
+      if (!user && !studentSession && !professorSession && !parentSession) {
+        navigate('/admin');
       }
     }
-  }, [user, profile, studentSession, loading, navigate, requireAdmin, requireLauns, requireParent, requireProfessor]);
+  }, [user, profile, studentSession, loading, navigate, requireAdmin, requireLauns, requireSchoolAdmin, requireParent, requireProfessor]);
 
   if (loading) {
     return (
@@ -99,6 +124,12 @@ export default function ProtectedRoute({
   // Check authentication based on requirements
   if (requireLauns) {
     if (!user || !profile || profile.role !== 'admin') {
+      return null;
+    }
+  }
+  
+  if (requireSchoolAdmin) {
+    if (!user || !profile || !['school_admin', 'coordinator'].includes(profile.role)) {
       return null;
     }
   }

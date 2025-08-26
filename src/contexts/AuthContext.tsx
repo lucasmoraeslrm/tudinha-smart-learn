@@ -6,7 +6,7 @@ interface Profile {
   id: string;
   user_id: string;
   full_name: string | null;
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'school_admin' | 'coordinator';
   created_at: string;
   updated_at: string;
 }
@@ -29,11 +29,12 @@ interface AuthContextType {
   studentSession: StudentSession | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string, role: 'admin' | 'student', codigo?: string, anoLetivo?: string, turma?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role: 'admin' | 'student' | 'school_admin' | 'coordinator', codigo?: string, anoLetivo?: string, turma?: string) => Promise<{ error: any }>;
   signInStudent: (codigo: string, password: string) => Promise<{ error: any }>;
   signUpStudent: (codigo: string, password: string, name: string, anoLetivo?: string, turma?: string, age?: number) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
+  isSchoolAdmin: boolean;
   isStudent: boolean;
   getStudentId: () => string | null;
   getStudentName: () => string | null;
@@ -151,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'admin' | 'student', codigo?: string, anoLetivo?: string, turma?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'admin' | 'student' | 'school_admin' | 'coordinator', codigo?: string, anoLetivo?: string, turma?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -269,6 +270,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUpStudent,
     signOut,
     isAdmin: profile?.role === 'admin',
+    isSchoolAdmin: ['school_admin', 'coordinator'].includes(profile?.role || ''),
     isStudent: studentSession?.role === 'student' || profile?.role === 'student',
     getStudentId,
     getStudentName,
