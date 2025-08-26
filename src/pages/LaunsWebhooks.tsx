@@ -396,15 +396,15 @@ export default function LaunsWebhooks() {
                   <div key={webhook.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-medium text-white">{webhook.nome}</h3>
-                        <Badge variant="outline" className="text-xs text-white/70 border-white/30">
+                        <h3 className="font-medium text-foreground">{webhook.nome}</h3>
+                        <Badge variant="outline" className="text-xs">
                           {tiposWebhook.find(t => t.value === webhook.tipo)?.label || webhook.tipo}
                         </Badge>
                       </div>
-                      <p className="text-sm text-white/70 mb-1">
+                      <p className="text-sm text-muted-foreground mb-1">
                         {webhook.modo_producao ? webhook.url_producao : webhook.url_teste}
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-white/60">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>Disparos: {webhook.total_disparos}</span>
                         <span>Modo: {webhook.modo_producao ? 'Produção' : 'Teste'}</span>
                       </div>
