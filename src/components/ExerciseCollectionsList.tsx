@@ -21,9 +21,10 @@ interface ExerciseCollection {
 
 interface ExerciseCollectionsListProps {
   onSelectCollection: (collection: ExerciseCollection) => void;
+  onManageCollection: (collection: ExerciseCollection) => void;
 }
 
-export default function ExerciseCollectionsList({ onSelectCollection }: ExerciseCollectionsListProps) {
+export default function ExerciseCollectionsList({ onSelectCollection, onManageCollection }: ExerciseCollectionsListProps) {
   const [collections, setCollections] = useState<ExerciseCollection[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingCollection, setEditingCollection] = useState<ExerciseCollection | null>(null);
@@ -246,12 +247,22 @@ export default function ExerciseCollectionsList({ onSelectCollection }: Exercise
                   <span>~{collection.total_exercises * 2} min estimados</span>
                 </div>
                 
-                <Button 
-                  onClick={() => onSelectCollection(collection)}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  Iniciar Exercícios
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => onSelectCollection(collection)}
+                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    Iniciar Exercícios
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => onManageCollection(collection)}
+                    className="flex-1"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Gerenciar
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -6,20 +6,42 @@ import { BookOpen, Plus, Search, Filter } from 'lucide-react';
 import ImportExerciseJSON from '@/components/ImportExerciseJSON';
 import ExerciseCollectionsList from '@/components/ExerciseCollectionsList';
 import ExercisePlayer from '@/components/ExercisePlayer';
+import ExerciseManager from '@/components/ExerciseManager';
 
 export default function LaunsExercicios() {
   const [selectedCollection, setSelectedCollection] = useState<any>(null);
+  const [managingCollection, setManagingCollection] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleSelectCollection = (collection: any) => {
     setSelectedCollection(collection);
   };
 
+  const handleManageCollection = (collection: any) => {
+    setManagingCollection(collection);
+  };
+
   const handleBack = () => {
     setSelectedCollection(null);
+    setManagingCollection(null);
     setRefreshKey(prev => prev + 1); // Refresh the collections list
   };
 
+  // If managing a collection, show the manager
+  if (managingCollection) {
+    return (
+      <LaunsLayout>
+        <div className="p-6">
+          <ExerciseManager
+            collectionId={managingCollection.id}
+            onBack={handleBack}
+          />
+        </div>
+      </LaunsLayout>
+    );
+  }
+
+  // If exercising a collection, show the player
   if (selectedCollection) {
     return (
       <LaunsLayout>
@@ -52,6 +74,7 @@ export default function LaunsExercicios() {
         <ExerciseCollectionsList 
           key={refreshKey}
           onSelectCollection={handleSelectCollection}
+          onManageCollection={handleManageCollection}
         />
       </div>
     </LaunsLayout>
