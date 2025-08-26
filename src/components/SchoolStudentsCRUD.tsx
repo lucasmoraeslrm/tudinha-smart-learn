@@ -50,8 +50,6 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
 
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    codigo: '',
     ra: '',
     password: '',
     turma_id: '',
@@ -108,8 +106,6 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
     try {
       const studentData = {
         name: formData.name,
-        email: formData.email || null,
-        codigo: formData.codigo || null,
         ra: formData.ra || null,
         turma_id: formData.turma_id || null,
         data_nascimento: formData.data_nascimento || null,
@@ -146,8 +142,6 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
       setEditingStudent(null);
       setFormData({
         name: '',
-        email: '',
-        codigo: '',
         ra: '',
         password: '',
         turma_id: '',
@@ -167,8 +161,6 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
     setEditingStudent(student);
     setFormData({
       name: student.name,
-      email: student.email || '',
-      codigo: student.codigo || '',
       ra: student.ra || '',
       password: '',
       turma_id: student.turma_id || '',
@@ -202,8 +194,7 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
 
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.codigo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    student.ra?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -225,8 +216,6 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                 setEditingStudent(null);
                 setFormData({
                   name: '',
-                  email: '',
-                  codigo: '',
                   ra: '',
                   password: '',
                   turma_id: '',
@@ -257,23 +246,6 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="codigo">Código</Label>
-                  <Input
-                    id="codigo"
-                    value={formData.codigo}
-                    onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
-                  />
-                </div>
-                <div>
                   <Label htmlFor="ra">RA *</Label>
                   <Input
                     id="ra"
@@ -301,11 +273,11 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                          <SelectValue placeholder="Selecione uma turma" />
                        </SelectTrigger>
                        <SelectContent>
-                         {turmas.map((turma) => (
-                           <SelectItem key={turma.id} value={turma.id}>
-                             {turma.codigo} - {turma.nome}
-                           </SelectItem>
-                         ))}
+                          {turmas.map((turma) => (
+                            <SelectItem key={turma.id} value={turma.id}>
+                              {turma.serie} - {turma.nome} - {turma.ano_letivo}
+                            </SelectItem>
+                          ))}
                        </SelectContent>
                      </Select>
                    </div>
@@ -334,7 +306,7 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, código ou email..."
+              placeholder="Buscar por nome ou RA..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -351,30 +323,28 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Código</TableHead>
+                <TableHead>RA</TableHead>
                 <TableHead>Turma</TableHead>
-                <TableHead>Email</TableHead>
                 <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredStudents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                     {searchTerm ? 'Nenhum aluno encontrado' : 'Nenhum aluno cadastrado'}
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredStudents.map((student) => (
                   <TableRow key={student.id}>
-                    <TableCell className="font-medium">{student.name}</TableCell>
-                    <TableCell>{student.codigo || '-'}</TableCell>
-                     <TableCell>
-                       {student.turma ? (
-                         <Badge variant="secondary">{student.turma}</Badge>
-                       ) : '-'}
-                     </TableCell>
-                     <TableCell>{student.email || '-'}</TableCell>
+                     <TableCell className="font-medium">{student.name}</TableCell>
+                     <TableCell>{student.ra || '-'}</TableCell>
+                      <TableCell>
+                        {student.turma ? (
+                          <Badge variant="secondary">{student.turma}</Badge>
+                        ) : '-'}
+                      </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
