@@ -30,7 +30,7 @@ serve(async (req) => {
     console.log('Checking coordinator credentials for email:', email);
 
     // Check if coordinator exists in coordenadores table
-    const { data: coordenadores, error: coordError } = await supabase
+    const { data: coordenadores, error: coordError } = await supabaseServiceRole
       .from('coordenadores')
       .select('*')
       .eq('email', email)
@@ -106,7 +106,7 @@ serve(async (req) => {
           }
 
           // Update profile if it exists
-          const { error: profileError } = await supabase
+          const { error: profileError } = await supabaseServiceRole
             .from('profiles')
             .upsert({
               user_id: existingUser.user.id,
@@ -143,7 +143,7 @@ serve(async (req) => {
     console.log('Auth user created, creating profile...');
 
     // Create profile
-    const { error: profileError } = await supabase
+    const { error: profileError } = await supabaseServiceRole
       .from('profiles')
       .upsert({
         user_id: authData.user.id,

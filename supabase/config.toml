@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-n8n-webhook]
 verify_jwt = false
+
+[functions.provision-coordinator-auth]
+verify_jwt = false
