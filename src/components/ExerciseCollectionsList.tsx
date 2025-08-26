@@ -247,22 +247,13 @@ export default function ExerciseCollectionsList({ onSelectCollection, onManageCo
                   <span>~{collection.total_exercises * 2} min estimados</span>
                 </div>
                 
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={() => onSelectCollection(collection)}
-                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    Iniciar Exercícios
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => onManageCollection(collection)}
-                    className="flex-1"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Gerenciar
-                  </Button>
-                </div>
+                <Button 
+                  onClick={() => onManageCollection(collection)}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Gerenciar
+                </Button>
               </div>
             </CardContent>
           </Card>
