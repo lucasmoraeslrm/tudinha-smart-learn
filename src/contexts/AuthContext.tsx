@@ -119,14 +119,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .eq('user_id', session.user.id)
               .single();
             
-            setProfile(profileData as Profile);
+            let updatedProfile = profileData as Profile;
+
+            // If user is coordinator and has no escola_id, try to find it
+            if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && !profileData.escola_id) {
+              const { data: coordenadorData } = await supabase
+                .from('coordenadores')
+                .select('escola_id')
+                .eq('email', session.user.email)
+                .single();
+
+              if (coordenadorData?.escola_id) {
+                // Update profile with escola_id
+                const { data: updatedProfileData } = await supabase
+                  .from('profiles')
+                  .update({ escola_id: coordenadorData.escola_id })
+                  .eq('user_id', session.user.id)
+                  .select()
+                  .single();
+
+                updatedProfile = updatedProfileData as Profile;
+              }
+            }
+            
+            setProfile(updatedProfile);
 
             // If user is coordinator, fetch school data
-            if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && profileData.escola_id) {
+            if (updatedProfile && ['school_admin', 'coordinator'].includes(updatedProfile.role) && updatedProfile.escola_id) {
               const { data: escolaData } = await supabase
                 .from('escolas')
                 .select('*')
-                .eq('id', profileData.escola_id)
+                .eq('id', updatedProfile.escola_id)
                 .single();
               
               setEscola(escolaData as Escola);
@@ -160,14 +183,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('user_id', session.user.id)
           .single()
           .then(async ({ data: profileData }) => {
-            setProfile(profileData as Profile);
+            let updatedProfile = profileData as Profile;
+
+            // If user is coordinator and has no escola_id, try to find it
+            if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && !profileData.escola_id) {
+              const { data: coordenadorData } = await supabase
+                .from('coordenadores')
+                .select('escola_id')
+                .eq('email', session.user.email)
+                .single();
+
+              if (coordenadorData?.escola_id) {
+                // Update profile with escola_id
+                const { data: updatedProfileData } = await supabase
+                  .from('profiles')
+                  .update({ escola_id: coordenadorData.escola_id })
+                  .eq('user_id', session.user.id)
+                  .select()
+                  .single();
+
+                updatedProfile = updatedProfileData as Profile;
+              }
+            }
+
+            setProfile(updatedProfile);
 
             // If user is coordinator, fetch school data
-            if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && profileData.escola_id) {
+            if (updatedProfile && ['school_admin', 'coordinator'].includes(updatedProfile.role) && updatedProfile.escola_id) {
               const { data: escolaData } = await supabase
                 .from('escolas')
                 .select('*')
-                .eq('id', profileData.escola_id)
+                .eq('id', updatedProfile.escola_id)
                 .single();
               
               setEscola(escolaData as Escola);

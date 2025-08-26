@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEscola } from '@/hooks/useEscola';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, MessageCircle, User, Bot, TrendingUp, TrendingDown, Clock, Eye, CheckCircle, XCircle, Calendar } from 'lucide-react';
 
@@ -42,12 +43,13 @@ export function AdminChat() {
   const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
   const [showFullHistory, setShowFullHistory] = useState(false);
   const { toast } = useToast();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isSchoolAdmin } = useAuth();
+  const { escola } = useEscola();
 
   // Carregar lista de alunos
   useEffect(() => {
     loadStudents();
-  }, []);
+  }, [escola?.id]);
 
   // Carregar histórico quando aluno é selecionado
   useEffect(() => {
@@ -62,10 +64,16 @@ export function AdminChat() {
 
   const loadStudents = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('students')
-        .select('id, name, email, age')
-        .order('name');
+        .select('id, name, email, age');
+      
+      // Filter by school for coordinators
+      if (escola?.id) {
+        query = query.eq('escola_id', escola.id);
+      }
+      
+      const { data, error } = await query.order('name');
 
       if (error) throw error;
       setStudents(data || []);
@@ -429,10 +437,10 @@ export function AdminChat() {
       return;
     }
 
-    if (!user?.id || !isAdmin) {
+    if (!user?.id || (!isAdmin && !isSchoolAdmin)) {
       toast({
         title: "Erro",
-        description: "Acesso negado. Você precisa estar logado como administrador para usar esta funcionalidade.",
+        description: "Acesso negado. Você precisa estar logado como administrador ou coordenador para usar esta funcionalidade.",
         variant: "destructive",
       });
       return;
