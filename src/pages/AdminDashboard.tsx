@@ -10,13 +10,19 @@ import {
   Activity,
   CheckCircle,
   MessageSquare,
-  BookCheck
+  BookCheck,
+  School,
+  MapPin,
+  Mail,
+  Phone
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useEscola } from '@/hooks/useEscola';
 
 export default function AdminDashboard() {
+  const { escola, isSchoolUser, hasEscola } = useEscola();
   const [stats, setStats] = useState({
     students: 0,
     exercises: 0,
@@ -190,10 +196,59 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* School Info Header - Only for school users */}
+      {isSchoolUser && hasEscola && (
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                {escola?.logo_url ? (
+                  <img 
+                    src={escola.logo_url} 
+                    alt={escola.nome} 
+                    className="w-8 h-8 object-contain"
+                  />
+                ) : (
+                  <School className="w-6 h-6 text-primary" />
+                )}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">{escola?.nome_fantasia || escola?.nome}</h2>
+                <p className="text-sm text-muted-foreground">{escola?.razao_social}</p>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              {escola?.email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  <span>{escola.email}</span>
+                </div>
+              )}
+              {escola?.telefone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  <span>{escola.telefone}</span>
+                </div>
+              )}
+              {escola?.endereco && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <span>{escola.endereco}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">Dashboard Administrativo</h1>
-        <p className="text-muted-foreground">Visão geral do sistema educacional</p>
+        <p className="text-muted-foreground">
+          {isSchoolUser ? `Visão geral da ${escola?.nome || 'escola'}` : 'Visão geral do sistema educacional'}
+        </p>
       </div>
 
       {/* Stats */}

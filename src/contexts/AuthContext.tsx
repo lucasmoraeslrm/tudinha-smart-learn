@@ -7,8 +7,25 @@ interface Profile {
   user_id: string;
   full_name: string | null;
   role: 'admin' | 'student' | 'school_admin' | 'coordinator';
+  escola_id?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface Escola {
+  id: string;
+  nome: string;
+  codigo: string;
+  nome_fantasia?: string;
+  razao_social?: string;
+  email?: string;
+  telefone?: string;
+  endereco?: string;
+  logo_url?: string;
+  cor_primaria?: string;
+  cor_secundaria?: string;
+  plano: string;
+  ativa: boolean;
 }
 
 interface StudentSession {
@@ -26,6 +43,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  escola: Escola | null;
   studentSession: StudentSession | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -46,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [escola, setEscola] = useState<Escola | null>(null);
   const [studentSession, setStudentSession] = useState<StudentSession | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -101,9 +120,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .single();
             
             setProfile(profileData as Profile);
+
+            // If user is coordinator, fetch school data
+            if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && profileData.escola_id) {
+              const { data: escolaData } = await supabase
+                .from('escolas')
+                .select('*')
+                .eq('id', profileData.escola_id)
+                .single();
+              
+              setEscola(escolaData as Escola);
+            }
           }, 0);
         } else {
           setProfile(null);
+          setEscola(null);
         }
         
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
@@ -128,8 +159,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .select('*')
           .eq('user_id', session.user.id)
           .single()
-          .then(({ data: profileData }) => {
+          .then(async ({ data: profileData }) => {
             setProfile(profileData as Profile);
+
+            // If user is coordinator, fetch school data
+            if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && profileData.escola_id) {
+              const { data: escolaData } = await supabase
+                .from('escolas')
+                .select('*')
+                .eq('id', profileData.escola_id)
+                .single();
+              
+              setEscola(escolaData as Escola);
+            }
+
             setLoading(false);
           });
       } else {
@@ -262,6 +305,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     profile,
+    escola,
     studentSession,
     loading,
     signIn,
