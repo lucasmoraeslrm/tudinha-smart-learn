@@ -201,13 +201,6 @@ export default function LaunsEscolaDetails() {
                     <p className="text-base text-foreground">{school.telefone}</p>
                   </div>
                 )}
-                
-                {school.celular && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Celular:</label>
-                    <p className="text-base text-foreground">{school.celular}</p>
-                  </div>
-                )}
               </div>
 
               {/* Location Information */}
@@ -233,20 +226,6 @@ export default function LaunsEscolaDetails() {
                       {school.numero && `, ${school.numero}`}
                       {school.complemento && `, ${school.complemento}`}
                     </p>
-                  </div>
-                )}
-                
-                {school.bairro && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Bairro:</label>
-                    <p className="text-base text-foreground">{school.bairro}</p>
-                  </div>
-                )}
-                
-                {school.cep && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">CEP:</label>
-                    <p className="text-base text-foreground">{school.cep}</p>
                   </div>
                 )}
               </div>
