@@ -397,14 +397,14 @@ export default function LaunsWebhooks() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-medium text-white">{webhook.nome}</h3>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs text-white/70 border-white/30">
                           {tiposWebhook.find(t => t.value === webhook.tipo)?.label || webhook.tipo}
                         </Badge>
                       </div>
-                      <p className="text-sm text-white/60 mb-1">
+                      <p className="text-sm text-white/70 mb-1">
                         {webhook.modo_producao ? webhook.url_producao : webhook.url_teste}
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-white/50">
+                      <div className="flex items-center gap-4 text-xs text-white/60">
                         <span>Disparos: {webhook.total_disparos}</span>
                         <span>Modo: {webhook.modo_producao ? 'Produção' : 'Teste'}</span>
                       </div>
