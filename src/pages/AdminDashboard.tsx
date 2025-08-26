@@ -48,10 +48,26 @@ export default function AdminDashboard() {
       if (escolaId) studentsQuery.eq('escola_id', escolaId);
       const studentsRes = await studentsQuery;
 
-      const [exercisesRes, listsRes, messagesRes] = await Promise.all([
+      // Get student IDs for message filtering
+      let studentIds: string[] = [];
+      if (escolaId) {
+        const { data: studentsData } = await supabase
+          .from('students')
+          .select('id')
+          .eq('escola_id', escolaId);
+        studentIds = studentsData?.map(s => s.id) || [];
+      }
+
+      // Fetch messages count (filtered by school students)
+      let messagesQuery = supabase.from('messages').select('id', { count: 'exact' });
+      if (escolaId && studentIds.length > 0) {
+        messagesQuery = messagesQuery.in('user_id', studentIds);
+      }
+      const messagesRes = await messagesQuery;
+
+      const [exercisesRes, listsRes] = await Promise.all([
         supabase.from('exercises').select('id', { count: 'exact' }),
-        supabase.from('exercise_lists').select('id', { count: 'exact' }),
-        supabase.from('messages').select('id', { count: 'exact' })
+        supabase.from('exercise_lists').select('id', { count: 'exact' })
       ]);
 
       setStats({
@@ -74,12 +90,16 @@ export default function AdminDashboard() {
         .limit(5);
       if (escolaId) answersQuery.eq('students.escola_id', escolaId);
 
-      const chatQuery = supabase
+      // Fetch chat messages (filtered by school students)
+      let chatQuery = supabase
         .from('messages')
         .select('created_at, user_id')
         .eq('sender', 'user')
         .order('created_at', { ascending: false })
         .limit(5);
+      if (escolaId && studentIds.length > 0) {
+        chatQuery = chatQuery.in('user_id', studentIds);
+      }
 
       const completedListsQuery = supabase
         .from('student_answers')
@@ -139,24 +159,34 @@ export default function AdminDashboard() {
       activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
       setRecentActivity(activities.slice(0, 3));
 
-      // Calculate performance metrics
-      const totalAnswers = await supabase
+      // Calculate performance metrics (filtered by school)
+      let totalAnswersQuery = supabase
         .from('student_answers')
         .select('is_correct', { count: 'exact' });
-      
-      const correctAnswers = await supabase
+      let correctAnswersQuery = supabase
         .from('student_answers')
         .select('id', { count: 'exact' })
         .eq('is_correct', true);
+      let uniqueStudentsQuery = supabase
+        .from('messages')
+        .select('user_id')
+        .eq('sender', 'user');
+
+      if (escolaId && studentIds.length > 0) {
+        totalAnswersQuery = totalAnswersQuery.in('student_id', studentIds);
+        correctAnswersQuery = correctAnswersQuery.in('student_id', studentIds);
+        uniqueStudentsQuery = uniqueStudentsQuery.in('user_id', studentIds);
+      }
+
+      const [totalAnswers, correctAnswers, uniqueStudentsWithMessages] = await Promise.all([
+        totalAnswersQuery,
+        correctAnswersQuery,
+        uniqueStudentsQuery
+      ]);
 
       const completionRate = totalAnswers.count && totalAnswers.count > 0 
         ? Math.round((correctAnswers.count || 0) / totalAnswers.count * 100)
         : 0;
-
-      const uniqueStudentsWithMessages = await supabase
-        .from('messages')
-        .select('user_id')
-        .eq('sender', 'user');
 
       const uniqueUsers = new Set(uniqueStudentsWithMessages.data?.map(m => m.user_id)).size;
       const chatEngagement = stats.students > 0 ? Math.round((uniqueUsers / stats.students) * 100) : 0;
