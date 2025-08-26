@@ -108,80 +108,147 @@ export default function LaunsEscolaDetails() {
         </div>
 
         {/* School Information Card */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Left Column */}
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Nome da Escola:</label>
-                  <p className="text-base font-medium text-foreground">{school.nome}</p>
-                </div>
-                
-                {school.razao_social && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Razão Social:</label>
-                    <p className="text-base text-foreground">{school.razao_social}</p>
+        <Card className="mb-6 border-0 shadow-lg">
+          <CardContent className="p-8">
+            <div className="flex items-start gap-6 mb-6">
+              {/* Logo Section */}
+              <div className="flex-shrink-0">
+                {school.logo_url ? (
+                  <img 
+                    src={school.logo_url} 
+                    alt={`Logo da ${school.nome}`}
+                    className="w-20 h-20 object-contain rounded-lg border border-border/50"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg flex items-center justify-center border border-border/50">
+                    <span className="text-2xl font-bold text-primary">
+                      {school.nome.charAt(0).toUpperCase()}
+                    </span>
                   </div>
                 )}
+              </div>
+              
+              {/* Header Info */}
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold text-foreground mb-2">{school.nome}</h2>
+                <div className="flex items-center gap-4 mb-4">
+                  <Badge 
+                    variant={school.ativa ? "default" : "secondary"}
+                    className={school.ativa ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100" : "bg-gray-100 text-gray-800"}
+                  >
+                    {school.ativa ? "Ativa" : "Inativa"}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">•</span>
+                  <span className="text-sm text-muted-foreground">
+                    Cadastrada em {new Date(school.created_at).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Information Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground border-b border-border/50 pb-2">
+                  Informações Básicas
+                </h3>
                 
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Código:</label>
-                  <p className="text-base font-mono text-foreground">{school.codigo}</p>
+                  <p className="text-base font-mono text-foreground bg-muted/30 px-2 py-1 rounded mt-1">
+                    {school.codigo}
+                  </p>
                 </div>
-              </div>
-
-              {/* Middle Column */}
-              <div className="space-y-4">
-                {school.nome_fantasia && (
+                
+                {school.dominio && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Nome Fantasia:</label>
-                    <p className="text-base text-foreground">{school.nome_fantasia}</p>
+                    <label className="text-sm font-medium text-muted-foreground">URL/Domínio:</label>
+                    <p className="text-base text-foreground break-all">
+                      <a 
+                        href={`https://${school.dominio}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {school.dominio}
+                      </a>
+                    </p>
                   </div>
                 )}
+              </div>
+
+              {/* Contact Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground border-b border-border/50 pb-2">
+                  Contato
+                </h3>
                 
                 {school.email && (
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">E-mail:</label>
-                    <p className="text-base text-foreground">{school.email}</p>
+                    <p className="text-base text-foreground">
+                      <a href={`mailto:${school.email}`} className="text-primary hover:underline">
+                        {school.email}
+                      </a>
+                    </p>
                   </div>
                 )}
                 
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Plano:</label>
-                  <p className="text-base capitalize text-foreground">{school.plano}</p>
-                </div>
+                {school.telefone && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Telefone:</label>
+                    <p className="text-base text-foreground">{school.telefone}</p>
+                  </div>
+                )}
+                
+                {school.celular && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Celular:</label>
+                    <p className="text-base text-foreground">{school.celular}</p>
+                  </div>
+                )}
               </div>
 
-              {/* Right Column */}
+              {/* Location Information */}
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Status:</label>
-                  <div className="mt-1">
-                    <Badge 
-                      variant={school.ativa ? "default" : "secondary"}
-                      className={school.ativa ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100" : "bg-gray-100 text-gray-800"}
-                    >
-                      {school.ativa ? "Ativa" : "Inativa"}
-                    </Badge>
-                  </div>
-                </div>
+                <h3 className="text-lg font-semibold text-foreground border-b border-border/50 pb-2">
+                  Localização
+                </h3>
                 
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Situação:</label>
-                  <div className="mt-1">
-                    <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
-                      Confiável
-                    </Badge>
+                {(school.cidade || school.uf) && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Cidade/Estado:</label>
+                    <p className="text-base text-foreground">
+                      {[school.cidade, school.uf].filter(Boolean).join(' / ')}
+                    </p>
                   </div>
-                </div>
+                )}
                 
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Data Cadastro:</label>
-                  <p className="text-base text-foreground">
-                    {new Date(school.created_at).toLocaleDateString('pt-BR')}
-                  </p>
-                </div>
+                {school.endereco && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Endereço:</label>
+                    <p className="text-base text-foreground">
+                      {school.endereco}
+                      {school.numero && `, ${school.numero}`}
+                      {school.complemento && `, ${school.complemento}`}
+                    </p>
+                  </div>
+                )}
+                
+                {school.bairro && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Bairro:</label>
+                    <p className="text-base text-foreground">{school.bairro}</p>
+                  </div>
+                )}
+                
+                {school.cep && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">CEP:</label>
+                    <p className="text-base text-foreground">{school.cep}</p>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
