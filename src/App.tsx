@@ -33,6 +33,7 @@ import LaunsEscolaForm from "./pages/LaunsEscolaForm";
 import LaunsEscolaDetails from "./pages/LaunsEscolaDetails";
 import LaunsEscolaConfig from "./pages/LaunsEscolaConfig";
 import LaunsExercicios from "./pages/LaunsExercicios";
+import LaunsSystemStatus from "./pages/LaunsSystemStatus";
 import LaunsWebhooks from "./pages/LaunsWebhooks";
 import LaunsUsuarios from "./pages/LaunsUsuarios";
 import ParentLogin from "./pages/ParentLogin";
@@ -132,6 +133,11 @@ const App = () => (
             <Route path="/launs/exercicios" element={
               <ProtectedLaunsRoute>
                 <LaunsExercicios />
+              </ProtectedLaunsRoute>
+            } />
+            <Route path="/launs/sistema" element={
+              <ProtectedLaunsRoute>
+                <LaunsSystemStatus />
               </ProtectedLaunsRoute>
             } />
             <Route path="/launs/webhooks" element={

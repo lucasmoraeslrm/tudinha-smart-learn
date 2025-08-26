@@ -22,7 +22,8 @@ import {
   Webhook,
   Users,
   LogOut,
-  Settings
+  Settings,
+  Activity
 } from 'lucide-react';
 
 const navigationItems = [
@@ -45,6 +46,11 @@ const navigationItems = [
     title: 'Webhooks',
     url: '/launs/webhooks',
     icon: Webhook,
+  },
+  {
+    title: 'Status do Sistema',
+    url: '/launs/sistema',
+    icon: Activity,
   },
   {
     title: 'Usuários',
