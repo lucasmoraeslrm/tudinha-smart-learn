@@ -64,10 +64,37 @@ export default function AdminLogin() {
 
     try {
       clearOtherSessions();
+      
+      // First, try regular Supabase Auth login
       const { error } = await signIn(email, password);
       
       if (error) {
-        throw error;
+        // If login failed, try to provision coordinator
+        console.log('Auth login failed, checking coordinator provisioning...');
+        
+        const { data: provisionResult, error: provisionError } = await supabase.functions.invoke(
+          'provision-coordinator-auth',
+          {
+            body: { email, password }
+          }
+        );
+
+        if (provisionError) {
+          console.error('Provision error:', provisionError);
+          throw new Error(error.message || "Credenciais inválidas. Verifique seu email e senha.");
+        }
+
+        if (provisionResult?.success) {
+          // Provisioning successful, retry login
+          console.log('Coordinator provisioned, retrying login...');
+          const { error: retryError } = await signIn(email, password);
+          
+          if (retryError) {
+            throw new Error("Usuário provisionado mas falha no login. Tente novamente.");
+          }
+        } else {
+          throw new Error(error.message || "Credenciais inválidas. Tente novamente.");
+        }
       }
 
       toast({
