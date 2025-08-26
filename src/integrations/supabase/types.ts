@@ -332,6 +332,33 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_collections: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          materia: string
+          serie_escolar: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          materia: string
+          serie_escolar: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          materia?: string
+          serie_escolar?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       exercise_lists: {
         Row: {
           created_at: string
@@ -364,6 +391,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      exercise_topics: {
+        Row: {
+          assunto: string
+          collection_id: string
+          created_at: string
+          id: string
+          ordem: number
+        }
+        Insert: {
+          assunto: string
+          collection_id: string
+          created_at?: string
+          id?: string
+          ordem?: number
+        }
+        Update: {
+          assunto?: string
+          collection_id?: string
+          created_at?: string
+          id?: string
+          ordem?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_topics_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_collections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       exercises: {
         Row: {
@@ -1011,6 +1070,95 @@ export type Database = {
           },
         ]
       }
+      student_exercise_sessions: {
+        Row: {
+          created_at: string
+          finished_at: string | null
+          id: string
+          score: number | null
+          started_at: string
+          student_id: string
+          topic_id: string
+          total_questions: number | null
+          total_time_seconds: number | null
+        }
+        Insert: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          score?: number | null
+          started_at?: string
+          student_id: string
+          topic_id: string
+          total_questions?: number | null
+          total_time_seconds?: number | null
+        }
+        Update: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          score?: number | null
+          started_at?: string
+          student_id?: string
+          topic_id?: string
+          total_questions?: number | null
+          total_time_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_exercise_sessions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_question_responses: {
+        Row: {
+          answered_at: string
+          exercise_id: string
+          id: string
+          is_correct: boolean
+          session_id: string
+          student_answer: string
+          time_spent_seconds: number
+        }
+        Insert: {
+          answered_at?: string
+          exercise_id: string
+          id?: string
+          is_correct: boolean
+          session_id: string
+          student_answer: string
+          time_spent_seconds: number
+        }
+        Update: {
+          answered_at?: string
+          exercise_id?: string
+          id?: string
+          is_correct?: boolean
+          session_id?: string
+          student_answer?: string
+          time_spent_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_question_responses_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "topic_exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_question_responses_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "student_exercise_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           age: number | null
@@ -1079,6 +1227,47 @@ export type Database = {
             columns: ["turma_id"]
             isOneToOne: false
             referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topic_exercises: {
+        Row: {
+          alternativas: Json
+          created_at: string
+          enunciado: string
+          explicacao: string | null
+          id: string
+          ordem: number
+          resposta_correta: string
+          topic_id: string
+        }
+        Insert: {
+          alternativas: Json
+          created_at?: string
+          enunciado: string
+          explicacao?: string | null
+          id?: string
+          ordem?: number
+          resposta_correta: string
+          topic_id: string
+        }
+        Update: {
+          alternativas?: Json
+          created_at?: string
+          enunciado?: string
+          explicacao?: string | null
+          id?: string
+          ordem?: number
+          resposta_correta?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_exercises_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_topics"
             referencedColumns: ["id"]
           },
         ]
