@@ -328,16 +328,55 @@ export default function LaunsEscolaDetails() {
 
         {/* Dynamic Content Based on Active Section */}
         {activeSection === 'overview' && (
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Logs da Escola</h3>
-              <div className="text-center py-8 text-muted-foreground">
-                <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p>Sistema de logs em desenvolvimento</p>
-                <p className="text-sm">Aqui serão exibidos os logs de atividade da escola</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {/* Total de Alunos Ativos */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total de Alunos Ativos</p>
+                    <p className="text-3xl font-bold text-foreground">156</p>
+                    <p className="text-xs text-muted-foreground mt-1">+12 este mês</p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <GraduationCap className="w-6 h-6 text-purple-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Total de Interações com Tudinha */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Interações com Tudinha</p>
+                    <p className="text-3xl font-bold text-foreground">2,847</p>
+                    <p className="text-xs text-muted-foreground mt-1">+234 esta semana</p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <Users className="w-6 h-6 text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* % Exercícios Acertados */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Taxa de Acertos</p>
+                    <p className="text-3xl font-bold text-foreground">87%</p>
+                    <p className="text-xs text-muted-foreground mt-1">+5% vs. mês anterior</p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {activeSection === 'materias' && (
