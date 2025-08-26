@@ -76,6 +76,7 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
     try {
       const turmaData = {
         ...formData,
+        codigo: `${formData.serie}${formData.nome}`, // Gerar código automaticamente
         escola_id: schoolId
       };
 
@@ -164,7 +165,6 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
 
   const filteredTurmas = turmas.filter(turma =>
     turma.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    turma.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     turma.serie.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -199,22 +199,12 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="nome">Nome *</Label>
+                  <Label htmlFor="nome">Turma *</Label>
                   <Input
                     id="nome"
                     value={formData.nome}
                     onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                     placeholder="Ex: A, B, C"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="codigo">Código *</Label>
-                  <Input
-                    id="codigo"
-                    value={formData.codigo}
-                    onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
-                    placeholder="Ex: 1A, 2B, 3C"
                     required
                   />
                 </div>
@@ -263,7 +253,7 @@ export default function SchoolTurmasCRUD({ schoolId }: SchoolTurmasCRUDProps) {
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, código ou série..."
+              placeholder="Buscar por nome ou série..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
