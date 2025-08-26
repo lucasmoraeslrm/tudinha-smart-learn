@@ -403,9 +403,9 @@ export default function ExerciseManager({ collectionId, onBack }: ExerciseManage
         </CardHeader>
         <CardContent>
           <Tabs defaultValue={collection.topics[0]?.id || 'empty'} className="w-full">
-            <TabsList className="grid w-full grid-cols-auto">
+            <TabsList className="w-full overflow-x-auto whitespace-nowrap flex gap-2 bg-transparent p-1">
               {collection.topics.map((topic) => (
-                <TabsTrigger key={topic.id} value={topic.id}>
+                <TabsTrigger key={topic.id} value={topic.id} className="shrink-0 px-3 py-1.5 rounded-md data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
                   {topic.assunto}
                 </TabsTrigger>
               ))}
