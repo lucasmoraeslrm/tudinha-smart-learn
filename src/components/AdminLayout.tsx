@@ -11,8 +11,10 @@ import {
   Shield,
   Users,
   List,
-  MapPin
+  MapPin,
+  School
 } from 'lucide-react';
+import { useEscola } from '@/hooks/useEscola';
 
 const sidebarItems = [
   { title: 'Dashboard', url: '/admin/dashboard', icon: LayoutDashboard },
@@ -30,6 +32,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { profile, signOut } = useAuth();
+  const { escola, isSchoolUser } = useEscola();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -47,16 +50,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Header */}
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 p-2">
-              <img 
-                src="https://storange.tudinha.com.br/colag.png" 
-                alt="Colégio Almeida Garrett" 
-                className="w-full h-full object-contain"
-              />
+            <div className="w-10 h-10 rounded-lg bg-primary/10 p-2 flex items-center justify-center">
+              {escola?.logo_url ? (
+                <img
+                  src={escola.logo_url}
+                  alt={escola?.nome_fantasia || escola?.nome || 'Escola'}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <School className="w-5 h-5 text-primary" />
+              )}
             </div>
             <div>
-              <h2 className="font-semibold text-sm">Colégio Almeida</h2>
-              <p className="text-xs text-muted-foreground">Garrett</p>
+              <h2 className="font-semibold text-sm">{escola?.nome_fantasia || escola?.nome || 'Sua Escola'}</h2>
+              {escola?.codigo && (
+                <p className="text-xs text-muted-foreground">{escola.codigo}</p>
+              )}
             </div>
           </div>
           <p className="text-xs text-muted-foreground">Painel Administrativo</p>
@@ -70,7 +79,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </div>
             <div>
               <p className="text-sm font-medium">Olá, {adminName.split(' ')[0]}!</p>
-              <p className="text-xs text-muted-foreground">Administrador</p>
+              <p className="text-xs text-muted-foreground">
+                {profile?.role === 'coordinator' ? 'Coordenador' : 'Administrador da Escola'}
+              </p>
             </div>
           </div>
         </div>
@@ -128,12 +139,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold">Olá, {adminName.split(' ')[0]}! 👋</h1>
-            <p className="text-sm text-muted-foreground">Painel de administração do colégio</p>
+            <p className="text-sm text-muted-foreground">
+              {isSchoolUser ? `Painel de administração da ${escola?.nome_fantasia || escola?.nome || 'escola'}` : 'Painel administrativo'}
+            </p>
           </div>
           
           <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
             <Shield className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Admin</span>
+            <span className="text-sm font-medium text-primary">{profile?.role === 'coordinator' ? 'Coordenador' : 'Admin'}</span>
           </div>
         </div>
 

@@ -38,14 +38,17 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    fetchDashboardData(escola?.id);
+  }, [escola?.id]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (escolaId?: string) => {
     try {
-      // Fetch basic stats
-      const [studentsRes, exercisesRes, listsRes, messagesRes] = await Promise.all([
-        supabase.from('students').select('id', { count: 'exact' }),
+      // Fetch basic stats (filter by escola when available)
+      const studentsQuery = supabase.from('students').select('id', { count: 'exact' });
+      if (escolaId) studentsQuery.eq('escola_id', escolaId);
+      const studentsRes = await studentsQuery;
+
+      const [exercisesRes, listsRes, messagesRes] = await Promise.all([
         supabase.from('exercises').select('id', { count: 'exact' }),
         supabase.from('exercise_lists').select('id', { count: 'exact' }),
         supabase.from('messages').select('id', { count: 'exact' })
@@ -58,34 +61,42 @@ export default function AdminDashboard() {
         messages: messagesRes.count || 0
       });
 
-      // Fetch recent activity
+      // Fetch recent activity (filter by escola via students join)
+      const answersQuery = supabase
+        .from('student_answers')
+        .select(`
+          answered_at,
+          is_correct,
+          students!inner(name, escola_id),
+          exercises!inner(title, subject)
+        `)
+        .order('answered_at', { ascending: false })
+        .limit(5);
+      if (escolaId) answersQuery.eq('students.escola_id', escolaId);
+
+      const chatQuery = supabase
+        .from('messages')
+        .select('created_at, user_id')
+        .eq('sender', 'user')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      const completedListsQuery = supabase
+        .from('student_answers')
+        .select(`
+          answered_at,
+          students!inner(name, escola_id),
+          exercise_lists!inner(title)
+        `)
+        .not('list_id', 'is', null)
+        .order('answered_at', { ascending: false })
+        .limit(3);
+      if (escolaId) completedListsQuery.eq('students.escola_id', escolaId);
+
       const [answersRes, chatRes, completedListsRes] = await Promise.all([
-        supabase
-          .from('student_answers')
-          .select(`
-            answered_at,
-            is_correct,
-            students!inner(name),
-            exercises!inner(title, subject)
-          `)
-          .order('answered_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('messages')
-          .select('created_at, user_id')
-          .eq('sender', 'user')
-          .order('created_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('student_answers')
-          .select(`
-            answered_at,
-            students!inner(name),
-            exercise_lists!inner(title)
-          `)
-          .not('list_id', 'is', null)
-          .order('answered_at', { ascending: false })
-          .limit(3)
+        answersQuery,
+        chatQuery,
+        completedListsQuery
       ]);
 
       // Process recent activity
