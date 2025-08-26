@@ -1015,8 +1015,10 @@ export type Database = {
         Row: {
           age: number | null
           ano_letivo: string | null
+          ativo: boolean
           codigo: string | null
           created_at: string
+          data_nascimento: string | null
           email: string | null
           escola_id: string | null
           id: string
@@ -1031,8 +1033,10 @@ export type Database = {
         Insert: {
           age?: number | null
           ano_letivo?: string | null
+          ativo?: boolean
           codigo?: string | null
           created_at?: string
+          data_nascimento?: string | null
           email?: string | null
           escola_id?: string | null
           id?: string
@@ -1047,8 +1051,10 @@ export type Database = {
         Update: {
           age?: number | null
           ano_letivo?: string | null
+          ativo?: boolean
           codigo?: string | null
           created_at?: string
+          data_nascimento?: string | null
           email?: string | null
           escola_id?: string | null
           id?: string

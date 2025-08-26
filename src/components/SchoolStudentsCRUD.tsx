@@ -24,7 +24,12 @@ interface Student {
   data_nascimento?: string;
   password_hash?: string;
   escola_id: string;
+  ativo: boolean;
   created_at: string;
+  // Dados da turma via JOIN
+  turma_nome?: string;
+  turma_serie?: string;
+  turma_ano_letivo?: string;
 }
 
 interface SchoolStudentsCRUDProps {
@@ -53,7 +58,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
     ra: '',
     password: '',
     turma_id: '',
-    data_nascimento: ''
+    data_nascimento: '',
+    ativo: true
   });
 
   useEffect(() => {
@@ -83,12 +89,28 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
     try {
       const { data, error } = await supabase
         .from('students')
-        .select('*')
+        .select(`
+          *,
+          turmas (
+            nome,
+            serie,
+            ano_letivo
+          )
+        `)
         .eq('escola_id', schoolId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setStudents(data || []);
+      
+      // Mapear os dados da turma para o formato esperado
+      const mappedStudents = (data || []).map(student => ({
+        ...student,
+        turma_nome: student.turmas?.nome,
+        turma_serie: student.turmas?.serie,
+        turma_ano_letivo: student.turmas?.ano_letivo
+      }));
+      
+      setStudents(mappedStudents || []);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -109,6 +131,7 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
         ra: formData.ra || null,
         turma_id: formData.turma_id || null,
         data_nascimento: formData.data_nascimento || null,
+        ativo: formData.ativo,
         escola_id: schoolId,
         ...(formData.password && { password_hash: formData.password }) // In production, hash this properly
       };
@@ -145,7 +168,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
         ra: '',
         password: '',
         turma_id: '',
-        data_nascimento: ''
+        data_nascimento: '',
+        ativo: true
       });
       fetchStudents();
     } catch (error: any) {
@@ -164,7 +188,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
       ra: student.ra || '',
       password: '',
       turma_id: student.turma_id || '',
-      data_nascimento: student.data_nascimento || ''
+      data_nascimento: student.data_nascimento || '',
+      ativo: student.ativo
     });
     setIsDialogOpen(true);
   };
@@ -219,7 +244,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                   ra: '',
                   password: '',
                   turma_id: '',
-                  data_nascimento: ''
+                  data_nascimento: '',
+                  ativo: true
                 });
               }}>
                 <UserPlus className="w-4 h-4 mr-2" />
@@ -254,17 +280,29 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="password">Senha *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required={!editingStudent}
-                    placeholder={editingStudent ? "Deixe em branco para manter" : ""}
-                  />
-                </div>
+                 <div>
+                   <Label htmlFor="password">Senha *</Label>
+                   <Input
+                     id="password"
+                     type="password"
+                     value={formData.password}
+                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                     required={!editingStudent}
+                     placeholder={editingStudent ? "Deixe em branco para manter" : ""}
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="ativo">Status</Label>
+                   <Select value={formData.ativo.toString()} onValueChange={(value) => setFormData({ ...formData, ativo: value === 'true' })}>
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="true">Ativo</SelectItem>
+                       <SelectItem value="false">Inativo</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
                  <div className="grid grid-cols-2 gap-4">
                    <div>
                      <Label htmlFor="turma">Turma</Label>
@@ -325,26 +363,34 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                 <TableHead>Nome</TableHead>
                 <TableHead>RA</TableHead>
                 <TableHead>Turma</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredStudents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     {searchTerm ? 'Nenhum aluno encontrado' : 'Nenhum aluno cadastrado'}
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredStudents.map((student) => (
-                  <TableRow key={student.id}>
-                     <TableCell className="font-medium">{student.name}</TableCell>
-                     <TableCell>{student.ra || '-'}</TableCell>
-                      <TableCell>
-                        {student.turma ? (
-                          <Badge variant="secondary">{student.turma}</Badge>
-                        ) : '-'}
-                      </TableCell>
+                   <TableRow key={student.id}>
+                      <TableCell className="font-medium">{student.name}</TableCell>
+                      <TableCell>{student.ra || '-'}</TableCell>
+                       <TableCell>
+                         {student.turma_nome ? (
+                           <Badge variant="secondary">
+                             {student.turma_serie} - {student.turma_nome} - {student.turma_ano_letivo}
+                           </Badge>
+                         ) : '-'}
+                       </TableCell>
+                       <TableCell>
+                         <Badge variant={student.ativo ? "default" : "secondary"}>
+                           {student.ativo ? "Ativo" : "Inativo"}
+                         </Badge>
+                       </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
