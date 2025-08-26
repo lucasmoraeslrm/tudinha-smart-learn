@@ -46,7 +46,7 @@ export default function LaunsExercicios() {
               Gerencie e importe exercícios organizados por matéria e assunto
             </p>
           </div>
-          <ImportExerciseJSON key={refreshKey} />
+          <ImportExerciseJSON onImportSuccess={() => setRefreshKey(prev => prev + 1)} />
         </div>
 
         <ExerciseCollectionsList 

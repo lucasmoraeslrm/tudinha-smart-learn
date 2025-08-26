@@ -21,7 +21,11 @@ interface ExerciseJSONData {
   }[];
 }
 
-export default function ImportExerciseJSON() {
+interface ImportExerciseJSONProps {
+  onImportSuccess?: () => void;
+}
+
+export default function ImportExerciseJSON({ onImportSuccess }: ImportExerciseJSONProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [jsonText, setJsonText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -116,6 +120,7 @@ export default function ImportExerciseJSON() {
 
       setJsonText('');
       setIsOpen(false);
+      onImportSuccess?.(); // Trigger refresh
 
     } catch (error) {
       console.error('Error importing JSON:', error);
