@@ -38,23 +38,17 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AdminDashboard - Escola changed:', escola);
-    console.log('AdminDashboard - isSchoolUser:', isSchoolUser);
-    console.log('AdminDashboard - hasEscola:', hasEscola);
     fetchDashboardData(escola?.id);
   }, [escola?.id]);
 
   const fetchDashboardData = async (escolaId?: string) => {
-    console.log('AdminDashboard - fetchDashboardData called with escolaId:', escolaId);
     try {
       // Fetch basic stats (filter by escola when available)
       const studentsQuery = supabase.from('students').select('id', { count: 'exact' });
       if (escolaId) {
-        console.log('AdminDashboard - Filtering students by escolaId:', escolaId);
         studentsQuery.eq('escola_id', escolaId);
       }
       const studentsRes = await studentsQuery;
-      console.log('AdminDashboard - Students result:', studentsRes);
 
       // Get student IDs for message filtering
       let studentIds: string[] = [];
@@ -64,7 +58,6 @@ export default function AdminDashboard() {
           .select('id')
           .eq('escola_id', escolaId);
         studentIds = studentsData?.map(s => s.id) || [];
-        console.log('AdminDashboard - Student IDs for school:', studentIds);
       }
 
       // Fetch messages count (filtered by school students)
@@ -84,13 +77,6 @@ export default function AdminDashboard() {
         exercises: exercisesRes.count || 0,
         exerciseLists: listsRes.count || 0,
         messages: messagesRes.count || 0
-      });
-      console.log('AdminDashboard - Final stats:', {
-        students: studentsRes.count || 0,
-        exercises: exercisesRes.count || 0,
-        exerciseLists: listsRes.count || 0,
-        messages: messagesRes.count || 0,
-        escolaId
       });
 
       // Fetch recent activity (filter by escola via students join)

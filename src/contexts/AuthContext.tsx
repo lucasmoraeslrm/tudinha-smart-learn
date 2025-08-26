@@ -123,14 +123,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // If user is coordinator and has no escola_id, try to find it
             if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && !profileData.escola_id) {
-              console.log('AuthContext - Coordinator without escola_id, looking up in coordenadores table');
               const { data: coordenadorData } = await supabase
                 .from('coordenadores')
                 .select('escola_id')
                 .eq('email', session.user.email)
                 .single();
-
-              console.log('AuthContext - Coordenador data found:', coordenadorData);
 
               if (coordenadorData?.escola_id) {
                 // Update profile with escola_id
@@ -141,24 +138,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   .select()
                   .single();
 
-                console.log('AuthContext - Profile updated with escola_id:', updatedProfileData);
                 updatedProfile = updatedProfileData as Profile;
               }
             }
             
             setProfile(updatedProfile);
 
-            // If user is coordinator, fetch school data
-            if (updatedProfile && ['school_admin', 'coordinator'].includes(updatedProfile.role) && updatedProfile.escola_id) {
-              console.log('AuthContext - Fetching escola data for escola_id:', updatedProfile.escola_id);
+            // If user has escola_id, fetch school data
+            if (updatedProfile && updatedProfile.escola_id) {
               const { data: escolaData } = await supabase
                 .from('escolas')
                 .select('*')
                 .eq('id', updatedProfile.escola_id)
                 .single();
               
-              console.log('AuthContext - Escola data loaded:', escolaData);
               setEscola(escolaData as Escola);
+            } else {
+              setEscola(null);
             }
           }, 0);
         } else {
@@ -193,14 +189,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // If user is coordinator and has no escola_id, try to find it
             if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && !profileData.escola_id) {
-              console.log('AuthContext getSession - Coordinator without escola_id, looking up in coordenadores table');
               const { data: coordenadorData } = await supabase
                 .from('coordenadores')
                 .select('escola_id')
                 .eq('email', session.user.email)
                 .single();
-
-              console.log('AuthContext getSession - Coordenador data found:', coordenadorData);
 
               if (coordenadorData?.escola_id) {
                 // Update profile with escola_id
@@ -211,24 +204,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   .select()
                   .single();
 
-                console.log('AuthContext getSession - Profile updated with escola_id:', updatedProfileData);
                 updatedProfile = updatedProfileData as Profile;
               }
             }
 
             setProfile(updatedProfile);
 
-            // If user is coordinator, fetch school data
-            if (updatedProfile && ['school_admin', 'coordinator'].includes(updatedProfile.role) && updatedProfile.escola_id) {
-              console.log('AuthContext getSession - Fetching escola data for escola_id:', updatedProfile.escola_id);
+            // If user has escola_id, fetch school data
+            if (updatedProfile && updatedProfile.escola_id) {
               const { data: escolaData } = await supabase
                 .from('escolas')
                 .select('*')
                 .eq('id', updatedProfile.escola_id)
                 .single();
               
-              console.log('AuthContext getSession - Escola data loaded:', escolaData);
               setEscola(escolaData as Escola);
+            } else {
+              setEscola(null);
             }
 
             setLoading(false);
