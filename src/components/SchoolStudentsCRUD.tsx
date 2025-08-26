@@ -21,8 +21,7 @@ interface Student {
   ano_letivo?: string;
   turma?: string;
   turma_id?: string;
-  idade?: number;
-  maquina_padrao?: string;
+  data_nascimento?: string;
   password_hash?: string;
   escola_id: string;
   created_at: string;
@@ -55,11 +54,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
     codigo: '',
     ra: '',
     password: '',
-    ano_letivo: '',
-    turma: '',
     turma_id: '',
-    idade: '',
-    maquina_padrao: ''
+    data_nascimento: ''
   });
 
   useEffect(() => {
@@ -116,10 +112,7 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
         codigo: formData.codigo || null,
         ra: formData.ra || null,
         turma_id: formData.turma_id || null,
-        ano_letivo: formData.ano_letivo || null,
-        turma: formData.turma || null,
-        idade: formData.idade ? parseInt(formData.idade) : null,
-        maquina_padrao: formData.maquina_padrao || null,
+        data_nascimento: formData.data_nascimento || null,
         escola_id: schoolId,
         ...(formData.password && { password_hash: formData.password }) // In production, hash this properly
       };
@@ -157,11 +150,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
         codigo: '',
         ra: '',
         password: '',
-        ano_letivo: '',
-        turma: '',
         turma_id: '',
-        idade: '',
-        maquina_padrao: ''
+        data_nascimento: ''
       });
       fetchStudents();
     } catch (error: any) {
@@ -181,11 +171,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
       codigo: student.codigo || '',
       ra: student.ra || '',
       password: '',
-      ano_letivo: student.ano_letivo || '',
-      turma: student.turma || '',
       turma_id: student.turma_id || '',
-      idade: student.idade?.toString() || '',
-      maquina_padrao: student.maquina_padrao || ''
+      data_nascimento: student.data_nascimento || ''
     });
     setIsDialogOpen(true);
   };
@@ -242,11 +229,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                   codigo: '',
                   ra: '',
                   password: '',
-                  ano_letivo: '',
-                  turma: '',
                   turma_id: '',
-                  idade: '',
-                  maquina_padrao: ''
+                  data_nascimento: ''
                 });
               }}>
                 <UserPlus className="w-4 h-4 mr-2" />
@@ -309,58 +293,32 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                     placeholder={editingStudent ? "Deixe em branco para manter" : ""}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="turma">Turma</Label>
-                    <Select value={formData.turma_id} onValueChange={(value) => setFormData({ ...formData, turma_id: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma turma" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {turmas.map((turma) => (
-                          <SelectItem key={turma.id} value={turma.id}>
-                            {turma.codigo} - {turma.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="idade">Idade</Label>
-                    <Input
-                      id="idade"
-                      type="number"
-                      value={formData.idade}
-                      onChange={(e) => setFormData({ ...formData, idade: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="ano_letivo">Ano Letivo</Label>
-                    <Input
-                      id="ano_letivo"
-                      value={formData.ano_letivo}
-                      onChange={(e) => setFormData({ ...formData, ano_letivo: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="turma">Turma</Label>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <Label htmlFor="turma">Turma</Label>
+                     <Select value={formData.turma_id} onValueChange={(value) => setFormData({ ...formData, turma_id: value })}>
+                       <SelectTrigger>
+                         <SelectValue placeholder="Selecione uma turma" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         {turmas.map((turma) => (
+                           <SelectItem key={turma.id} value={turma.id}>
+                             {turma.codigo} - {turma.nome}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   </div>
+                   <div>
+                     <Label htmlFor="data_nascimento">Data de Aniversário</Label>
                      <Input
-                       id="turma"
-                       value={formData.turma}
-                       onChange={(e) => setFormData({ ...formData, turma: e.target.value })}
+                       id="data_nascimento"
+                       type="date"
+                       value={formData.data_nascimento}
+                       onChange={(e) => setFormData({ ...formData, data_nascimento: e.target.value })}
                      />
                    </div>
                  </div>
-                <div>
-                  <Label htmlFor="maquina_padrao">Máquina Padrão</Label>
-                  <Input
-                    id="maquina_padrao"
-                    value={formData.maquina_padrao}
-                    onChange={(e) => setFormData({ ...formData, maquina_padrao: e.target.value })}
-                  />
-                </div>
                 <DialogFooter>
                   <Button type="submit">
                     {editingStudent ? 'Atualizar' : 'Cadastrar'}
@@ -395,7 +353,6 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                 <TableHead>Nome</TableHead>
                 <TableHead>Código</TableHead>
                 <TableHead>Turma</TableHead>
-                <TableHead>Ano Letivo</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
@@ -403,7 +360,7 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
             <TableBody>
               {filteredStudents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     {searchTerm ? 'Nenhum aluno encontrado' : 'Nenhum aluno cadastrado'}
                   </TableCell>
                 </TableRow>
@@ -412,13 +369,12 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">{student.name}</TableCell>
                     <TableCell>{student.codigo || '-'}</TableCell>
-                    <TableCell>
-                      {student.turma ? (
-                        <Badge variant="secondary">{student.turma}</Badge>
-                      ) : '-'}
-                    </TableCell>
-                    <TableCell>{student.ano_letivo || '-'}</TableCell>
-                    <TableCell>{student.email || '-'}</TableCell>
+                     <TableCell>
+                       {student.turma ? (
+                         <Badge variant="secondary">{student.turma}</Badge>
+                       ) : '-'}
+                     </TableCell>
+                     <TableCell>{student.email || '-'}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
