@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { useSchools } from '@/hooks/useSchools';
+import { supabase } from '@/integrations/supabase/client';
 import SchoolStudentsCRUD from '@/components/SchoolStudentsCRUD';
 import SchoolProfessorsCRUD from '@/components/SchoolProfessorsCRUD';
 import SchoolMateriasCRUD from '@/components/SchoolMateriasCRUD';
@@ -30,13 +31,72 @@ export default function LaunsEscolaDetails() {
   const { schools, loading } = useSchools();
   const [school, setSchool] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
+  const [dashboardMetrics, setDashboardMetrics] = useState({
+    totalStudents: 0,
+    totalInteractions: 0,
+    correctAnswersPercentage: 0,
+    loading: true
+  });
 
   useEffect(() => {
     if (schools.length > 0 && id) {
       const foundSchool = schools.find(s => s.id === id);
-      setSchool(foundSchool || null);
+      if (foundSchool) {
+        setSchool(foundSchool);
+        fetchDashboardMetrics();
+      }
     }
   }, [schools, id]);
+
+  const fetchDashboardMetrics = async () => {
+    try {
+      setDashboardMetrics(prev => ({ ...prev, loading: true }));
+
+      // Buscar total de alunos ativos
+      const { data: studentsData, error: studentsError } = await supabase
+        .from('students')
+        .select('id')
+        .eq('escola_id', id);
+
+      if (studentsError) throw studentsError;
+
+      // Buscar total de interações com admin chat
+      const { data: interactionsData, error: interactionsError } = await supabase
+        .from('admin_chat_logs')
+        .select('id')
+        .in('student_id', studentsData?.map(s => s.id) || []);
+
+      if (interactionsError) throw interactionsError;
+
+      // Buscar taxa de acertos dos exercícios
+      const { data: answersData, error: answersError } = await supabase
+        .from('student_answers')
+        .select('is_correct')
+        .in('student_id', studentsData?.map(s => s.id) || []);
+
+      if (answersError) throw answersError;
+
+      const totalAnswers = answersData?.length || 0;
+      const correctAnswers = answersData?.filter(a => a.is_correct).length || 0;
+      const correctPercentage = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+
+      setDashboardMetrics({
+        totalStudents: studentsData?.length || 0,
+        totalInteractions: interactionsData?.length || 0,
+        correctAnswersPercentage: correctPercentage,
+        loading: false
+      });
+
+    } catch (error) {
+      console.error('Erro ao buscar métricas do dashboard:', error);
+      setDashboardMetrics({
+        totalStudents: 0,
+        totalInteractions: 0,
+        correctAnswersPercentage: 0,
+        loading: false
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -335,8 +395,12 @@ export default function LaunsEscolaDetails() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total de Alunos Ativos</p>
-                    <p className="text-3xl font-bold text-foreground">156</p>
-                    <p className="text-xs text-muted-foreground mt-1">+12 este mês</p>
+                    {dashboardMetrics.loading ? (
+                      <div className="w-12 h-8 bg-muted animate-pulse rounded"></div>
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{dashboardMetrics.totalStudents}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">cadastrados na escola</p>
                   </div>
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                     <GraduationCap className="w-6 h-6 text-purple-600" />
@@ -351,8 +415,12 @@ export default function LaunsEscolaDetails() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Interações com Tudinha</p>
-                    <p className="text-3xl font-bold text-foreground">2,847</p>
-                    <p className="text-xs text-muted-foreground mt-1">+234 esta semana</p>
+                    {dashboardMetrics.loading ? (
+                      <div className="w-16 h-8 bg-muted animate-pulse rounded"></div>
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{dashboardMetrics.totalInteractions.toLocaleString()}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">interações registradas</p>
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                     <Users className="w-6 h-6 text-green-600" />
@@ -367,8 +435,12 @@ export default function LaunsEscolaDetails() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Taxa de Acertos</p>
-                    <p className="text-3xl font-bold text-foreground">87%</p>
-                    <p className="text-xs text-muted-foreground mt-1">+5% vs. mês anterior</p>
+                    {dashboardMetrics.loading ? (
+                      <div className="w-12 h-8 bg-muted animate-pulse rounded"></div>
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{dashboardMetrics.correctAnswersPercentage}%</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">dos exercícios respondidos</p>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <BookOpen className="w-6 h-6 text-blue-600" />
