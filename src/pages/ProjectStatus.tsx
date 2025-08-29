@@ -241,11 +241,21 @@ export default function ProjectStatus() {
               Análise completa do sistema, módulos e acessos
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              Última atualização: {lastUpdate.toLocaleTimeString()}
-            </span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Última atualização: {lastUpdate.toLocaleTimeString()}
+              </span>
+            </div>
+            <a 
+              href="/status-public" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline"
+            >
+              Ver status público
+            </a>
           </div>
         </div>
 

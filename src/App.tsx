@@ -39,6 +39,7 @@ import LaunsUsuarios from "./pages/LaunsUsuarios";
 import ProjectStatus from "./pages/ProjectStatus";
 import ParentLogin from "./pages/ParentLogin";
 import ParentDashboard from "./pages/ParentDashboard";
+import PublicStatus from "./pages/PublicStatus";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -230,6 +231,9 @@ const App = () => (
                 <ParentDashboard />
               </ProtectedRoute>
             } />
+            
+            {/* Public Status Route */}
+            <Route path="/status-public" element={<PublicStatus />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
