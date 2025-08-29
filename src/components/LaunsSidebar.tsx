@@ -23,7 +23,8 @@ import {
   Users,
   LogOut,
   Settings,
-  Activity
+  Activity,
+  Monitor
 } from 'lucide-react';
 
 const navigationItems = [
@@ -51,6 +52,11 @@ const navigationItems = [
     title: 'Status do Sistema',
     url: '/launs/sistema',
     icon: Activity,
+  },
+  {
+    title: 'Status do Projeto',
+    url: '/launs/status',
+    icon: Monitor,
   },
   {
     title: 'Usuários',

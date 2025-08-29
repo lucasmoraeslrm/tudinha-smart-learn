@@ -36,6 +36,7 @@ import LaunsExercicios from "./pages/LaunsExercicios";
 import LaunsSystemStatus from "./pages/LaunsSystemStatus";
 import LaunsWebhooks from "./pages/LaunsWebhooks";
 import LaunsUsuarios from "./pages/LaunsUsuarios";
+import ProjectStatus from "./pages/ProjectStatus";
 import ParentLogin from "./pages/ParentLogin";
 import ParentDashboard from "./pages/ParentDashboard";
 import NotFound from "./pages/NotFound";
@@ -149,6 +150,16 @@ const App = () => (
               <ProtectedLaunsRoute>
                 <LaunsUsuarios />
               </ProtectedLaunsRoute>
+            } />
+            <Route path="/launs/status" element={
+              <ProtectedLaunsRoute>
+                <ProjectStatus />
+              </ProtectedLaunsRoute>
+            } />
+            <Route path="/admin/status" element={
+              <ProtectedRoute requireSchoolAdmin>
+                <ProjectStatus />
+              </ProtectedRoute>
             } />
             
             
