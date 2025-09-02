@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -251,114 +250,113 @@ export default function AdminProfessores() {
 
   return (
     <AdminLayout>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
-                Professores
-              </CardTitle>
-              <CardDescription>
-                Gerencie os professores da escola
-              </CardDescription>
-            </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={resetForm}>
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Novo Professor
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingProfessor ? 'Editar Professor' : 'Novo Professor'}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {editingProfessor ? 'Edite as informações do professor' : 'Preencha as informações do novo professor'}
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="nome">Nome</Label>
-                    <Input
-                      id="nome"
-                      value={formData.nome}
-                      onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="codigo">Código</Label>
-                    <Input
-                      id="codigo"
-                      value={formData.codigo}
-                      onChange={(e) => setFormData(prev => ({ ...prev, codigo: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="password">
-                      {editingProfessor ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}
-                    </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                      required={!editingProfessor}
-                    />
-                  </div>
-                  
-                  {materiasOptions.length > 0 && (
-                    <div>
-                      <Label>Matérias</Label>
-                      <div className="grid grid-cols-1 gap-2 mt-2 max-h-40 overflow-y-auto border rounded-md p-3">
-                        {materiasOptions.map((materia) => (
-                          <div key={materia.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`materia-${materia.id}`}
-                              checked={formData.materiasSelectedIds.includes(materia.id)}
-                              onCheckedChange={(checked) => handleMateriaToggle(materia.id, checked as boolean)}
-                            />
-                            <Label htmlFor={`materia-${materia.id}`} className="text-sm">
-                              {materia.nome}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="ativo"
-                      checked={formData.ativo}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ativo: checked }))}
-                    />
-                    <Label htmlFor="ativo">Ativo</Label>
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit">
-                      {editingProfessor ? 'Atualizar' : 'Cadastrar'}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              <BookOpen className="w-6 h-6" />
+              Professores
+            </h1>
+            <p className="text-muted-foreground">
+              Gerencie os professores da escola
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Novo Professor
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingProfessor ? 'Editar Professor' : 'Novo Professor'}
+                </DialogTitle>
+                <DialogDescription>
+                  {editingProfessor ? 'Edite as informações do professor' : 'Preencha as informações do novo professor'}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="nome">Nome</Label>
+                  <Input
+                    id="nome"
+                    value={formData.nome}
+                    onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="codigo">Código</Label>
+                  <Input
+                    id="codigo"
+                    value={formData.codigo}
+                    onChange={(e) => setFormData(prev => ({ ...prev, codigo: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">
+                    {editingProfessor ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    required={!editingProfessor}
+                  />
+                </div>
+                
+                {materiasOptions.length > 0 && (
+                  <div>
+                    <Label>Matérias</Label>
+                    <div className="grid grid-cols-1 gap-2 mt-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                      {materiasOptions.map((materia) => (
+                        <div key={materia.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`materia-${materia.id}`}
+                            checked={formData.materiasSelectedIds.includes(materia.id)}
+                            onCheckedChange={(checked) => handleMateriaToggle(materia.id, checked as boolean)}
+                          />
+                          <Label htmlFor={`materia-${materia.id}`} className="text-sm">
+                            {materia.nome}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="ativo"
+                    checked={formData.ativo}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ativo: checked }))}
+                  />
+                  <Label htmlFor="ativo">Ativo</Label>
+                </div>
+                <DialogFooter>
+                  <Button type="submit">
+                    {editingProfessor ? 'Atualizar' : 'Cadastrar'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+        
+        <div className="bg-card rounded-lg border p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -465,8 +463,8 @@ export default function AdminProfessores() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </AdminLayout>
   );
 }
