@@ -49,12 +49,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Header */}
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 p-2 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 p-1 flex items-center justify-center overflow-hidden">
               {escola?.logo_url ? (
                 <img
                   src={escola.logo_url}
                   alt={escola?.nome_fantasia || escola?.nome || 'Escola'}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain rounded-md"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               ) : (
                 <School className="w-5 h-5 text-primary" />
