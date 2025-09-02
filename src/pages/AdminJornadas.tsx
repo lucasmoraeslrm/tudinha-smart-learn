@@ -424,14 +424,23 @@ export default function AdminJornadas() {
         throw error;
       }
 
+      // Remover o exercício do estado local imediatamente
+      setJornadaExercises(prevExercises => 
+        prevExercises.filter(ex => ex.id !== exerciseId)
+      );
+
       toast({
         title: "Sucesso",
         description: "Exercício excluído com sucesso!",
       });
 
       console.log('Chamando loadData() para recarregar...');
-      await loadData();
-      console.log('Dados recarregados com sucesso');
+      // Aguardar um pouco antes de recarregar para garantir que a exclusão foi processada
+      setTimeout(async () => {
+        await loadData();
+        console.log('Dados recarregados com sucesso');
+      }, 500);
+      
     } catch (error: any) {
       console.error('Erro completo:', error);
       toast({
