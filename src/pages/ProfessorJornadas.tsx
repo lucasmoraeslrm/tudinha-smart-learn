@@ -404,6 +404,35 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
                       {selectedExercises.length} selecionado{selectedExercises.length !== 1 ? 's' : ''}
                     </Badge>
                   </div>
+
+                  {/* Carregar exercícios de jornada existente */}
+                  <div className="space-y-2">
+                    <Label className="text-sm">Carregar de jornada existente</Label>
+                    <Select
+                      value=""
+                      onValueChange={(jornadaId) => {
+                        const jornada = jornadas.find(j => j.id === jornadaId);
+                        if (jornada && jornada.exercise_ids) {
+                          const exerciseIds = Array.isArray(jornada.exercise_ids) ? jornada.exercise_ids : [];
+                          const uniqueIds = [...new Set([...selectedExercises, ...exerciseIds])];
+                          setSelectedExercises(uniqueIds);
+                          setFormData({...formData, exercise_ids: uniqueIds});
+                          toast.success(`${exerciseIds.length} exercícios carregados da jornada`);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="bg-background border z-50">
+                        <SelectValue placeholder="Selecionar jornada para carregar exercícios" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border z-50">
+                        {jornadas.filter(j => j.exercise_ids && j.exercise_ids.length > 0).map((jornada) => (
+                          <SelectItem key={jornada.id} value={jornada.id}>
+                            {jornada.aula_titulo} ({jornada.exercise_ids?.length || 0} exercícios)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
