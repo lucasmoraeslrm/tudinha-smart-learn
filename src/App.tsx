@@ -48,8 +48,8 @@ import ProjectStatus from "./pages/ProjectStatus";
 import ParentLogin from "./pages/ParentLogin";
 import ParentDashboard from "./pages/ParentDashboard";
 import PublicStatus from "./pages/PublicStatus";
-import ProfessorPageWrapper from "./components/ProfessorPageWrapper";
-import NotFound from "./pages/NotFound";
+import ProfessorPageWrapper from "@/components/ProfessorPageWrapper";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
   defaultOptions: {
