@@ -63,6 +63,7 @@ export default function SchoolUsersCRUD() {
     
     try {
       setLoading(true);
+      console.log('Carregando usuários para escola:', escola.id);
       
       // Buscar coordenadores da escola (que são os usuários de acesso)
       const { data, error } = await supabase
@@ -71,6 +72,8 @@ export default function SchoolUsersCRUD() {
         .eq('escola_id', escola.id)
         .eq('ativo', true)
         .order('created_at', { ascending: false });
+
+      console.log('Resultado da query coordenadores:', { data, error });
 
       if (error) throw error;
       
@@ -84,6 +87,7 @@ export default function SchoolUsersCRUD() {
         updated_at: coord.updated_at
       }));
       
+      console.log('Usuários mapeados:', mappedUsers);
       setUsers(mappedUsers);
     } catch (error: any) {
       console.error('Erro ao carregar usuários:', error);
