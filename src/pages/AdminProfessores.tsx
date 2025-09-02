@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import AdminLayout from '@/components/AdminLayout';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -240,17 +240,14 @@ export default function AdminProfessores() {
 
   if (!escola?.id) {
     return (
-      <AdminLayout>
-        <div className="text-center text-muted-foreground">
-          Carregando dados da escola...
-        </div>
-      </AdminLayout>
+      <div className="text-center text-muted-foreground">
+        Carregando dados da escola...
+      </div>
     );
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
@@ -465,6 +462,5 @@ export default function AdminProfessores() {
           )}
         </div>
       </div>
-    </AdminLayout>
   );
 }
