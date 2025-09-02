@@ -1993,16 +1993,40 @@ export type Database = {
         Args: { user_email: string }
         Returns: Json
       }
+      verify_coordenador_login: {
+        Args: { p_login: string; p_senha: string }
+        Returns: {
+          coordenador_id: string
+          escola_id: string
+          ok: boolean
+        }[]
+      }
       verify_coordenador_password: {
         Args: { input_codigo: string; input_password: string }
         Returns: {
           coordenador_data: Json
         }[]
       }
+      verify_professor_login: {
+        Args: { p_login: string; p_senha: string }
+        Returns: {
+          escola_id: string
+          ok: boolean
+          professor_id: string
+        }[]
+      }
       verify_professor_password: {
         Args: { input_codigo: string; input_password: string }
         Returns: {
           professor_data: Json
+        }[]
+      }
+      verify_student_login: {
+        Args: { p_codigo: string; p_senha: string }
+        Returns: {
+          escola_id: string
+          ok: boolean
+          student_id: string
         }[]
       }
       verify_student_password: {
