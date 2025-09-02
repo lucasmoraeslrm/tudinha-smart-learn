@@ -434,12 +434,7 @@ export default function AdminJornadas() {
         description: "Exercício excluído com sucesso!",
       });
 
-      console.log('Chamando loadData() para recarregar...');
-      // Aguardar um pouco antes de recarregar para garantir que a exclusão foi processada
-      setTimeout(async () => {
-        await loadData();
-        console.log('Dados recarregados com sucesso');
-      }, 500);
+      console.log('Exercício removido do estado local com sucesso');
       
     } catch (error: any) {
       console.error('Erro completo:', error);
