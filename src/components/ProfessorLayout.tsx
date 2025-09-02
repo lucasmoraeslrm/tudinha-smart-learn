@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfessorLogin from './ProfessorLogin';
-import ProfessorDashboard from './ProfessorDashboard';
 
 const ProfessorLayout: React.FC = () => {
   const [professorData, setProfessorData] = useState<any>(null);
@@ -20,6 +19,9 @@ const ProfessorLayout: React.FC = () => {
         
         if (hoursDiff < 8) {
           setProfessorData(sessionData);
+          // Redirecionar para o dashboard com o novo layout
+          navigate('/professor/dashboard');
+          return;
         } else {
           localStorage.removeItem('professorSession');
         }
@@ -27,26 +29,19 @@ const ProfessorLayout: React.FC = () => {
         localStorage.removeItem('professorSession');
       }
     }
-  }, []);
+  }, [navigate]);
 
   const handleProfessorSuccess = (data: any) => {
     setProfessorData(data);
+    // Redirecionar para o dashboard após login bem-sucedido
+    navigate('/professor/dashboard');
   };
 
   const handleBackToHome = () => {
     navigate('/');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('professorSession');
-    setProfessorData(null);
-    navigate('/');
-  };
-
-  if (professorData) {
-    return <ProfessorDashboard professorData={professorData} onLogout={handleLogout} />;
-  }
-
+  // Sempre mostrar tela de login na rota /professor
   return <ProfessorLogin onBack={handleBackToHome} onSuccess={handleProfessorSuccess} />;
 };
 
