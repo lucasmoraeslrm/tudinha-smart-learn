@@ -1727,6 +1727,66 @@ export type Database = {
           },
         ]
       }
+      user_achievements: {
+        Row: {
+          achievement_code: string
+          metadata: Json | null
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_code: string
+          metadata?: Json | null
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_code?: string
+          metadata?: Json | null
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          created_at: string | null
+          current_streak: number | null
+          experience_points: number | null
+          last_activity_date: string | null
+          level: number | null
+          longest_streak: number | null
+          total_exercises_completed: number | null
+          total_study_time_minutes: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_streak?: number | null
+          experience_points?: number | null
+          last_activity_date?: string | null
+          level?: number | null
+          longest_streak?: number | null
+          total_exercises_completed?: number | null
+          total_study_time_minutes?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_streak?: number | null
+          experience_points?: number | null
+          last_activity_date?: string | null
+          level?: number | null
+          longest_streak?: number | null
+          total_exercises_completed?: number | null
+          total_study_time_minutes?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       webhooks: {
         Row: {
           ativo: boolean
@@ -2221,6 +2281,14 @@ export type Database = {
       }
       refresh_mv_user_progress: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_exercise_completion_stats: {
+        Args: { p_study_time_minutes?: number; p_user_id: string }
+        Returns: undefined
+      }
+      update_streak_on_login: {
+        Args: { p_user_id: string }
         Returns: undefined
       }
       verify_coordenador_login: {
