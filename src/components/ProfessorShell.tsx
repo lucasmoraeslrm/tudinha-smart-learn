@@ -51,7 +51,8 @@ export default function ProfessorShell({ children, professorData, onLogout }: Pr
       const { data, error } = await supabase
         .from('escolas')
         .select('*')
-        .eq('id', professorData.escola_id);
+        .eq('id', professorData.escola_id)
+        .single();
 
       console.log('Resultado da consulta escola:', { data, error });
 
@@ -60,9 +61,9 @@ export default function ProfessorShell({ children, professorData, onLogout }: Pr
         return;
       }
 
-      if (data && data.length > 0) {
-        setEscolaData(data[0]);
-        console.log('Dados da escola carregados:', data[0]);
+      if (data) {
+        setEscolaData(data);
+        console.log('Dados da escola carregados:', data);
       } else {
         console.log('Nenhuma escola encontrada');
       }

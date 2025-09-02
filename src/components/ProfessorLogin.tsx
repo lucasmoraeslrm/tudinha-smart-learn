@@ -45,7 +45,8 @@ const ProfessorLogin: React.FC<ProfessorLoginProps> = ({ onBack, onSuccess }) =>
             id: professorData.id,
             nome: professorData.nome,
             codigo: professorData.codigo,
-            materias: professorData.materias,
+            escola_id: professorData.escola_id,
+            email: professorData.email,
             loginTime: new Date().toISOString()
           }));
           
