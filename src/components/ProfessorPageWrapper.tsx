@@ -1,19 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProfessorShell from '@/components/ProfessorShell';
-import ProfessorDashboardMain from './ProfessorDashboardMain';
+import ProfessorShell from './ProfessorShell';
 
-export default function ProfessorDashboardPage() {
+interface ProfessorPageWrapperProps {
+  children: (professorData: any) => React.ReactNode;
+}
+
+export default function ProfessorPageWrapper({ children }: ProfessorPageWrapperProps) {
   const navigate = useNavigate();
   const [professorData, setProfessorData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const session = localStorage.getItem('professorSession');
     if (session) {
-      setProfessorData(JSON.parse(session));
+      try {
+        setProfessorData(JSON.parse(session));
+      } catch (error) {
+        console.error('Error parsing professor session:', error);
+        localStorage.removeItem('professorSession');
+        navigate('/professor');
+      }
     } else {
       navigate('/professor');
     }
+    setLoading(false);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -21,13 +32,13 @@ export default function ProfessorDashboardPage() {
     navigate('/professor');
   };
 
-  if (!professorData) {
+  if (loading || !professorData) {
     return null;
   }
 
   return (
     <ProfessorShell professorData={professorData} onLogout={handleLogout}>
-      <ProfessorDashboardMain professorData={professorData} />
+      {children(professorData)}
     </ProfessorShell>
   );
 }

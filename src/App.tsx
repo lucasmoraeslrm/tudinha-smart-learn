@@ -30,6 +30,10 @@ import AdminMaterias from "./pages/AdminMaterias";
 import AdminTurmas from "./pages/AdminTurmas";
 import ProfessorLayout from "./components/ProfessorLayout";
 import ProfessorDashboardPage from "./pages/ProfessorDashboardPage";
+import ProfessorStudents from "./pages/ProfessorStudents";
+import ProfessorJornadas from "./pages/ProfessorJornadas";
+import ProfessorHistorico from "./pages/ProfessorHistorico";
+import ProfessorExercicios from "./pages/ProfessorExercicios";
 import LaunsLogin from "./pages/LaunsLogin";
 import LaunsDashboard from "./pages/LaunsDashboard";
 import LaunsEscolas from "./pages/LaunsEscolas";
@@ -44,6 +48,7 @@ import ProjectStatus from "./pages/ProjectStatus";
 import ParentLogin from "./pages/ParentLogin";
 import ParentDashboard from "./pages/ParentDashboard";
 import PublicStatus from "./pages/PublicStatus";
+import ProfessorPageWrapper from "./components/ProfessorPageWrapper";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -247,10 +252,26 @@ const App = () => {
             
             {/* Professor Routes */}
             <Route path="/professor" element={<ProfessorLayout />} />
-            <Route path="/professor/dashboard" element={
-              <ProtectedRoute requireProfessor>
-                <ProfessorDashboardPage />
-              </ProtectedRoute>
+            <Route path="/professor/dashboard" element={<ProfessorDashboardPage />} />
+            <Route path="/professor/students" element={
+              <ProfessorPageWrapper>
+                {(professorData) => <ProfessorStudents professorData={professorData} />}
+              </ProfessorPageWrapper>
+            } />
+            <Route path="/professor/jornadas" element={
+              <ProfessorPageWrapper>
+                {(professorData) => <ProfessorJornadas professorData={professorData} />}
+              </ProfessorPageWrapper>
+            } />
+            <Route path="/professor/historico" element={
+              <ProfessorPageWrapper>
+                {(professorData) => <ProfessorHistorico professorData={professorData} />}
+              </ProfessorPageWrapper>
+            } />
+            <Route path="/professor/exercicios" element={
+              <ProfessorPageWrapper>
+                {(professorData) => <ProfessorExercicios professorData={professorData} />}
+              </ProfessorPageWrapper>
             } />
             
             {/* Parent Routes */}
