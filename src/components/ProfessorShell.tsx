@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   LayoutDashboard, 
   Users,
@@ -30,6 +31,32 @@ interface ProfessorShellProps {
 export default function ProfessorShell({ children, professorData, onLogout }: ProfessorShellProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [escolaData, setEscolaData] = useState<any>(null);
+
+  useEffect(() => {
+    carregarDadosEscola();
+  }, [professorData]);
+
+  const carregarDadosEscola = async () => {
+    if (!professorData?.escola_id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('escolas')
+        .select('*')
+        .eq('id', professorData.escola_id)
+        .single();
+
+      if (error) {
+        console.error('Erro ao carregar dados da escola:', error);
+        return;
+      }
+
+      setEscolaData(data);
+    } catch (error) {
+      console.error('Erro ao carregar dados da escola:', error);
+    }
+  };
 
   const handleLogout = () => {
     onLogout();
@@ -45,14 +72,30 @@ export default function ProfessorShell({ children, professorData, onLogout }: Pr
         {/* Header */}
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 p-1 flex items-center justify-center">
-              <School className="w-5 h-5 text-primary" />
+            <div className="w-10 h-10 rounded-lg bg-primary/10 p-1 flex items-center justify-center overflow-hidden">
+              {escolaData?.logo_url ? (
+                <img
+                  src={escolaData.logo_url}
+                  alt={escolaData?.nome_fantasia || escolaData?.nome || 'Escola'}
+                  className="w-full h-full object-contain rounded-md"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <School className="w-5 h-5 text-primary" />
+              )}
             </div>
             <div>
-              <h2 className="font-semibold text-sm">Sistema Acadêmico</h2>
-              <p className="text-xs text-muted-foreground">Área do Professor</p>
+              <h2 className="font-semibold text-sm">
+                {escolaData?.nome_fantasia || escolaData?.nome || 'Sistema Acadêmico'}
+              </h2>
+              {escolaData?.codigo && (
+                <p className="text-xs text-muted-foreground">{escolaData.codigo}</p>
+              )}
             </div>
           </div>
+          <p className="text-xs text-muted-foreground">Área do Professor</p>
         </div>
 
         {/* Professor Info */}

@@ -17,11 +17,34 @@ export default function ProfessorDashboardMain({ professorData }: ProfessorDashb
     exerciciosDisponiveis: 0
   });
   const [recentJornadas, setRecentJornadas] = useState<any[]>([]);
+  const [escolaData, setEscolaData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     carregarDados();
+    carregarDadosEscola();
   }, [professorData]);
+
+  const carregarDadosEscola = async () => {
+    if (!professorData?.escola_id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('escolas')
+        .select('*')
+        .eq('id', professorData.escola_id)
+        .single();
+
+      if (error) {
+        console.error('Erro ao carregar dados da escola:', error);
+        return;
+      }
+
+      setEscolaData(data);
+    } catch (error) {
+      console.error('Erro ao carregar dados da escola:', error);
+    }
+  };
 
   const carregarDados = async () => {
     if (!professorData?.codigo) return;
@@ -94,6 +117,9 @@ export default function ProfessorDashboardMain({ professorData }: ProfessorDashb
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
           Bem-vindo, Prof. {professorData?.nome?.split(' ')[0]}!
+          {escolaData && (
+            <span> • {escolaData.nome_fantasia || escolaData.nome}</span>
+          )}
         </p>
       </div>
 
