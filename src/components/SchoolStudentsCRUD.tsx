@@ -91,31 +91,54 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Fazer consulta simples dos alunos primeiro
+      const { data: studentsData, error: studentsError } = await supabase
         .from('students')
-        .select(`
-          *,
-          turmas!turma_id (
-            nome,
-            serie,
-            ano_letivo
-          )
-        `)
+        .select('*')
         .eq('escola_id', schoolId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (studentsError) throw studentsError;
+
+      // Se não há alunos, retorna array vazio
+      if (!studentsData || studentsData.length === 0) {
+        setStudents([]);
+        return;
+      }
+
+      // Buscar dados das turmas separadamente para alunos que têm turma_id
+      const turmaIds = studentsData
+        .map(student => student.turma_id)
+        .filter(id => id !== null);
+
+      let turmasData: any[] = [];
+      if (turmaIds.length > 0) {
+        const { data: turmasResult, error: turmasError } = await supabase
+          .from('turmas')
+          .select('id, nome, serie, ano_letivo')
+          .in('id', turmaIds);
+
+        if (turmasError) {
+          console.warn('Erro ao carregar turmas:', turmasError);
+        } else {
+          turmasData = turmasResult || [];
+        }
+      }
+
+      // Mapear os dados combinando students com turmas
+      const mappedStudents = studentsData.map(student => {
+        const turmaData = turmasData.find(turma => turma.id === student.turma_id);
+        return {
+          ...student,
+          turma_nome: turmaData?.nome || student.turma || null,
+          turma_serie: turmaData?.serie || null,
+          turma_ano_letivo: turmaData?.ano_letivo || student.ano_letivo || null
+        };
+      });
       
-      // Mapear os dados da turma para o formato esperado
-      const mappedStudents = (data || []).map(student => ({
-        ...student,
-        turma_nome: student.turmas?.nome,
-        turma_serie: student.turmas?.serie,
-        turma_ano_letivo: student.turmas?.ano_letivo
-      }));
-      
-      setStudents(mappedStudents || []);
+      setStudents(mappedStudents);
     } catch (error: any) {
+      console.error('Erro completo:', error);
       toast({
         variant: "destructive",
         title: "Erro ao carregar alunos",
