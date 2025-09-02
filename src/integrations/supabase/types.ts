@@ -44,6 +44,20 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admin_chat_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "admin_chat_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_performance"
+            referencedColumns: ["student_id"]
+          },
         ]
       }
       aluno_tutor: {
@@ -72,6 +86,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aluno_tutor_aluno_id_fkey"
+            columns: ["aluno_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "aluno_tutor_aluno_id_fkey"
+            columns: ["aluno_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_performance"
+            referencedColumns: ["student_id"]
           },
           {
             foreignKeyName: "aluno_tutor_tutor_id_fkey"
@@ -129,6 +157,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professores"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aulas_programadas_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["professor_id"]
           },
         ]
       }
@@ -499,6 +534,13 @@ export type Database = {
             referencedRelation: "jornadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "interacoes_jornada_n8n_jornada_id_fkey"
+            columns: ["jornada_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["jornada_id"]
+          },
         ]
       }
       jornada_exercises: {
@@ -615,6 +657,20 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "jornadas_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "jornadas_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_performance"
+            referencedColumns: ["student_id"]
+          },
         ]
       }
       login_logs: {
@@ -652,6 +708,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "login_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "login_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_performance"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -837,6 +907,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "professor_materia_turma_materia_id_fkey"
+            columns: ["materia_id"]
+            isOneToOne: false
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["materia_id"]
+          },
+          {
             foreignKeyName: "professor_materia_turma_professor_id_fkey"
             columns: ["professor_id"]
             isOneToOne: false
@@ -844,11 +921,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "professor_materia_turma_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["professor_id"]
+          },
+          {
             foreignKeyName: "professor_materia_turma_turma_id_fkey"
             columns: ["turma_id"]
             isOneToOne: false
             referencedRelation: "turmas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professor_materia_turma_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["turma_id"]
           },
         ]
       }
@@ -951,6 +1042,20 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "profiles_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_performance"
+            referencedColumns: ["student_id"]
+          },
         ]
       }
       series_anos_letivos: {
@@ -1020,6 +1125,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "student_answers_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "v_exercises_catalog"
+            referencedColumns: ["exercise_id"]
+          },
+          {
             foreignKeyName: "student_answers_list_id_fkey"
             columns: ["list_id"]
             isOneToOne: false
@@ -1032,6 +1144,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_answers_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "student_answers_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_performance"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -1067,6 +1193,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_auth_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "student_auth_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_performance"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -1228,6 +1368,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "turmas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["turma_id"]
           },
         ]
       }
@@ -1427,7 +1574,114 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_escola_usuarios: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          escola_codigo: string | null
+          escola_id: string | null
+          escola_nome: string | null
+          tipo_usuario: string | null
+          usuario_codigo: string | null
+          usuario_email: string | null
+          usuario_id: string | null
+          usuario_nome: string | null
+        }
+        Relationships: []
+      }
+      v_exercises_catalog: {
+        Row: {
+          correct_answer: string | null
+          correct_attempts: number | null
+          created_at: string | null
+          difficulty: string | null
+          exercise_id: string | null
+          explanation: string | null
+          nivel_dificuldade: string | null
+          options: Json | null
+          question: string | null
+          subject: string | null
+          success_rate_percent: number | null
+          title: string | null
+          total_attempts: number | null
+        }
+        Relationships: []
+      }
+      v_jornadas_overview: {
+        Row: {
+          ano_letivo: string | null
+          assunto: string | null
+          aula_titulo: string | null
+          escola_codigo: string | null
+          escola_nome: string | null
+          exercise_ids: string[] | null
+          fim_previsto: string | null
+          fim_real: string | null
+          inicio_previsto: string | null
+          inicio_real: string | null
+          jornada_criada_em: string | null
+          jornada_id: string | null
+          materia: string | null
+          professor_nome: string | null
+          serie: string | null
+          status: string | null
+          student_codigo: string | null
+          student_id: string | null
+          student_nome: string | null
+          student_ra: string | null
+          tempo_resumo_segundos: number | null
+          total_exercicios: number | null
+          turma_nome: string | null
+        }
+        Relationships: []
+      }
+      v_professor_materias_turmas: {
+        Row: {
+          ano_letivo: string | null
+          ativo: boolean | null
+          atribuicao_criada_em: string | null
+          escola_codigo: string | null
+          escola_id: string | null
+          escola_nome: string | null
+          materia_codigo: string | null
+          materia_id: string | null
+          materia_nome: string | null
+          professor_codigo: string | null
+          professor_email: string | null
+          professor_id: string | null
+          professor_nome: string | null
+          serie: string | null
+          turma_codigo: string | null
+          turma_id: string | null
+          turma_nome: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professores_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_student_performance: {
+        Row: {
+          escola_nome: string | null
+          jornadas_concluidas: number | null
+          jornadas_em_andamento: number | null
+          ra: string | null
+          respostas_corretas: number | null
+          student_codigo: string | null
+          student_id: string | null
+          student_nome: string | null
+          taxa_acerto_percent: number | null
+          total_jornadas: number | null
+          total_respostas: number | null
+          turma_nome: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_professor_students: {
