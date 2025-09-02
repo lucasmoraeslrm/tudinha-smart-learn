@@ -41,15 +41,15 @@ export type Database = {
             foreignKeyName: "admin_chat_logs_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
+            referencedRelation: "students"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "admin_chat_logs_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -77,15 +77,15 @@ export type Database = {
             foreignKeyName: "aluno_tutor_aluno_id_fkey"
             columns: ["aluno_id"]
             isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
+            referencedRelation: "students"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "aluno_tutor_aluno_id_fkey"
             columns: ["aluno_id"]
             isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
           },
           {
             foreignKeyName: "aluno_tutor_tutor_id_fkey"
@@ -148,8 +148,8 @@ export type Database = {
             foreignKeyName: "aulas_programadas_professor_id_fkey"
             columns: ["professor_id"]
             isOneToOne: false
-            referencedRelation: "professores_publico"
-            referencedColumns: ["id"]
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["professor_id"]
           },
         ]
       }
@@ -159,7 +159,6 @@ export type Database = {
           deleted_at: string | null
           id: string
           last_message_at: string | null
-          owner_id: string | null
           title: string
           updated_at: string
           user_id: string
@@ -169,7 +168,6 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           last_message_at?: string | null
-          owner_id?: string | null
           title?: string
           updated_at?: string
           user_id: string
@@ -179,7 +177,6 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           last_message_at?: string | null
-          owner_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -227,13 +224,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "coordenadores_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "coordenadores_escola_id_fkey"
             columns: ["escola_id"]
@@ -586,7 +576,6 @@ export type Database = {
           assunto: string | null
           aula_titulo: string
           created_at: string
-          escola_id: string | null
           exercise_ids: string[] | null
           fim_previsto: string | null
           fim_real: string | null
@@ -608,7 +597,6 @@ export type Database = {
           assunto?: string | null
           aula_titulo: string
           created_at?: string
-          escola_id?: string | null
           exercise_ids?: string[] | null
           fim_previsto?: string | null
           fim_real?: string | null
@@ -630,7 +618,6 @@ export type Database = {
           assunto?: string | null
           aula_titulo?: string
           created_at?: string
-          escola_id?: string | null
           exercise_ids?: string[] | null
           fim_previsto?: string | null
           fim_real?: string | null
@@ -650,21 +637,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "jornadas_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "jornadas_student_fk"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
-          },
-          {
-            foreignKeyName: "jornadas_student_fk"
+            foreignKeyName: "jornadas_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
@@ -674,15 +647,8 @@ export type Database = {
             foreignKeyName: "jornadas_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "mv_user_progress"
+            referencedRelation: "v_jornadas_overview"
             referencedColumns: ["student_id"]
-          },
-          {
-            foreignKeyName: "jornadas_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -719,15 +685,15 @@ export type Database = {
             foreignKeyName: "login_logs_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
+            referencedRelation: "students"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "login_logs_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -794,13 +760,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "materias_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "materias_escola_id_fkey"
             columns: ["escola_id"]
             isOneToOne: false
@@ -816,7 +775,6 @@ export type Database = {
           attachment_url: string | null
           chat_id: string | null
           created_at: string
-          feedback: string | null
           id: string
           message: string
           sender: string
@@ -829,7 +787,6 @@ export type Database = {
           attachment_url?: string | null
           chat_id?: string | null
           created_at?: string
-          feedback?: string | null
           id?: string
           message: string
           sender: string
@@ -842,7 +799,6 @@ export type Database = {
           attachment_url?: string | null
           chat_id?: string | null
           created_at?: string
-          feedback?: string | null
           id?: string
           message?: string
           sender?: string
@@ -851,31 +807,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "messages_chat_fk"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "chats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_chat_fk"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "chats_v"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "messages_chat_id_fkey"
             columns: ["chat_id"]
             isOneToOne: false
             referencedRelation: "chats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_chat_id_fkey"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "chats_v"
             referencedColumns: ["id"]
           },
         ]
@@ -937,34 +872,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "pmt_materia_fk"
-            columns: ["materia_id"]
-            isOneToOne: false
-            referencedRelation: "materias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pmt_professor_fk"
-            columns: ["professor_id"]
-            isOneToOne: false
-            referencedRelation: "professores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pmt_professor_fk"
-            columns: ["professor_id"]
-            isOneToOne: false
-            referencedRelation: "professores_publico"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pmt_turma_fk"
-            columns: ["turma_id"]
-            isOneToOne: false
-            referencedRelation: "turmas"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "professor_materia_turma_materia_id_fkey"
             columns: ["materia_id"]
             isOneToOne: false
@@ -972,6 +879,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "professor_materia_turma_materia_id_fkey"
+            columns: ["materia_id"]
+            isOneToOne: false
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["materia_id"]
+          },
+          {
             foreignKeyName: "professor_materia_turma_professor_id_fkey"
             columns: ["professor_id"]
             isOneToOne: false
@@ -982,8 +896,8 @@ export type Database = {
             foreignKeyName: "professor_materia_turma_professor_id_fkey"
             columns: ["professor_id"]
             isOneToOne: false
-            referencedRelation: "professores_publico"
-            referencedColumns: ["id"]
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["professor_id"]
           },
           {
             foreignKeyName: "professor_materia_turma_turma_id_fkey"
@@ -991,6 +905,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "turmas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professor_materia_turma_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["turma_id"]
           },
         ]
       }
@@ -1029,13 +950,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "professores_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "professores_escola_id_fkey"
             columns: ["escola_id"]
@@ -1097,78 +1011,15 @@ export type Database = {
             foreignKeyName: "profiles_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
+            referencedRelation: "students"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "profiles_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      redacoes_usuario: {
-        Row: {
-          conteudo: string
-          created_at: string | null
-          escola_id: string | null
-          feedback: Json | null
-          id: string
-          notas: Json | null
-          palavras: number | null
-          status: string | null
-          tema_id: string | null
-          tempo_ms: number | null
-          titulo: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          conteudo: string
-          created_at?: string | null
-          escola_id?: string | null
-          feedback?: Json | null
-          id?: string
-          notas?: Json | null
-          palavras?: number | null
-          status?: string | null
-          tema_id?: string | null
-          tempo_ms?: number | null
-          titulo?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          conteudo?: string
-          created_at?: string | null
-          escola_id?: string | null
-          feedback?: Json | null
-          id?: string
-          notas?: Json | null
-          palavras?: number | null
-          status?: string | null
-          tema_id?: string | null
-          tempo_ms?: number | null
-          titulo?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "redacoes_usuario_escola_id_fkey"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "redacoes_usuario_tema_id_fkey"
-            columns: ["tema_id"]
-            isOneToOne: false
-            referencedRelation: "temas_redacao"
-            referencedColumns: ["id"]
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -1232,52 +1083,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "answers_exercise_fk"
-            columns: ["exercise_id"]
-            isOneToOne: false
-            referencedRelation: "exercises"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "answers_exercise_fk"
-            columns: ["exercise_id"]
-            isOneToOne: false
-            referencedRelation: "exercises_v"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "answers_exercise_fk"
-            columns: ["exercise_id"]
-            isOneToOne: false
-            referencedRelation: "v_exercises_catalog"
-            referencedColumns: ["exercise_id"]
-          },
-          {
-            foreignKeyName: "answers_student_fk"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
-          },
-          {
-            foreignKeyName: "answers_student_fk"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "student_answers_exercise_id_fkey"
             columns: ["exercise_id"]
             isOneToOne: false
             referencedRelation: "exercises"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "student_answers_exercise_id_fkey"
-            columns: ["exercise_id"]
-            isOneToOne: false
-            referencedRelation: "exercises_v"
             referencedColumns: ["id"]
           },
           {
@@ -1298,15 +1107,15 @@ export type Database = {
             foreignKeyName: "student_answers_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
+            referencedRelation: "students"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "student_answers_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -1340,15 +1149,15 @@ export type Database = {
             foreignKeyName: "student_auth_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
+            referencedRelation: "students"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "student_auth_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -1388,20 +1197,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ses_student_fk"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
-          },
-          {
-            foreignKeyName: "ses_student_fk"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "student_exercise_sessions_topic_id_fkey"
             columns: ["topic_id"]
             isOneToOne: false
@@ -1439,13 +1234,6 @@ export type Database = {
           time_spent_seconds?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "resp_session_fk"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "student_exercise_sessions"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "student_question_responses_exercise_id_fkey"
             columns: ["exercise_id"]
@@ -1519,24 +1307,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "students_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "students_escola_id_fkey"
             columns: ["escola_id"]
             isOneToOne: false
             referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "students_turma_fk"
-            columns: ["turma_id"]
-            isOneToOne: false
-            referencedRelation: "turmas"
             referencedColumns: ["id"]
           },
           {
@@ -1546,40 +1320,14 @@ export type Database = {
             referencedRelation: "turmas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "students_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "v_professor_materias_turmas"
+            referencedColumns: ["turma_id"]
+          },
         ]
-      }
-      temas_redacao: {
-        Row: {
-          ativo: boolean | null
-          competencias: Json | null
-          created_at: string | null
-          id: string
-          publica: boolean | null
-          texto_motivador: string | null
-          titulo: string
-          updated_at: string | null
-        }
-        Insert: {
-          ativo?: boolean | null
-          competencias?: Json | null
-          created_at?: string | null
-          id?: string
-          publica?: boolean | null
-          texto_motivador?: string | null
-          titulo: string
-          updated_at?: string | null
-        }
-        Update: {
-          ativo?: boolean | null
-          competencias?: Json | null
-          created_at?: string | null
-          id?: string
-          publica?: boolean | null
-          texto_motivador?: string | null
-          titulo?: string
-          updated_at?: string | null
-        }
-        Relationships: []
       }
       topic_exercises: {
         Row: {
@@ -1658,13 +1406,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "turmas_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "turmas_escola_id_fkey"
             columns: ["escola_id"]
             isOneToOne: false
@@ -1712,13 +1453,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "tutores_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "tutores_escola_id_fkey"
             columns: ["escola_id"]
             isOneToOne: false
@@ -1726,66 +1460,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      user_achievements: {
-        Row: {
-          achievement_code: string
-          metadata: Json | null
-          unlocked_at: string | null
-          user_id: string
-        }
-        Insert: {
-          achievement_code: string
-          metadata?: Json | null
-          unlocked_at?: string | null
-          user_id: string
-        }
-        Update: {
-          achievement_code?: string
-          metadata?: Json | null
-          unlocked_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_stats: {
-        Row: {
-          created_at: string | null
-          current_streak: number | null
-          experience_points: number | null
-          last_activity_date: string | null
-          level: number | null
-          longest_streak: number | null
-          total_exercises_completed: number | null
-          total_study_time_minutes: number | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          current_streak?: number | null
-          experience_points?: number | null
-          last_activity_date?: string | null
-          level?: number | null
-          longest_streak?: number | null
-          total_exercises_completed?: number | null
-          total_study_time_minutes?: number | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          current_streak?: number | null
-          experience_points?: number | null
-          last_activity_date?: string | null
-          level?: number | null
-          longest_streak?: number | null
-          total_exercises_completed?: number | null
-          total_study_time_minutes?: number | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
       }
       webhooks: {
         Row: {
@@ -1851,222 +1525,6 @@ export type Database = {
       }
     }
     Views: {
-      chats_v: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          owner_id: string | null
-          title: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          owner_id?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          owner_id?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      exercises_v: {
-        Row: {
-          content: string | null
-          id: string | null
-          publica: boolean | null
-          title: string | null
-          topic_id: string | null
-        }
-        Insert: {
-          content?: string | null
-          id?: string | null
-          publica?: never
-          title?: string | null
-          topic_id?: never
-        }
-        Update: {
-          content?: string | null
-          id?: string | null
-          publica?: never
-          title?: string | null
-          topic_id?: never
-        }
-        Relationships: []
-      }
-      messages_v: {
-        Row: {
-          chat_id: string | null
-          content: string | null
-          created_at: string | null
-          feedback: string | null
-          id: string | null
-          image_urls: string[] | null
-          role: string | null
-          user_id: string | null
-        }
-        Insert: {
-          chat_id?: string | null
-          content?: string | null
-          created_at?: string | null
-          feedback?: never
-          id?: string | null
-          image_urls?: never
-          role?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          chat_id?: string | null
-          content?: string | null
-          created_at?: string | null
-          feedback?: never
-          id?: string | null
-          image_urls?: never
-          role?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_chat_fk"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "chats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_chat_fk"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "chats_v"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_chat_id_fkey"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "chats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_chat_id_fkey"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "chats_v"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      mv_user_progress: {
-        Row: {
-          acertos: number | null
-          escola_id: string | null
-          exercicios_tentados: number | null
-          perc_acerto: number | null
-          student_id: string | null
-          total_respostas: number | null
-          ultima_atividade: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_escola_id_fkey"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      professores_publico: {
-        Row: {
-          ativo: boolean | null
-          codigo: string | null
-          email: string | null
-          escola_id: string | null
-          id: string | null
-          nome: string | null
-        }
-        Insert: {
-          ativo?: boolean | null
-          codigo?: string | null
-          email?: string | null
-          escola_id?: string | null
-          id?: string | null
-          nome?: string | null
-        }
-        Update: {
-          ativo?: boolean | null
-          codigo?: string | null
-          email?: string | null
-          escola_id?: string | null
-          id?: string | null
-          nome?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "professores_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "professores_escola_id_fkey"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      v_current_identity: {
-        Row: {
-          escola_id: string | null
-          role: string | null
-          student_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          escola_id?: string | null
-          role?: string | null
-          student_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          escola_id?: string | null
-          role?: string | null
-          student_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_escola_id_fkey"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
-          },
-          {
-            foreignKeyName: "profiles_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       v_exercises_catalog: {
         Row: {
           correct_answer: string | null
@@ -2111,36 +1569,7 @@ export type Database = {
           total_exercicios: number | null
           turma_nome: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "jornadas_student_fk"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
-          },
-          {
-            foreignKeyName: "jornadas_student_fk"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "jornadas_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "mv_user_progress"
-            referencedColumns: ["student_id"]
-          },
-          {
-            foreignKeyName: "jornadas_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       v_professor_materias_turmas: {
         Row: {
@@ -2163,69 +1592,6 @@ export type Database = {
           turma_nome: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "pmt_materia_fk"
-            columns: ["materia_id"]
-            isOneToOne: false
-            referencedRelation: "materias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pmt_professor_fk"
-            columns: ["professor_id"]
-            isOneToOne: false
-            referencedRelation: "professores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pmt_professor_fk"
-            columns: ["professor_id"]
-            isOneToOne: false
-            referencedRelation: "professores_publico"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pmt_turma_fk"
-            columns: ["turma_id"]
-            isOneToOne: false
-            referencedRelation: "turmas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "professor_materia_turma_materia_id_fkey"
-            columns: ["materia_id"]
-            isOneToOne: false
-            referencedRelation: "materias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "professor_materia_turma_professor_id_fkey"
-            columns: ["professor_id"]
-            isOneToOne: false
-            referencedRelation: "professores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "professor_materia_turma_professor_id_fkey"
-            columns: ["professor_id"]
-            isOneToOne: false
-            referencedRelation: "professores_publico"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "professor_materia_turma_turma_id_fkey"
-            columns: ["turma_id"]
-            isOneToOne: false
-            referencedRelation: "turmas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "professores_escola_fk"
-            columns: ["escola_id"]
-            isOneToOne: false
-            referencedRelation: "escolas"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "professores_escola_id_fkey"
             columns: ["escola_id"]
@@ -2251,18 +1617,6 @@ export type Database = {
           turma_nome: string
         }[]
       }
-      get_school_user_progress: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          acertos: number
-          exercicios_tentados: number
-          perc_acerto: number
-          student_id: string
-          total_respostas: number
-          ultima_atividade: string
-          user_id: string
-        }[]
-      }
       is_professor_or_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -2279,60 +1633,16 @@ export type Database = {
         Args: { user_email: string }
         Returns: Json
       }
-      refresh_mv_user_progress: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      run_rls_tests: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      test_rls_isolation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      update_exercise_completion_stats: {
-        Args: { p_study_time_minutes?: number; p_user_id: string }
-        Returns: undefined
-      }
-      update_streak_on_login: {
-        Args: { p_user_id: string }
-        Returns: undefined
-      }
-      verify_coordenador_login: {
-        Args: { p_login: string; p_senha: string }
-        Returns: {
-          coordenador_id: string
-          escola_id: string
-          ok: boolean
-        }[]
-      }
       verify_coordenador_password: {
         Args: { input_codigo: string; input_password: string }
         Returns: {
           coordenador_data: Json
         }[]
       }
-      verify_professor_login: {
-        Args: { p_login: string; p_senha: string }
-        Returns: {
-          escola_id: string
-          ok: boolean
-          professor_id: string
-        }[]
-      }
       verify_professor_password: {
         Args: { input_codigo: string; input_password: string }
         Returns: {
           professor_data: Json
-        }[]
-      }
-      verify_student_login: {
-        Args: { p_codigo: string; p_senha: string }
-        Returns: {
-          escola_id: string
-          ok: boolean
-          student_id: string
         }[]
       }
       verify_student_password: {

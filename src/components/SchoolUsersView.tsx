@@ -43,14 +43,10 @@ export default function SchoolUsersView({ schoolId }: SchoolUsersViewProps) {
       const allUsers: User[] = [];
 
       // Buscar estudantes
-      const { data: students, error: studentsError } = await supabase
+      const { data: students } = await supabase
         .from('students')
         .select('id, name, email, codigo, turma, ano_letivo')
         .eq('escola_id', schoolId);
-
-      if (studentsError) {
-        console.error('Erro ao buscar estudantes:', studentsError);
-      }
 
       if (students) {
         students.forEach(student => {
@@ -67,15 +63,11 @@ export default function SchoolUsersView({ schoolId }: SchoolUsersViewProps) {
       }
 
       // Buscar professores
-      const { data: professors, error: professorsError } = await supabase
+      const { data: professors } = await supabase
         .from('professores')
         .select('id, nome, email, codigo')
         .eq('escola_id', schoolId)
         .eq('ativo', true);
-
-      if (professorsError) {
-        console.error('Erro ao buscar professores:', professorsError);
-      }
 
       if (professors) {
         professors.forEach(professor => {
@@ -90,15 +82,11 @@ export default function SchoolUsersView({ schoolId }: SchoolUsersViewProps) {
       }
 
       // Buscar coordenadores
-      const { data: coordinators, error: coordinatorsError } = await supabase
+      const { data: coordinators } = await supabase
         .from('coordenadores')
         .select('id, nome, email, codigo, funcao')
         .eq('escola_id', schoolId)
         .eq('ativo', true);
-
-      if (coordinatorsError) {
-        console.error('Erro ao buscar coordenadores:', coordinatorsError);
-      }
 
       if (coordinators) {
         coordinators.forEach(coordinator => {
@@ -114,15 +102,11 @@ export default function SchoolUsersView({ schoolId }: SchoolUsersViewProps) {
       }
 
       // Buscar tutores
-      const { data: tutors, error: tutorsError } = await supabase
+      const { data: tutors } = await supabase
         .from('tutores')
         .select('id, nome, email, tipo')
         .eq('escola_id', schoolId)
         .eq('ativo', true);
-
-      if (tutorsError) {
-        console.error('Erro ao buscar tutores:', tutorsError);
-      }
 
       if (tutors) {
         tutors.forEach(tutor => {
@@ -147,13 +131,6 @@ export default function SchoolUsersView({ schoolId }: SchoolUsersViewProps) {
         tutores: allUsers.filter(u => u.tipo === 'tutor').length
       };
       setStats(stats);
-
-      // Log para debug
-      console.log('Usuários carregados:', {
-        total: allUsers.length,
-        coordenadores: allUsers.filter(u => u.tipo === 'coordenador').length,
-        schoolId
-      });
 
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);

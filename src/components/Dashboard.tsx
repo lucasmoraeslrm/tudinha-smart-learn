@@ -63,7 +63,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userName, onStartChat, onViewExer
           .select(`
             is_correct, 
             list_id,
-            exercises!exercise_id(subject, title)
+            exercises!inner(subject, title)
           `)
           .eq('student_id', studentId)
           .order('answered_at', { ascending: false })

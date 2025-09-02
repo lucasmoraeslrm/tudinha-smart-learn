@@ -165,7 +165,7 @@ export function AdminChat() {
           user_answer,
           is_correct,
           answered_at,
-          exercises!exercise_id (
+          exercises:exercise_id (
             question,
             correct_answer
           )

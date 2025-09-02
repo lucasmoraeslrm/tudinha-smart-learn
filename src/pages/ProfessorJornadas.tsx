@@ -74,8 +74,8 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
         .from('professor_materia_turma')
         .select(`
           *,
-          materias!materia_id (id, nome, codigo),
-          turmas!turma_id (id, nome, codigo, serie, ano_letivo)
+          materias (id, nome, codigo),
+          turmas (id, nome, codigo, serie, ano_letivo)
         `)
         .eq('professor_id', professorData.id)
         .eq('ativo', true);
