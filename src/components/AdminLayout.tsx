@@ -138,22 +138,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <div className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold">Olá, {adminName.split(' ')[0]}! 👋</h1>
-            <p className="text-sm text-muted-foreground">
-              {isSchoolUser ? `Painel de administração da ${escola?.nome_fantasia || escola?.nome || 'escola'}` : 'Painel administrativo'}
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
-            <Shield className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">{profile?.role === 'coordinator' ? 'Coordenador' : 'Admin'}</span>
-          </div>
-        </div>
-
+      <div className="flex-1">
         {/* Page Content */}
         <main className="flex-1 p-6 overflow-auto">
           {children}
