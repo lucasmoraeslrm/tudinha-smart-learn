@@ -1109,6 +1109,69 @@ export type Database = {
           },
         ]
       }
+      redacoes_usuario: {
+        Row: {
+          conteudo: string
+          created_at: string | null
+          escola_id: string | null
+          feedback: Json | null
+          id: string
+          notas: Json | null
+          palavras: number | null
+          status: string | null
+          tema_id: string | null
+          tempo_ms: number | null
+          titulo: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string | null
+          escola_id?: string | null
+          feedback?: Json | null
+          id?: string
+          notas?: Json | null
+          palavras?: number | null
+          status?: string | null
+          tema_id?: string | null
+          tempo_ms?: number | null
+          titulo?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string | null
+          escola_id?: string | null
+          feedback?: Json | null
+          id?: string
+          notas?: Json | null
+          palavras?: number | null
+          status?: string | null
+          tema_id?: string | null
+          tempo_ms?: number | null
+          titulo?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redacoes_usuario_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redacoes_usuario_tema_id_fkey"
+            columns: ["tema_id"]
+            isOneToOne: false
+            referencedRelation: "temas_redacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       series_anos_letivos: {
         Row: {
           ano_letivo: string
@@ -1484,6 +1547,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      temas_redacao: {
+        Row: {
+          ativo: boolean | null
+          competencias: Json | null
+          created_at: string | null
+          id: string
+          publica: boolean | null
+          texto_motivador: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          competencias?: Json | null
+          created_at?: string | null
+          id?: string
+          publica?: boolean | null
+          texto_motivador?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          competencias?: Json | null
+          created_at?: string | null
+          id?: string
+          publica?: boolean | null
+          texto_motivador?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       topic_exercises: {
         Row: {
