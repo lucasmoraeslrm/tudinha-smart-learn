@@ -38,21 +38,34 @@ export default function ProfessorShell({ children, professorData, onLogout }: Pr
   }, [professorData]);
 
   const carregarDadosEscola = async () => {
-    if (!professorData?.escola_id) return;
+    console.log('Professor data:', professorData);
+    console.log('Escola ID:', professorData?.escola_id);
+    
+    if (!professorData?.escola_id) {
+      console.log('Professor não tem escola_id');
+      return;
+    }
 
     try {
+      console.log('Buscando dados da escola...');
       const { data, error } = await supabase
         .from('escolas')
         .select('*')
-        .eq('id', professorData.escola_id)
-        .single();
+        .eq('id', professorData.escola_id);
+
+      console.log('Resultado da consulta escola:', { data, error });
 
       if (error) {
         console.error('Erro ao carregar dados da escola:', error);
         return;
       }
 
-      setEscolaData(data);
+      if (data && data.length > 0) {
+        setEscolaData(data[0]);
+        console.log('Dados da escola carregados:', data[0]);
+      } else {
+        console.log('Nenhuma escola encontrada');
+      }
     } catch (error) {
       console.error('Erro ao carregar dados da escola:', error);
     }
