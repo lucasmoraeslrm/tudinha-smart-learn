@@ -130,6 +130,13 @@ export type Database = {
             referencedRelation: "professores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "aulas_programadas_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professores_publico"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chats: {
@@ -810,10 +817,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_chat_fk"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats_v"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_chat_id_fkey"
             columns: ["chat_id"]
             isOneToOne: false
             referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats_v"
             referencedColumns: ["id"]
           },
         ]
@@ -889,6 +910,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pmt_professor_fk"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professores_publico"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pmt_turma_fk"
             columns: ["turma_id"]
             isOneToOne: false
@@ -907,6 +935,13 @@ export type Database = {
             columns: ["professor_id"]
             isOneToOne: false
             referencedRelation: "professores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professor_materia_turma_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professores_publico"
             referencedColumns: ["id"]
           },
           {
@@ -1096,6 +1131,13 @@ export type Database = {
             foreignKeyName: "answers_exercise_fk"
             columns: ["exercise_id"]
             isOneToOne: false
+            referencedRelation: "exercises_v"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_exercise_fk"
+            columns: ["exercise_id"]
+            isOneToOne: false
             referencedRelation: "v_exercises_catalog"
             referencedColumns: ["exercise_id"]
           },
@@ -1111,6 +1153,13 @@ export type Database = {
             columns: ["exercise_id"]
             isOneToOne: false
             referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_answers_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises_v"
             referencedColumns: ["id"]
           },
           {
@@ -1570,6 +1619,158 @@ export type Database = {
       }
     }
     Views: {
+      chats_v: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          owner_id: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          owner_id?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          owner_id?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      exercises_v: {
+        Row: {
+          content: string | null
+          id: string | null
+          publica: boolean | null
+          title: string | null
+          topic_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          publica?: never
+          title?: string | null
+          topic_id?: never
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          publica?: never
+          title?: string | null
+          topic_id?: never
+        }
+        Relationships: []
+      }
+      messages_v: {
+        Row: {
+          chat_id: string | null
+          content: string | null
+          created_at: string | null
+          feedback: string | null
+          id: string | null
+          image_urls: string[] | null
+          role: string | null
+          user_id: string | null
+        }
+        Insert: {
+          chat_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          feedback?: never
+          id?: string | null
+          image_urls?: never
+          role?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          chat_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          feedback?: never
+          id?: string | null
+          image_urls?: never
+          role?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_chat_fk"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_chat_fk"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats_v"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats_v"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professores_publico: {
+        Row: {
+          ativo: boolean | null
+          codigo: string | null
+          email: string | null
+          escola_id: string | null
+          id: string | null
+          nome: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo?: string | null
+          email?: string | null
+          escola_id?: string | null
+          id?: string | null
+          nome?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string | null
+          email?: string | null
+          escola_id?: string | null
+          id?: string | null
+          nome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professores_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professores_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_current_identity: {
         Row: {
           escola_id: string | null
@@ -1703,6 +1904,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pmt_professor_fk"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professores_publico"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pmt_turma_fk"
             columns: ["turma_id"]
             isOneToOne: false
@@ -1721,6 +1929,13 @@ export type Database = {
             columns: ["professor_id"]
             isOneToOne: false
             referencedRelation: "professores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professor_materia_turma_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professores_publico"
             referencedColumns: ["id"]
           },
           {
