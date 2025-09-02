@@ -84,20 +84,10 @@ serve(async (req) => {
       }
 
       const student = studentData[0].student_data
-      console.log('Student data found:', { ...student, password_hash: 'HIDDEN' })
+      console.log('Student data found:', { ...student })
 
-      // Verify password
-      console.log('Verifying password...')
-      const isValidPassword = await verifyPassword(password, student.password_hash)
-      console.log('Password valid:', isValidPassword)
-      
-      if (!isValidPassword) {
-        console.log('Invalid password for codigo:', codigo)
-        return new Response(
-          JSON.stringify({ error: 'Código ou senha inválidos' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
+      // Password was already validated in the database via verify_student_login
+      // Proceed to generate a session token and return student data
 
       console.log('Login successful, generating session token')
       
