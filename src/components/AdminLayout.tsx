@@ -22,7 +22,6 @@ const sidebarItems = [
   { title: 'Gerenciar Alunos', url: '/admin/students', icon: Users },
   { title: 'Gerenciar Professores', url: '/admin/professores', icon: Users },
   { title: 'Gerenciar Jornadas', url: '/admin/jornadas', icon: MapPin },
-  { title: 'Criar Exercícios', url: '/admin/exercises', icon: BookOpen },
 ];
 
 interface AdminLayoutProps {
