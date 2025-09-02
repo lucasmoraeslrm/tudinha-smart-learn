@@ -403,25 +403,37 @@ export default function AdminJornadas() {
   };
 
   const deleteExercise = async (exerciseId: string, title: string) => {
+    console.log('Tentando excluir exercício:', exerciseId, title);
+    
     if (!confirm(`Tem certeza que deseja excluir o exercício "${title}"?`)) {
+      console.log('Usuário cancelou a exclusão');
       return;
     }
 
     try {
-      const { error } = await supabase
+      console.log('Enviando requisição de exclusão para o Supabase...');
+      const { error, data } = await supabase
         .from('jornada_exercises')
         .delete()
         .eq('id', exerciseId);
 
-      if (error) throw error;
+      console.log('Resposta da exclusão:', { error, data });
+
+      if (error) {
+        console.error('Erro na exclusão:', error);
+        throw error;
+      }
 
       toast({
         title: "Sucesso",
         description: "Exercício excluído com sucesso!",
       });
 
-      loadData();
+      console.log('Chamando loadData() para recarregar...');
+      await loadData();
+      console.log('Dados recarregados com sucesso');
     } catch (error: any) {
+      console.error('Erro completo:', error);
       toast({
         title: "Erro",
         description: "Não foi possível excluir o exercício.",
