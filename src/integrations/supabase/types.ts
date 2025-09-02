@@ -204,6 +204,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "coordenadores_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "coordenadores_escola_id_fkey"
             columns: ["escola_id"]
             isOneToOne: false
@@ -555,6 +562,7 @@ export type Database = {
           assunto: string | null
           aula_titulo: string
           created_at: string
+          escola_id: string | null
           exercise_ids: string[] | null
           fim_previsto: string | null
           fim_real: string | null
@@ -576,6 +584,7 @@ export type Database = {
           assunto?: string | null
           aula_titulo: string
           created_at?: string
+          escola_id?: string | null
           exercise_ids?: string[] | null
           fim_previsto?: string | null
           fim_real?: string | null
@@ -597,6 +606,7 @@ export type Database = {
           assunto?: string | null
           aula_titulo?: string
           created_at?: string
+          escola_id?: string | null
           exercise_ids?: string[] | null
           fim_previsto?: string | null
           fim_real?: string | null
@@ -615,6 +625,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "jornadas_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jornadas_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "jornadas_student_id_fkey"
             columns: ["student_id"]
@@ -725,6 +749,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "materias_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "materias_escola_id_fkey"
             columns: ["escola_id"]
             isOneToOne: false
@@ -771,6 +802,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_chat_fk"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_chat_id_fkey"
             columns: ["chat_id"]
@@ -837,6 +875,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "pmt_materia_fk"
+            columns: ["materia_id"]
+            isOneToOne: false
+            referencedRelation: "materias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pmt_professor_fk"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pmt_turma_fk"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "professor_materia_turma_materia_id_fkey"
             columns: ["materia_id"]
             isOneToOne: false
@@ -894,6 +953,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "professores_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "professores_escola_id_fkey"
             columns: ["escola_id"]
@@ -1020,6 +1086,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "answers_exercise_fk"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_exercise_fk"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "v_exercises_catalog"
+            referencedColumns: ["exercise_id"]
+          },
+          {
+            foreignKeyName: "answers_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "student_answers_exercise_id_fkey"
             columns: ["exercise_id"]
             isOneToOne: false
@@ -1120,6 +1207,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "ses_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "student_exercise_sessions_topic_id_fkey"
             columns: ["topic_id"]
             isOneToOne: false
@@ -1157,6 +1251,13 @@ export type Database = {
           time_spent_seconds?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "resp_session_fk"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "student_exercise_sessions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "student_question_responses_exercise_id_fkey"
             columns: ["exercise_id"]
@@ -1230,10 +1331,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "students_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "students_escola_id_fkey"
             columns: ["escola_id"]
             isOneToOne: false
             referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_turma_fk"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
             referencedColumns: ["id"]
           },
           {
@@ -1322,6 +1437,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "turmas_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "turmas_escola_id_fkey"
             columns: ["escola_id"]
             isOneToOne: false
@@ -1368,6 +1490,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tutores_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tutores_escola_id_fkey"
             columns: ["escola_id"]
@@ -1523,6 +1652,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "jornadas_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "jornadas_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
@@ -1553,6 +1689,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "pmt_materia_fk"
+            columns: ["materia_id"]
+            isOneToOne: false
+            referencedRelation: "materias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pmt_professor_fk"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pmt_turma_fk"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "professor_materia_turma_materia_id_fkey"
             columns: ["materia_id"]
             isOneToOne: false
@@ -1571,6 +1728,13 @@ export type Database = {
             columns: ["turma_id"]
             isOneToOne: false
             referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professores_escola_fk"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
             referencedColumns: ["id"]
           },
           {
