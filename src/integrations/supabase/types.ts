@@ -1440,6 +1440,10 @@ export type Database = {
           turma_nome: string
         }[]
       }
+      pmt_is_same_school: {
+        Args: { _materia_id: string; _professor_id: string; _turma_id: string }
+        Returns: boolean
+      }
       professor_can_view_student: {
         Args: { professor_codigo: string; student_id: string }
         Returns: boolean
