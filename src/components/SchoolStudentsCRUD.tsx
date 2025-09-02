@@ -8,9 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { GraduationCap, UserPlus, Edit, Trash2, Search } from 'lucide-react';
+import { GraduationCap, UserPlus, Edit, Trash2, Search, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface Student {
   id: string;
@@ -262,26 +266,26 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nome *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="ra">RA *</Label>
-                  <Input
-                    id="ra"
-                    value={formData.ra}
-                    onChange={(e) => setFormData({ ...formData, ra: e.target.value })}
-                    required
-                  />
-                </div>
                  <div>
-                   <Label htmlFor="password">Senha *</Label>
+                   <Label htmlFor="name">Nome *</Label>
+                   <Input
+                     id="name"
+                     value={formData.name}
+                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                     required
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="ra">RA *</Label>
+                   <Input
+                     id="ra"
+                     value={formData.ra}
+                     onChange={(e) => setFormData({ ...formData, ra: e.target.value })}
+                     required
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="password">Senha {!editingStudent && '*'}</Label>
                    <Input
                      id="password"
                      type="password"
@@ -311,22 +315,49 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                          <SelectValue placeholder="Selecione uma turma" />
                        </SelectTrigger>
                        <SelectContent>
-                          {turmas.map((turma) => (
-                            <SelectItem key={turma.id} value={turma.id}>
-                              {turma.serie} - {turma.nome} - {turma.ano_letivo}
-                            </SelectItem>
-                          ))}
+                         {turmas.map((turma) => (
+                           <SelectItem key={turma.id} value={turma.id}>
+                             {turma.serie} - {turma.nome} - {turma.ano_letivo}
+                           </SelectItem>
+                         ))}
                        </SelectContent>
                      </Select>
                    </div>
                    <div>
                      <Label htmlFor="data_nascimento">Data de Aniversário</Label>
-                     <Input
-                       id="data_nascimento"
-                       type="date"
-                       value={formData.data_nascimento}
-                       onChange={(e) => setFormData({ ...formData, data_nascimento: e.target.value })}
-                     />
+                     <Popover>
+                       <PopoverTrigger asChild>
+                         <Button
+                           variant={"outline"}
+                           className={cn(
+                             "w-full justify-start text-left font-normal",
+                             !formData.data_nascimento && "text-muted-foreground"
+                           )}
+                         >
+                           <CalendarIcon className="mr-2 h-4 w-4" />
+                           {formData.data_nascimento ? (
+                             format(new Date(formData.data_nascimento), "dd/MM/yyyy")
+                           ) : (
+                             <span>dd/mm/aaaa</span>
+                           )}
+                         </Button>
+                       </PopoverTrigger>
+                       <PopoverContent className="w-auto p-0" align="start">
+                         <Calendar
+                           mode="single"
+                           selected={formData.data_nascimento ? new Date(formData.data_nascimento) : undefined}
+                           onSelect={(date) => setFormData({ 
+                             ...formData, 
+                             data_nascimento: date ? format(date, "yyyy-MM-dd") : "" 
+                           })}
+                           disabled={(date) =>
+                             date > new Date() || date < new Date("1900-01-01")
+                           }
+                           initialFocus
+                           className={cn("p-3 pointer-events-auto")}
+                         />
+                       </PopoverContent>
+                     </Popover>
                    </div>
                  </div>
                 <DialogFooter>

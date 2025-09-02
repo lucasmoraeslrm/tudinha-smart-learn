@@ -1,6 +1,17 @@
 import React from 'react';
-import { ManageStudents } from '@/components/ManageStudents';
+import SchoolStudentsCRUD from '@/components/SchoolStudentsCRUD';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AdminStudents() {
-  return <ManageStudents />;
+  const { escola } = useAuth();
+
+  if (!escola?.id) {
+    return (
+      <div className="text-center text-muted-foreground">
+        Carregando dados da escola...
+      </div>
+    );
+  }
+
+  return <SchoolStudentsCRUD schoolId={escola.id} />;
 }
