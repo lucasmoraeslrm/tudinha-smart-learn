@@ -25,6 +25,8 @@ import AdminExercises from "./pages/AdminExercises";
 import AdminLists from "./pages/AdminLists";
 import AdminProfessores from "./pages/AdminProfessores";
 import AdminUsuariosCRUD from "./pages/AdminUsuariosCRUD";
+import AdminMaterias from "./pages/AdminMaterias";
+import AdminTurmas from "./pages/AdminTurmas";
 import ProfessorLayout from "./components/ProfessorLayout";
 import ProfessorDashboardPage from "./pages/ProfessorDashboardPage";
 import LaunsLogin from "./pages/LaunsLogin";
@@ -219,6 +221,16 @@ const App = () => (
             <Route path="/admin/usuarios-crud" element={
               <ProtectedRoute requireSchoolAdmin>
                 <AdminUsuariosCRUD />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/materias" element={
+              <ProtectedRoute requireSchoolAdmin>
+                <AdminMaterias />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/turmas" element={
+              <ProtectedRoute requireSchoolAdmin>
+                <AdminTurmas />
               </ProtectedRoute>
             } />
             

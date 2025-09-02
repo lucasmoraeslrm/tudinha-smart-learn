@@ -21,6 +21,8 @@ const sidebarItems = [
   { title: 'Chat com IA', url: '/admin/chat', icon: MessageCircle },
   { title: 'Gerenciar Alunos', url: '/admin/students', icon: Users },
   { title: 'Gerenciar Professores', url: '/admin/professores', icon: Users },
+  { title: 'Matérias', url: '/admin/materias', icon: BookOpen },
+  { title: 'Turmas', url: '/admin/turmas', icon: School },
   { title: 'Usuários CRUD', url: '/admin/usuarios-crud', icon: Shield },
   { title: 'Gerenciar Jornadas', url: '/admin/jornadas', icon: MapPin },
 ];
