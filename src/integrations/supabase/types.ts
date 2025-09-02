@@ -145,6 +145,7 @@ export type Database = {
           deleted_at: string | null
           id: string
           last_message_at: string | null
+          owner_id: string | null
           title: string
           updated_at: string
           user_id: string
@@ -154,6 +155,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           last_message_at?: string | null
+          owner_id?: string | null
           title?: string
           updated_at?: string
           user_id: string
@@ -163,6 +165,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           last_message_at?: string | null
+          owner_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -778,6 +781,7 @@ export type Database = {
           attachment_url: string | null
           chat_id: string | null
           created_at: string
+          feedback: string | null
           id: string
           message: string
           sender: string
@@ -790,6 +794,7 @@ export type Database = {
           attachment_url?: string | null
           chat_id?: string | null
           created_at?: string
+          feedback?: string | null
           id?: string
           message: string
           sender: string
@@ -802,6 +807,7 @@ export type Database = {
           attachment_url?: string | null
           chat_id?: string | null
           created_at?: string
+          feedback?: string | null
           id?: string
           message?: string
           sender?: string
