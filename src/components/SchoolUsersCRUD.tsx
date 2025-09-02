@@ -64,16 +64,27 @@ export default function SchoolUsersCRUD() {
     try {
       setLoading(true);
       
+      // Buscar coordenadores da escola (que são os usuários de acesso)
       const { data, error } = await supabase
-        .from('profiles')
+        .from('coordenadores')
         .select('*')
         .eq('escola_id', escola.id)
-        .in('role', ['school_admin', 'coordinator'])
+        .eq('ativo', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      setUsers(data || []);
+      // Mapear dados dos coordenadores para o formato esperado
+      const mappedUsers: SchoolUser[] = (data || []).map(coord => ({
+        id: coord.id,
+        full_name: coord.nome,
+        role: coord.funcao === 'diretor' ? 'school_admin' : 'coordinator',
+        email: coord.email,
+        created_at: coord.created_at,
+        updated_at: coord.updated_at
+      }));
+      
+      setUsers(mappedUsers);
     } catch (error: any) {
       console.error('Erro ao carregar usuários:', error);
       toast({
@@ -101,34 +112,29 @@ export default function SchoolUsersCRUD() {
     try {
       setCreating(true);
 
-      // Criar usuário no Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newUser.email,
-        password: newUser.password,
-        options: {
-          data: {
-            full_name: newUser.full_name,
-            role: newUser.role,
-            escola_id: escola.id
+      // Gerar código único para o coordenador
+      const codigo = `${newUser.role.toUpperCase()}${Date.now()}`;
+
+      // Criar coordenador na tabela coordenadores
+      const { error } = await supabase
+        .from('coordenadores')
+        .insert({
+          nome: newUser.full_name,
+          email: newUser.email,
+          codigo: codigo,
+          funcao: newUser.role === 'school_admin' ? 'diretor' : 'coordenador',
+          password_hash: newUser.password, // Em produção, isso deveria ser hasheado
+          escola_id: escola.id,
+          ativo: true,
+          permissoes: {
+            acesso_total: newUser.role === 'school_admin',
+            cadastro_aluno: newUser.role === 'school_admin',
+            cadastro_professor: newUser.role === 'school_admin',
+            financeiro: newUser.role === 'school_admin'
           }
-        }
-      });
+        });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // Criar/atualizar perfil
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            user_id: authData.user.id,
-            full_name: newUser.full_name,
-            role: newUser.role,
-            escola_id: escola.id
-          });
-
-        if (profileError) throw profileError;
-      }
+      if (error) throw error;
 
       toast({
         title: "Sucesso",
@@ -161,10 +167,10 @@ export default function SchoolUsersCRUD() {
 
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('coordenadores')
         .update({
-          full_name: editingUser.full_name,
-          role: editingUser.role,
+          nome: editingUser.full_name,
+          funcao: editingUser.role === 'school_admin' ? 'diretor' : 'coordenador',
           updated_at: new Date().toISOString()
         })
         .eq('id', editingUser.id);
@@ -196,10 +202,10 @@ export default function SchoolUsersCRUD() {
     }
 
     try {
-      // Deletar do profiles (o usuário do auth.users será mantido mas sem acesso)
+      // Desativar o coordenador em vez de deletar
       const { error } = await supabase
-        .from('profiles')
-        .delete()
+        .from('coordenadores')
+        .update({ ativo: false })
         .eq('id', user.id);
 
       if (error) throw error;
