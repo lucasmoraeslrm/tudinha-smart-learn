@@ -367,18 +367,24 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                  <div className="grid grid-cols-2 gap-4">
                    <div>
                      <Label htmlFor="turma">Turma</Label>
-                     <Select value={formData.turma_id} onValueChange={(value) => setFormData({ ...formData, turma_id: value })}>
-                       <SelectTrigger>
-                         <SelectValue placeholder="Selecione uma turma" />
-                       </SelectTrigger>
-                       <SelectContent>
-                         {turmas.map((turma) => (
-                           <SelectItem key={turma.id} value={turma.id}>
-                             {turma.serie} - {turma.nome} - {turma.ano_letivo}
-                           </SelectItem>
-                         ))}
-                       </SelectContent>
-                     </Select>
+                      <Select value={formData.turma_id} onValueChange={(value) => setFormData({ ...formData, turma_id: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma turma" />
+                        </SelectTrigger>
+                        <SelectContent className="z-[100] bg-popover border border-border shadow-lg">
+                          {turmas.length === 0 ? (
+                            <SelectItem value="" disabled>
+                              Nenhuma turma cadastrada
+                            </SelectItem>
+                          ) : (
+                            turmas.map((turma) => (
+                              <SelectItem key={turma.id} value={turma.id}>
+                                {turma.serie} - {turma.nome} - {turma.ano_letivo}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
                    </div>
                    <div>
                      <Label htmlFor="data_nascimento">Data de Aniversário</Label>
