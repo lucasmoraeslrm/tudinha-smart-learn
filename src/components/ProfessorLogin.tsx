@@ -33,27 +33,23 @@ const ProfessorLogin: React.FC<ProfessorLoginProps> = ({ onBack, onSuccess }) =>
       if (data && data.length > 0) {
         const professorData = data[0].professor_data as any;
         
-        // Verificar senha simples (em produção usar hash)
-        if (password === professorData.password_hash) {
-          toast({
-            title: "Login realizado com sucesso!",
-            description: `Bem-vindo, Professor ${professorData.nome}`,
-          });
-          
-          // Salvar dados do professor no localStorage
-          localStorage.setItem('professorSession', JSON.stringify({
-            id: professorData.id,
-            nome: professorData.nome,
-            codigo: professorData.codigo,
-            escola_id: professorData.escola_id,
-            email: professorData.email,
-            loginTime: new Date().toISOString()
-          }));
-          
-          onSuccess(professorData);
-        } else {
-          throw new Error('Código ou senha incorretos');
-        }
+        // A função verify_professor_password já verificou a senha
+        toast({
+          title: "Login realizado com sucesso!",
+          description: `Bem-vindo, Professor ${professorData.nome}`,
+        });
+        
+        // Salvar dados do professor no localStorage
+        localStorage.setItem('professorSession', JSON.stringify({
+          id: professorData.id,
+          nome: professorData.nome,
+          codigo: professorData.codigo,
+          escola_id: professorData.escola_id,
+          email: professorData.email,
+          loginTime: new Date().toISOString()
+        }));
+        
+        onSuccess(professorData);
       } else {
         throw new Error('Professor não encontrado');
       }
