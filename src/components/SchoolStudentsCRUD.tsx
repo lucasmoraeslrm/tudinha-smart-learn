@@ -95,7 +95,7 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
         .from('students')
         .select(`
           *,
-          turmas!turma_id (
+          turmas!students_turma_id_fkey (
             nome,
             serie,
             ano_letivo
