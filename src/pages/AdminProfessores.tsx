@@ -34,15 +34,18 @@ export default function AdminProfessores() {
   const [editingProfessor, setEditingProfessor] = useState<Professor | null>(null);
   const { toast } = useToast();
 
-  // Materias from DB and mapping professor -> materias
+  // Materias and Turmas from DB and mapping professor -> materias/turmas
   const [materiasOptions, setMateriasOptions] = useState<{ id: string; nome: string }[]>([]);
+  const [turmasOptions, setTurmasOptions] = useState<{ id: string; nome: string; serie: string }[]>([]);
   const [profMateriasMap, setProfMateriasMap] = useState<Record<string, string[]>>({});
+  const [profTurmasMap, setProfTurmasMap] = useState<Record<string, string[]>>({});
 
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     codigo: '',
     materiasSelectedIds: [] as string[],
+    turmasSelectedIds: [] as string[],
     ativo: true,
     password: ''
   });
@@ -63,6 +66,24 @@ export default function AdminProfessores() {
     }
   };
 
+  const fetchTurmasOptions = async () => {
+    if (!escola?.id) return;
+    try {
+      const { data, error } = await supabase
+        .from('turmas')
+        .select('id, nome, serie')
+        .eq('escola_id', escola.id)
+        .eq('ativo', true)
+        .order('serie')
+        .order('nome');
+      
+      if (error) throw error;
+      setTurmasOptions(data || []);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Erro ao carregar turmas', description: error.message });
+    }
+  };
+
   const fetchProfessors = async () => {
     if (!escola?.id) return;
     
@@ -78,20 +99,28 @@ export default function AdminProfessores() {
 
       setProfessors(professorsData || []);
 
-      // Fetch professor-materia relationships
+      // Fetch professor-materia-turma relationships
       const { data: relData, error: relError } = await supabase
         .from('professor_materia_turma')
-        .select('professor_id, materia_id')
+        .select('professor_id, materia_id, turma_id')
         .in('professor_id', (professorsData || []).map(p => p.id));
 
       if (relError) throw relError;
 
       const matMap: Record<string, string[]> = {};
+      const turMap: Record<string, string[]> = {};
       (relData || []).forEach(rel => {
-        if (!matMap[rel.professor_id]) matMap[rel.professor_id] = [];
-        matMap[rel.professor_id].push(rel.materia_id);
+        if (rel.materia_id) {
+          if (!matMap[rel.professor_id]) matMap[rel.professor_id] = [];
+          matMap[rel.professor_id].push(rel.materia_id);
+        }
+        if (rel.turma_id) {
+          if (!turMap[rel.professor_id]) turMap[rel.professor_id] = [];
+          turMap[rel.professor_id].push(rel.turma_id);
+        }
       });
       setProfMateriasMap(matMap);
+      setProfTurmasMap(turMap);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Erro ao carregar professores', description: error.message });
     } finally {
@@ -101,7 +130,7 @@ export default function AdminProfessores() {
 
   useEffect(() => {
     if (escola?.id) {
-      Promise.all([fetchMateriasOptions(), fetchProfessors()]);
+      Promise.all([fetchMateriasOptions(), fetchTurmasOptions(), fetchProfessors()]);
     }
   }, [escola?.id]);
 
@@ -110,6 +139,12 @@ export default function AdminProfessores() {
     materiasOptions.forEach(m => map[m.id] = m.nome);
     return map;
   }, [materiasOptions]);
+
+  const turmaNameById = useMemo(() => {
+    const map: Record<string, string> = {};
+    turmasOptions.forEach(t => map[t.id] = `${t.serie} - ${t.nome}`);
+    return map;
+  }, [turmasOptions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,11 +191,24 @@ export default function AdminProfessores() {
         professorId = data.id;
       }
 
-      // Update professor-materia relationships
+      // Update professor-materia-turma relationships
       if (professorId) {
         await supabase.from('professor_materia_turma').delete().eq('professor_id', professorId);
-        if (formData.materiasSelectedIds.length > 0) {
-          const inserts = formData.materiasSelectedIds.map((materia_id) => ({ professor_id: professorId, materia_id, ativo: true }));
+        
+        // Create all combinations of selected materias and turmas
+        const inserts = [];
+        for (const materiaId of formData.materiasSelectedIds) {
+          for (const turmaId of formData.turmasSelectedIds) {
+            inserts.push({
+              professor_id: professorId,
+              materia_id: materiaId,
+              turma_id: turmaId,
+              ativo: true
+            });
+          }
+        }
+        
+        if (inserts.length > 0) {
           const { error: relError } = await supabase.from('professor_materia_turma').insert(inserts);
           if (relError) throw relError;
         }
@@ -170,7 +218,7 @@ export default function AdminProfessores() {
       setIsDialogOpen(false);
       setEditingProfessor(null);
       resetForm();
-      await Promise.all([fetchMateriasOptions(), fetchProfessors()]);
+      await Promise.all([fetchMateriasOptions(), fetchTurmasOptions(), fetchProfessors()]);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Erro ao salvar professor', description: error.message });
     }
@@ -182,6 +230,7 @@ export default function AdminProfessores() {
       email: '',
       codigo: '',
       materiasSelectedIds: [],
+      turmasSelectedIds: [],
       ativo: true,
       password: ''
     });
@@ -194,6 +243,7 @@ export default function AdminProfessores() {
       email: professor.email || '',
       codigo: professor.codigo,
       materiasSelectedIds: profMateriasMap[professor.id] || [],
+      turmasSelectedIds: profTurmasMap[professor.id] || [],
       ativo: professor.ativo,
       password: ''
     });
@@ -229,6 +279,15 @@ export default function AdminProfessores() {
       materiasSelectedIds: checked 
         ? [...prev.materiasSelectedIds, materiaId]
         : prev.materiasSelectedIds.filter(id => id !== materiaId)
+    }));
+  };
+
+  const handleTurmaToggle = (turmaId: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      turmasSelectedIds: checked 
+        ? [...prev.turmasSelectedIds, turmaId]
+        : prev.turmasSelectedIds.filter(id => id !== turmaId)
     }));
   };
 
@@ -315,27 +374,47 @@ export default function AdminProfessores() {
                   />
                 </div>
                 
-                {materiasOptions.length > 0 && (
-                  <div>
-                    <Label>Matérias</Label>
-                    <div className="grid grid-cols-1 gap-2 mt-2 max-h-40 overflow-y-auto border rounded-md p-3">
-                      {materiasOptions.map((materia) => (
-                        <div key={materia.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`materia-${materia.id}`}
-                            checked={formData.materiasSelectedIds.includes(materia.id)}
-                            onCheckedChange={(checked) => handleMateriaToggle(materia.id, checked as boolean)}
-                          />
-                          <Label htmlFor={`materia-${materia.id}`} className="text-sm">
-                            {materia.nome}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex items-center space-x-2">
+                 {materiasOptions.length > 0 && (
+                   <div>
+                     <Label>Matérias</Label>
+                     <div className="grid grid-cols-1 gap-2 mt-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                       {materiasOptions.map((materia) => (
+                         <div key={materia.id} className="flex items-center space-x-2">
+                           <Checkbox
+                             id={`materia-${materia.id}`}
+                             checked={formData.materiasSelectedIds.includes(materia.id)}
+                             onCheckedChange={(checked) => handleMateriaToggle(materia.id, checked as boolean)}
+                           />
+                           <Label htmlFor={`materia-${materia.id}`} className="text-sm">
+                             {materia.nome}
+                           </Label>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+                 
+                 {turmasOptions.length > 0 && (
+                   <div>
+                     <Label>Turmas</Label>
+                     <div className="grid grid-cols-1 gap-2 mt-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                       {turmasOptions.map((turma) => (
+                         <div key={turma.id} className="flex items-center space-x-2">
+                           <Checkbox
+                             id={`turma-${turma.id}`}
+                             checked={formData.turmasSelectedIds.includes(turma.id)}
+                             onCheckedChange={(checked) => handleTurmaToggle(turma.id, checked as boolean)}
+                           />
+                           <Label htmlFor={`turma-${turma.id}`} className="text-sm">
+                             {turma.serie} - {turma.nome}
+                           </Label>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+                 
+                 <div className="flex items-center space-x-2">
                   <Switch
                     id="ativo"
                     checked={formData.ativo}
@@ -382,46 +461,59 @@ export default function AdminProfessores() {
             </div>
           ) : (
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Código</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Matérias</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
+               <TableHeader>
+                 <TableRow>
+                   <TableHead>Nome</TableHead>
+                   <TableHead>Código</TableHead>
+                   <TableHead>Email</TableHead>
+                   <TableHead>Matérias</TableHead>
+                   <TableHead>Turmas</TableHead>
+                   <TableHead>Status</TableHead>
+                   <TableHead>Ações</TableHead>
+                 </TableRow>
+               </TableHeader>
               <TableBody>
-                {filteredProfessors.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      {searchTerm ? 'Nenhum professor encontrado com esse termo de busca' : 'Nenhum professor cadastrado'}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredProfessors.map((professor) => (
-                    <TableRow key={professor.id}>
-                      <TableCell className="font-medium">{professor.nome}</TableCell>
-                      <TableCell>{professor.codigo}</TableCell>
-                      <TableCell>{professor.email || '-'}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {(profMateriasMap[professor.id] || []).map((materiaId) => (
-                            <Badge key={materiaId} variant="secondary" className="text-xs">
-                              {materiaNameById[materiaId] || 'Matéria não encontrada'}
-                            </Badge>
-                          ))}
-                          {(!profMateriasMap[professor.id] || profMateriasMap[professor.id].length === 0) && (
-                            <span className="text-muted-foreground text-sm">Nenhuma matéria</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={professor.ativo ? "default" : "secondary"}>
-                          {professor.ativo ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </TableCell>
+                 {filteredProfessors.length === 0 ? (
+                   <TableRow>
+                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                       {searchTerm ? 'Nenhum professor encontrado com esse termo de busca' : 'Nenhum professor cadastrado'}
+                     </TableCell>
+                   </TableRow>
+                 ) : (
+                   filteredProfessors.map((professor) => (
+                     <TableRow key={professor.id}>
+                       <TableCell className="font-medium">{professor.nome}</TableCell>
+                       <TableCell>{professor.codigo}</TableCell>
+                       <TableCell>{professor.email || '-'}</TableCell>
+                       <TableCell>
+                         <div className="flex flex-wrap gap-1">
+                           {(profMateriasMap[professor.id] || []).map((materiaId) => (
+                             <Badge key={materiaId} variant="secondary" className="text-xs">
+                               {materiaNameById[materiaId] || 'Matéria não encontrada'}
+                             </Badge>
+                           ))}
+                           {(!profMateriasMap[professor.id] || profMateriasMap[professor.id].length === 0) && (
+                             <span className="text-muted-foreground text-sm">Nenhuma matéria</span>
+                           )}
+                         </div>
+                       </TableCell>
+                       <TableCell>
+                         <div className="flex flex-wrap gap-1">
+                           {(profTurmasMap[professor.id] || []).map((turmaId) => (
+                             <Badge key={turmaId} variant="outline" className="text-xs">
+                               {turmaNameById[turmaId] || 'Turma não encontrada'}
+                             </Badge>
+                           ))}
+                           {(!profTurmasMap[professor.id] || profTurmasMap[professor.id].length === 0) && (
+                             <span className="text-muted-foreground text-sm">Nenhuma turma</span>
+                           )}
+                         </div>
+                       </TableCell>
+                       <TableCell>
+                         <Badge variant={professor.ativo ? "default" : "secondary"}>
+                           {professor.ativo ? "Ativo" : "Inativo"}
+                         </Badge>
+                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button
