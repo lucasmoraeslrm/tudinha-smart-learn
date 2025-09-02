@@ -1525,6 +1525,49 @@ export type Database = {
       }
     }
     Views: {
+      v_current_identity: {
+        Row: {
+          escola_id: string | null
+          role: string | null
+          student_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          escola_id?: string | null
+          role?: string | null
+          student_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          escola_id?: string | null
+          role?: string | null
+          student_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_jornadas_overview"
+            referencedColumns: ["student_id"]
+          },
+        ]
+      }
       v_exercises_catalog: {
         Row: {
           correct_answer: string | null
