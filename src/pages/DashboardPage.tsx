@@ -174,7 +174,7 @@ export default function DashboardPage() {
         .from('student_answers')
         .select(`
           is_correct,
-          exercises!inner(subject)
+          exercises!exercise_id(subject)
         `)
         .eq('student_id', studentId);
 
