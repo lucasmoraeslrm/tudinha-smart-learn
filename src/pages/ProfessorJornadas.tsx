@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { MapPin, Plus, Edit, Trash2, Play, Copy } from 'lucide-react';
 import { toast } from 'sonner';
@@ -16,6 +17,8 @@ interface ProfessorJornadasProps {
 
 export default function ProfessorJornadas({ professorData }: ProfessorJornadasProps) {
   const [jornadas, setJornadas] = useState<any[]>([]);
+  const [materias, setMaterias] = useState<any[]>([]);
+  const [turmas, setTurmas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingJornada, setEditingJornada] = useState<any>(null);
@@ -28,36 +31,91 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
   });
 
   useEffect(() => {
-    carregarJornadas();
+    carregarDados();
   }, [professorData]);
 
-  const carregarJornadas = async () => {
-    if (!professorData?.nome) return;
+  const carregarDados = async () => {
+    if (!professorData?.id) return;
 
     try {
-      const { data, error } = await supabase
+      // Carregar jornadas do professor
+      const { data: jornadasData, error: jornadasError } = await supabase
         .from('jornadas')
         .select('*')
         .eq('professor_nome', professorData.nome)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Erro ao carregar jornadas:', error);
-        return;
+      if (jornadasError) {
+        console.error('Erro ao carregar jornadas:', jornadasError);
+      } else {
+        setJornadas(jornadasData || []);
       }
 
-      setJornadas(data || []);
+      // Carregar matérias e turmas do professor
+      const { data: pmtData, error: pmtError } = await supabase
+        .from('professor_materia_turma')
+        .select(`
+          *,
+          materias (id, nome, codigo),
+          turmas (id, nome, codigo, serie, ano_letivo)
+        `)
+        .eq('professor_id', professorData.id)
+        .eq('ativo', true);
+
+      if (pmtError) {
+        console.error('Erro ao carregar dados do professor:', pmtError);
+      } else {
+        // Extrair matérias únicas
+        const materiasUnicas = pmtData?.reduce((acc: any[], curr) => {
+          const materia = curr.materias;
+          if (materia && !acc.find(m => m.id === materia.id)) {
+            acc.push(materia);
+          }
+          return acc;
+        }, []) || [];
+
+        // Extrair turmas únicas
+        const turmasUnicas = pmtData?.reduce((acc: any[], curr) => {
+          const turma = curr.turmas;
+          if (turma && !acc.find(t => t.id === turma.id)) {
+            acc.push(turma);
+          }
+          return acc;
+        }, []) || [];
+
+        setMaterias(materiasUnicas);
+        setTurmas(turmasUnicas);
+      }
     } catch (error) {
-      console.error('Erro ao carregar jornadas:', error);
+      console.error('Erro ao carregar dados:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      aula_titulo: '',
+      materia: '',
+      assunto: '',
+      serie_ano_letivo: '',
+      serie_turma: ''
+    });
+    setEditingJornada(null);
+  };
+
   const handleSave = async () => {
     try {
+      // Buscar dados da matéria e turma selecionadas
+      const materiaSelecionada = materias.find(m => m.id === formData.materia);
+      const turmaSelecionada = turmas.find(t => t.id === formData.serie_turma);
+
       const jornadaData = {
-        ...formData,
+        aula_titulo: formData.aula_titulo,
+        materia: materiaSelecionada?.nome || '',
+        assunto: formData.assunto,
+        serie_ano_letivo: turmaSelecionada?.serie + ' - ' + turmaSelecionada?.ano_letivo || '',
+        serie_turma: turmaSelecionada?.nome || '',
         professor_nome: professorData.nome,
         status: 'pendente'
       };
@@ -84,15 +142,8 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
 
       toast.success(editingJornada ? 'Jornada atualizada!' : 'Jornada criada!');
       setDialogOpen(false);
-      setEditingJornada(null);
-      setFormData({
-        aula_titulo: '',
-        materia: '',
-        assunto: '',
-        serie_ano_letivo: '',
-        serie_turma: ''
-      });
-      carregarJornadas();
+      resetForm();
+      carregarDados();
     } catch (error) {
       console.error('Erro ao salvar jornada:', error);
       toast.error('Erro ao salvar jornada');
@@ -101,12 +152,17 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
 
   const handleEdit = (jornada: any) => {
     setEditingJornada(jornada);
+    
+    // Encontrar IDs das matérias e turmas
+    const materia = materias.find(m => m.nome === jornada.materia);
+    const turma = turmas.find(t => t.nome === jornada.serie_turma);
+    
     setFormData({
       aula_titulo: jornada.aula_titulo || '',
-      materia: jornada.materia || '',
+      materia: materia?.id || '',
       assunto: jornada.assunto || '',
       serie_ano_letivo: jornada.serie_ano_letivo || '',
-      serie_turma: jornada.serie_turma || ''
+      serie_turma: turma?.id || ''
     });
     setDialogOpen(true);
   };
@@ -127,7 +183,7 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
       }
 
       toast.success('Jornada excluída!');
-      carregarJornadas();
+      carregarDados();
     } catch (error) {
       console.error('Erro ao excluir jornada:', error);
       toast.error('Erro ao excluir jornada');
@@ -151,7 +207,7 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
       }
 
       toast.success('Jornada duplicada!');
-      carregarJornadas();
+      carregarDados();
     } catch (error) {
       console.error('Erro ao duplicar jornada:', error);
       toast.error('Erro ao duplicar jornada');
@@ -172,7 +228,7 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
       }
 
       toast.success('Jornada iniciada!');
-      carregarJornadas();
+      carregarDados();
     } catch (error) {
       console.error('Erro ao iniciar jornada:', error);
       toast.error('Erro ao iniciar jornada');
@@ -214,21 +270,12 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => {
-              setEditingJornada(null);
-              setFormData({
-                aula_titulo: '',
-                materia: '',
-                assunto: '',
-                serie_ano_letivo: '',
-                serie_turma: ''
-              });
-            }}>
+            <Button onClick={resetForm}>
               <Plus className="w-4 h-4 mr-2" />
               Nova Jornada
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[500px] bg-background border z-50">
             <DialogHeader>
               <DialogTitle>
                 {editingJornada ? 'Editar Jornada' : 'Nova Jornada'}
@@ -244,15 +291,45 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
                   placeholder="Ex: Introdução à Matemática"
                 />
               </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="materia">Matéria</Label>
-                <Input
-                  id="materia"
+                <Select
                   value={formData.materia}
-                  onChange={(e) => setFormData({...formData, materia: e.target.value})}
-                  placeholder="Ex: Matemática"
-                />
+                  onValueChange={(value) => setFormData({...formData, materia: value})}
+                >
+                  <SelectTrigger className="bg-background border z-50">
+                    <SelectValue placeholder="Selecione uma matéria" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border z-50">
+                    {materias.map((materia) => (
+                      <SelectItem key={materia.id} value={materia.id}>
+                        {materia.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="turma">Turma</Label>
+                <Select
+                  value={formData.serie_turma}
+                  onValueChange={(value) => setFormData({...formData, serie_turma: value})}
+                >
+                  <SelectTrigger className="bg-background border z-50">
+                    <SelectValue placeholder="Selecione uma turma" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border z-50">
+                    {turmas.map((turma) => (
+                      <SelectItem key={turma.id} value={turma.id}>
+                        {turma.nome} - {turma.serie} {turma.ano_letivo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="assunto">Assunto</Label>
                 <Textarea
@@ -261,26 +338,6 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
                   onChange={(e) => setFormData({...formData, assunto: e.target.value})}
                   placeholder="Descreva o assunto da aula..."
                 />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="serie">Série/Ano</Label>
-                  <Input
-                    id="serie"
-                    value={formData.serie_ano_letivo}
-                    onChange={(e) => setFormData({...formData, serie_ano_letivo: e.target.value})}
-                    placeholder="Ex: 9º Ano"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="turma">Turma</Label>
-                  <Input
-                    id="turma"
-                    value={formData.serie_turma}
-                    onChange={(e) => setFormData({...formData, serie_turma: e.target.value})}
-                    placeholder="Ex: A"
-                  />
-                </div>
               </div>
             </div>
             <div className="flex justify-end gap-2">
