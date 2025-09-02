@@ -130,9 +130,37 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
     e.preventDefault();
     
     try {
+      const normalizedRA = (formData.ra || '').trim();
+
+      // Verificação de duplicidade de RA antes de salvar
+      if (normalizedRA) {
+        const { data: existing, error: checkError } = await supabase
+          .from('students')
+          .select('id')
+          .eq('ra', normalizedRA);
+
+        if (checkError) throw checkError;
+
+        const conflict =
+          existing && existing.length > 0
+            ? (editingStudent
+              ? existing.some((s: { id: string }) => s.id !== editingStudent.id)
+              : true)
+            : false;
+
+        if (conflict) {
+          toast({
+            variant: 'destructive',
+            title: 'RA já cadastrado',
+            description: 'O RA informado já está sendo usado por outro aluno. Escolha outro valor.'
+          });
+          return;
+        }
+      }
+
       const studentData = {
         name: formData.name,
-        ra: formData.ra || null,
+        ra: normalizedRA || null,
         turma_id: formData.turma_id || null,
         data_nascimento: formData.data_nascimento || null,
         ativo: formData.ativo,
@@ -149,8 +177,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
         if (error) throw error;
 
         toast({
-          title: "Aluno atualizado",
-          description: "Os dados do aluno foram atualizados com sucesso"
+          title: 'Aluno atualizado',
+          description: 'Os dados do aluno foram atualizados com sucesso'
         });
       } else {
         const { error } = await supabase
@@ -160,8 +188,8 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
         if (error) throw error;
 
         toast({
-          title: "Aluno cadastrado",
-          description: "Novo aluno foi cadastrado com sucesso"
+          title: 'Aluno cadastrado',
+          description: 'Novo aluno foi cadastrado com sucesso'
         });
       }
 
@@ -177,10 +205,16 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
       });
       fetchStudents();
     } catch (error: any) {
+      const message =
+        typeof error?.message === 'string' &&
+        error.message.includes('duplicate key value')
+          ? 'RA já está em uso. Tente outro.'
+          : error?.message || 'Erro inesperado ao salvar';
+
       toast({
-        variant: "destructive",
-        title: "Erro ao salvar aluno",
-        description: error.message
+        variant: 'destructive',
+        title: 'Erro ao salvar aluno',
+        description: message
       });
     }
   };
