@@ -24,6 +24,7 @@ import AdminJornadas from "./pages/AdminJornadas";
 import AdminExercises from "./pages/AdminExercises";
 import AdminLists from "./pages/AdminLists";
 import AdminProfessores from "./pages/AdminProfessores";
+import AdminUsuariosCRUD from "./pages/AdminUsuariosCRUD";
 import ProfessorLayout from "./components/ProfessorLayout";
 import ProfessorDashboardPage from "./pages/ProfessorDashboardPage";
 import LaunsLogin from "./pages/LaunsLogin";
@@ -213,6 +214,11 @@ const App = () => (
                 <AdminLayout>
                   <AdminProfessores />
                 </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/usuarios-crud" element={
+              <ProtectedRoute requireSchoolAdmin>
+                <AdminUsuariosCRUD />
               </ProtectedRoute>
             } />
             
