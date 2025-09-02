@@ -2283,6 +2283,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      run_rls_tests: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      test_rls_isolation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       update_exercise_completion_stats: {
         Args: { p_study_time_minutes?: number; p_user_id: string }
         Returns: undefined
