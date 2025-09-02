@@ -2237,6 +2237,26 @@ export type Database = {
       }
     }
     Functions: {
+      armor: {
+        Args: { "": string }
+        Returns: string
+      }
+      dearmor: {
+        Args: { "": string }
+        Returns: string
+      }
+      gen_random_bytes: {
+        Args: { "": number }
+        Returns: string
+      }
+      gen_random_uuid: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      gen_salt: {
+        Args: { "": string }
+        Returns: string
+      }
       get_current_user_professor_id: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -2267,6 +2287,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      pgp_armor_headers: {
+        Args: { "": string }
+        Returns: Record<string, unknown>[]
+      }
+      pgp_key_id: {
+        Args: { "": string }
+        Returns: string
+      }
       pmt_is_same_school: {
         Args: { _materia_id: string; _professor_id: string; _turma_id: string }
         Returns: boolean
@@ -2285,6 +2313,10 @@ export type Database = {
       }
       run_rls_tests: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      sha256_hash: {
+        Args: { input_text: string }
         Returns: string
       }
       test_rls_isolation: {
