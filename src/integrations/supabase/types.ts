@@ -41,6 +41,13 @@ export type Database = {
             foreignKeyName: "admin_chat_logs_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "admin_chat_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -66,6 +73,13 @@ export type Database = {
           tutor_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "aluno_tutor_aluno_id_fkey"
+            columns: ["aluno_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
           {
             foreignKeyName: "aluno_tutor_aluno_id_fkey"
             columns: ["aluno_id"]
@@ -646,8 +660,22 @@ export type Database = {
             foreignKeyName: "jornadas_student_fk"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "jornadas_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jornadas_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
           },
           {
             foreignKeyName: "jornadas_student_id_fkey"
@@ -687,6 +715,13 @@ export type Database = {
           student_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "login_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
           {
             foreignKeyName: "login_logs_student_id_fkey"
             columns: ["student_id"]
@@ -1062,6 +1097,13 @@ export type Database = {
             foreignKeyName: "profiles_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "profiles_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -1151,6 +1193,13 @@ export type Database = {
             foreignKeyName: "answers_student_fk"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "answers_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -1181,6 +1230,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "exercise_lists"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_answers_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
           },
           {
             foreignKeyName: "student_answers_student_id_fkey"
@@ -1217,6 +1273,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "student_auth_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
           {
             foreignKeyName: "student_auth_student_id_fkey"
             columns: ["student_id"]
@@ -1261,6 +1324,13 @@ export type Database = {
           total_time_seconds?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "ses_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
           {
             foreignKeyName: "ses_student_fk"
             columns: ["student_id"]
@@ -1735,6 +1805,27 @@ export type Database = {
           },
         ]
       }
+      mv_user_progress: {
+        Row: {
+          acertos: number | null
+          escola_id: string | null
+          exercicios_tentados: number | null
+          perc_acerto: number | null
+          student_id: string | null
+          total_respostas: number | null
+          ultima_atividade: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professores_publico: {
         Row: {
           ativo: boolean | null
@@ -1808,6 +1899,13 @@ export type Database = {
             foreignKeyName: "profiles_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "profiles_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -1862,8 +1960,22 @@ export type Database = {
             foreignKeyName: "jornadas_student_fk"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "jornadas_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jornadas_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
           },
           {
             foreignKeyName: "jornadas_student_id_fkey"
@@ -1983,6 +2095,18 @@ export type Database = {
           turma_nome: string
         }[]
       }
+      get_school_user_progress: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          acertos: number
+          exercicios_tentados: number
+          perc_acerto: number
+          student_id: string
+          total_respostas: number
+          ultima_atividade: string
+          user_id: string
+        }[]
+      }
       is_professor_or_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1998,6 +2122,10 @@ export type Database = {
       promote_to_admin: {
         Args: { user_email: string }
         Returns: Json
+      }
+      refresh_mv_user_progress: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       verify_coordenador_login: {
         Args: { p_login: string; p_senha: string }
