@@ -325,18 +325,19 @@ export default function SchoolStudentsCRUD({ schoolId }: SchoolStudentsCRUDProps
                    </div>
                    <div>
                      <Label htmlFor="data_nascimento">Data de Aniversário</Label>
-                     <Popover>
-                       <PopoverTrigger asChild>
-                         <Button
-                           variant={"outline"}
-                           className={cn(
-                             "w-full justify-start text-left font-normal",
-                             !formData.data_nascimento && "text-muted-foreground"
-                           )}
-                         >
-                           <CalendarIcon className="mr-2 h-4 w-4" />
-                           {formData.data_nascimento ? (
-                             format(new Date(formData.data_nascimento), "dd/MM/yyyy")
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !formData.data_nascimento && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {formData.data_nascimento ? (
+                              format(new Date(formData.data_nascimento), "dd/MM/yyyy")
                            ) : (
                              <span>dd/mm/aaaa</span>
                            )}
