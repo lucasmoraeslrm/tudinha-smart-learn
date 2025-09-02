@@ -123,22 +123,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // If user is coordinator and has no escola_id, try to find it
             if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && !profileData.escola_id) {
-              const { data: coordenadorData } = await supabase
-                .from('coordenadores')
-                .select('escola_id')
-                .eq('email', session.user.email)
-                .single();
-
-              if (coordenadorData?.escola_id) {
-                // Update profile with escola_id
+              // First try to get escola_id from user metadata
+              const userEscolaId = session.user.user_metadata?.escola_id;
+              
+              if (userEscolaId) {
+                // Update profile with escola_id from user metadata
                 const { data: updatedProfileData } = await supabase
                   .from('profiles')
-                  .update({ escola_id: coordenadorData.escola_id })
+                  .update({ escola_id: userEscolaId })
                   .eq('user_id', session.user.id)
                   .select()
                   .single();
 
                 updatedProfile = updatedProfileData as Profile;
+              } else {
+                // Fallback: try to find it in coordenadores table
+                const { data: coordenadorData } = await supabase
+                  .from('coordenadores')
+                  .select('escola_id')
+                  .eq('email', session.user.email)
+                  .maybeSingle();
+
+                if (coordenadorData?.escola_id) {
+                  // Update profile with escola_id
+                  const { data: updatedProfileData } = await supabase
+                    .from('profiles')
+                    .update({ escola_id: coordenadorData.escola_id })
+                    .eq('user_id', session.user.id)
+                    .select()
+                    .single();
+
+                  updatedProfile = updatedProfileData as Profile;
+                }
               }
             }
             
@@ -189,22 +205,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // If user is coordinator and has no escola_id, try to find it
             if (profileData && ['school_admin', 'coordinator'].includes(profileData.role) && !profileData.escola_id) {
-              const { data: coordenadorData } = await supabase
-                .from('coordenadores')
-                .select('escola_id')
-                .eq('email', session.user.email)
-                .single();
-
-              if (coordenadorData?.escola_id) {
-                // Update profile with escola_id
+              // First try to get escola_id from user metadata
+              const userEscolaId = session.user.user_metadata?.escola_id;
+              
+              if (userEscolaId) {
+                // Update profile with escola_id from user metadata
                 const { data: updatedProfileData } = await supabase
                   .from('profiles')
-                  .update({ escola_id: coordenadorData.escola_id })
+                  .update({ escola_id: userEscolaId })
                   .eq('user_id', session.user.id)
                   .select()
                   .single();
 
                 updatedProfile = updatedProfileData as Profile;
+              } else {
+                // Fallback: try to find it in coordenadores table
+                const { data: coordenadorData } = await supabase
+                  .from('coordenadores')
+                  .select('escola_id')
+                  .eq('email', session.user.email)
+                  .maybeSingle();
+
+                if (coordenadorData?.escola_id) {
+                  // Update profile with escola_id
+                  const { data: updatedProfileData } = await supabase
+                    .from('profiles')
+                    .update({ escola_id: coordenadorData.escola_id })
+                    .eq('user_id', session.user.id)
+                    .select()
+                    .single();
+
+                  updatedProfile = updatedProfileData as Profile;
+                }
               }
             }
 
