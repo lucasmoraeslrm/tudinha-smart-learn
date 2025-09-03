@@ -25,7 +25,8 @@ import {
   Settings,
   Activity,
   Monitor,
-  FileText
+  FileText,
+  Brain
 } from 'lucide-react';
 
 const navigationItems = [
@@ -43,6 +44,11 @@ const navigationItems = [
     title: 'Lista de Exercícios',
     url: '/launs/exercicios',
     icon: BookOpen,
+  },
+  {
+    title: 'IA ENEM',
+    url: '/launs/ia-enem',
+    icon: Brain,
   },
   {
     title: 'Webhooks',

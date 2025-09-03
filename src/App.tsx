@@ -49,6 +49,7 @@ import ParentLogin from "./pages/ParentLogin";
 import ParentDashboard from "./pages/ParentDashboard";
 import PublicStatus from "./pages/PublicStatus";
 import DocsAcessos from "./pages/DocsAcessos";
+import LaunsIAEnem from "./pages/LaunsIAEnem";
 import ProfessorPageWrapper from "@/components/ProfessorPageWrapper";
 import NotFound from "@/pages/NotFound";
 
@@ -155,6 +156,11 @@ const App = () => {
             <Route path="/launs/exercicios" element={
               <ProtectedLaunsRoute>
                 <LaunsExercicios />
+              </ProtectedLaunsRoute>
+            } />
+            <Route path="/launs/ia-enem" element={
+              <ProtectedLaunsRoute>
+                <LaunsIAEnem />
               </ProtectedLaunsRoute>
             } />
             <Route path="/launs/sistema" element={

@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.provision-coordinator-auth]
 verify_jwt = false
+
+[functions.enem-config]
+verify_jwt = true
+
+[functions.enem-corrigir]
+verify_jwt = true
