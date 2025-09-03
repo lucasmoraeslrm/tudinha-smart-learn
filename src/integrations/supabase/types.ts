@@ -53,6 +53,44 @@ export type Database = {
           },
         ]
       }
+      ai_enem_config: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          escola_id: string | null
+          id: string
+          modelo_openai: string
+          prompt_correcao: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          escola_id?: string | null
+          id?: string
+          modelo_openai?: string
+          prompt_correcao?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          escola_id?: string | null
+          id?: string
+          modelo_openai?: string
+          prompt_correcao?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_enem_config_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aluno_tutor: {
         Row: {
           aluno_id: string | null
