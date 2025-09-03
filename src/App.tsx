@@ -12,6 +12,7 @@ import DashboardPage from "./pages/DashboardPage";
 import JornadaPage from "./pages/JornadaPage";
 import ChatPage from "./pages/ChatPage";
 import ExerciciosPage from "./pages/ExerciciosPage";
+import StudentRedacao from "./pages/StudentRedacao";
 import ExerciseListView from "./pages/ExerciseListView";
 import ExerciseView from "./pages/ExerciseView";
 import StudentLayout from "./components/StudentLayout";
@@ -102,6 +103,13 @@ const App = () => {
               <ProtectedRoute>
                 <StudentLayout>
                   <ExerciciosPage />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/redacao" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <StudentRedacao />
                 </StudentLayout>
               </ProtectedRoute>
             } />

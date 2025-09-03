@@ -9,12 +9,14 @@ import {
   Settings, 
   LogOut,
   User,
-  MapPin
+  MapPin,
+  FileText
 } from 'lucide-react';
 
 const sidebarItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Jornada', url: '/jornada', icon: MapPin },
+  { title: 'Redação', url: '/redacao', icon: FileText },
   { title: 'Tudinha', url: '/chat', icon: MessageCircle },
   { title: 'Exercícios', url: '/exercicios', icon: BookOpen },
 ];

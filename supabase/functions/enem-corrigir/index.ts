@@ -27,10 +27,45 @@ serve(async (req) => {
       });
     }
 
-    // Get current user
+    // Check authentication - support both admin users and student sessions
+    let isAuthorized = false;
+    let currentUserId = null;
+    let studentId = null;
+
+    // Try admin authentication first
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    if (user) {
+      // Check if user is admin
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (profile && profile.role === 'admin') {
+        isAuthorized = true;
+        currentUserId = user.id;
+      }
+    }
+
+    // If not admin, check for student session in request body
+    if (!isAuthorized) {
+      const authHeader = req.headers.get('X-Student-Session');
+      if (authHeader) {
+        try {
+          const sessionData = JSON.parse(authHeader);
+          if (sessionData.id) {
+            studentId = sessionData.id;
+            isAuthorized = true;
+          }
+        } catch (e) {
+          console.error('Invalid student session data:', e);
+        }
+      }
+    }
+
+    if (!isAuthorized) {
+      return new Response(JSON.stringify({ error: 'Unauthorized - admin login or valid student session required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

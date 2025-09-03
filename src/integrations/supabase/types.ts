@@ -1157,6 +1157,7 @@ export type Database = {
           notas: Json | null
           palavras: number | null
           status: string | null
+          student_id: string | null
           tema_id: string | null
           tempo_ms: number | null
           titulo: string | null
@@ -1172,6 +1173,7 @@ export type Database = {
           notas?: Json | null
           palavras?: number | null
           status?: string | null
+          student_id?: string | null
           tema_id?: string | null
           tempo_ms?: number | null
           titulo?: string | null
@@ -1187,6 +1189,7 @@ export type Database = {
           notas?: Json | null
           palavras?: number | null
           status?: string | null
+          student_id?: string | null
           tema_id?: string | null
           tempo_ms?: number | null
           titulo?: string | null
@@ -1199,6 +1202,20 @@ export type Database = {
             columns: ["escola_id"]
             isOneToOne: false
             referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redacoes_usuario_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "redacoes_usuario_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
           {

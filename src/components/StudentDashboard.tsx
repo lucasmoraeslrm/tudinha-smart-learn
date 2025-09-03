@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Clock, BookOpen, MessageCircle, Play, LogOut, Trophy, History, User } from 'lucide-react';
+import { Clock, BookOpen, MessageCircle, Play, LogOut, Trophy, History, User, FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -190,9 +190,10 @@ const StudentDashboard = () => {
 
       <div className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="jornada">Jornada</TabsTrigger>
+            <TabsTrigger value="redacao">Redação</TabsTrigger>
             <TabsTrigger value="chat">Chat com Tudinha</TabsTrigger>
             <TabsTrigger value="exercicios">Exercícios</TabsTrigger>
           </TabsList>
@@ -376,6 +377,33 @@ const StudentDashboard = () => {
                     </p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="redacao">
+            <Card>
+              <CardHeader>
+                <CardTitle>Redação ENEM</CardTitle>
+                <CardDescription>
+                  Pratique redações e receba correções automáticas da IA
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Portal de Redações</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Acesse nosso portal completo de redações ENEM
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = '/redacao'}
+                    size="lg"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Acessar Portal
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
