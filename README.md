@@ -60,6 +60,18 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Documentação da Plataforma
+
+Esta é uma plataforma educacional com múltiplos perfis de acesso:
+
+- **Alunos**: Dashboard pessoal, jornadas de aprendizado, chat de estudos
+- **Professores**: Gestão de alunos, acompanhamento de jornadas
+- **Direção/Coordenação**: Administração escolar completa
+- **Launs Admin**: Administração global da plataforma
+- **Pais/Responsáveis**: Acompanhamento dos filhos (em desenvolvimento)
+
+Para documentação completa dos acessos, funcionalidades e arquitetura, acesse `/docs/acessos` no app ou visite a [documentação online](https://seu-dominio.com/docs/acessos).
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/2e302b2d-e01b-4c31-874b-380920bb2ac7) and click on Share -> Publish.

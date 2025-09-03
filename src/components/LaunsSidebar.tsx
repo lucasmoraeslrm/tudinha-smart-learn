@@ -24,7 +24,8 @@ import {
   LogOut,
   Settings,
   Activity,
-  Monitor
+  Monitor,
+  FileText
 } from 'lucide-react';
 
 const navigationItems = [
@@ -62,6 +63,11 @@ const navigationItems = [
     title: 'Usuários',
     url: '/launs/usuarios',
     icon: Users,
+  },
+  {
+    title: 'Documentação',
+    url: '/docs/acessos',
+    icon: FileText,
   },
 ];
 

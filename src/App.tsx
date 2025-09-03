@@ -48,6 +48,7 @@ import ProjectStatus from "./pages/ProjectStatus";
 import ParentLogin from "./pages/ParentLogin";
 import ParentDashboard from "./pages/ParentDashboard";
 import PublicStatus from "./pages/PublicStatus";
+import DocsAcessos from "./pages/DocsAcessos";
 import ProfessorPageWrapper from "@/components/ProfessorPageWrapper";
 import NotFound from "@/pages/NotFound";
 
@@ -281,6 +282,9 @@ const App = () => {
                 <ParentDashboard />
               </ProtectedRoute>
             } />
+            
+            {/* Documentation Route */}
+            <Route path="/docs/acessos" element={<DocsAcessos />} />
             
             {/* Public Status Route */}
             <Route path="/status-public" element={<PublicStatus />} />

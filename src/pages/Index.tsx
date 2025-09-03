@@ -141,6 +141,13 @@ const Index = () => {
             >
               Desenvolvedores
             </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/docs/acessos')}
+              className="text-white/60 hover:text-white hover:bg-white/10"
+            >
+              Documentação
+            </Button>
           </div>
         </div>
       </div>

@@ -12,7 +12,9 @@ import {
   Users,
   List,
   MapPin,
-  School
+  School,
+  FileText,
+  HelpCircle
 } from 'lucide-react';
 import { useEscola } from '@/hooks/useEscola';
 
@@ -116,6 +118,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Footer */}
         <div className="p-4 border-t border-border space-y-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/docs/acessos')}
+            className="w-full justify-start text-muted-foreground hover:text-foreground"
+          >
+            <HelpCircle className="w-4 h-4 mr-3" />
+            Ajuda & Docs
+          </Button>
+          
           <Button
             variant="ghost"
             size="sm"
