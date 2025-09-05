@@ -18,7 +18,7 @@ const sidebarItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard, moduleCode: null }, // Always available
   { title: 'Jornada', url: '/jornada', icon: MapPin, moduleCode: 'jornada' },
   { title: 'Redação', url: '/redacao', icon: FileText, moduleCode: 'redacao' },
-  { title: 'Tudinha', url: '/chat', icon: MessageCircle, moduleCode: 'tudinha-chat' },
+  { title: 'Tudinha', url: '/chat', icon: MessageCircle, moduleCode: 'chat' },
   { title: 'Exercícios', url: '/exercicios', icon: BookOpen, moduleCode: 'exercicios' },
 ];
 
@@ -31,6 +31,9 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
   const { activeModules } = useActiveModules(studentSession?.escola_id || null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  console.log('Student session:', studentSession);
+  console.log('Active modules:', activeModules);
 
   const handleLogout = async () => {
     await signOut();

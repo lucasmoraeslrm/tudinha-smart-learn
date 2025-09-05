@@ -23,6 +23,8 @@ export function useActiveModules(escolaId: string | null) {
 
     const fetchActiveModules = async () => {
       try {
+        console.log('Fetching modules for escola_id:', escolaId);
+        
         const { data, error } = await supabase
           .from('escola_modulos')
           .select(`
@@ -45,11 +47,14 @@ export function useActiveModules(escolaId: string | null) {
           return;
         }
 
+        console.log('Raw module data:', data);
+
         const modules = data?.map(item => ({
           ...item.modulos,
           ativo: item.ativo
         })).filter(module => module.ativo) || [];
 
+        console.log('Processed active modules:', modules);
         setActiveModules(modules as Module[]);
       } catch (error) {
         console.error('Error fetching active modules:', error);
