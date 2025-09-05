@@ -55,22 +55,40 @@ serve(async (req) => {
     const body = await req.json();
     const { dificuldade = 'medio', categoria_tematica = null } = body;
 
-    // Try to get the webhook URL for this school
-    const { data: webhook, error: webhookError } = await supabaseClient
+    // Try to get the webhook URL for this school - search for both types
+    let { data: webhook, error: webhookError } = await supabaseClient
       .from('webhooks')
       .select('*')
       .eq('escola_id', escolaId)
-      .eq('tipo', 'gerar_tema')
+      .in('tipo', ['gerar_tema', 'criar_tema_redacao'])
       .eq('ativo', true)
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // If no school-specific webhook, try global webhooks
+    if (!webhook) {
+      console.log('No school-specific webhook found, searching for global webhooks');
+      const { data: globalWebhook } = await supabaseClient
+        .from('webhooks')
+        .select('*')
+        .is('escola_id', null)
+        .in('tipo', ['gerar_tema', 'criar_tema_redacao'])
+        .eq('ativo', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      webhook = globalWebhook;
+    }
 
     // If no webhook is configured, fallback to direct OpenAI generation
-    if (webhookError || !webhook) {
-      console.log('No webhook found, falling back to direct OpenAI generation');
+    if (!webhook) {
+      console.log('No webhook found (school-specific or global), falling back to direct OpenAI generation');
       return await generateThemeDirectly(supabaseClient, dificuldade, categoria_tematica);
     }
 
     const webhookUrl = webhook.modo_producao ? webhook.url_producao : webhook.url_teste;
+    console.log(`Found webhook (ID: ${webhook.id}, Type: ${webhook.tipo}, School: ${webhook.escola_id || 'Global'})`);
     console.log('Using webhook URL:', webhookUrl);
 
     // Prepare payload for the webhook
@@ -84,19 +102,61 @@ serve(async (req) => {
 
     console.log('Sending payload to webhook:', payload);
 
-    // Call the webhook
-    const webhookResponse = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...webhook.headers || {}
-      },
-      body: JSON.stringify(payload),
-    });
+    let webhookStatus = 'erro';
+    let webhookResponse;
+    
+    try {
+      // Call the webhook
+      webhookResponse = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...webhook.headers || {}
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (!webhookResponse.ok) {
-      console.error('Webhook response not ok:', await webhookResponse.text());
-      return new Response(JSON.stringify({ error: 'Webhook call failed' }), {
+      if (!webhookResponse.ok) {
+        const errorText = await webhookResponse.text();
+        console.error(`Webhook failed with status ${webhookResponse.status}:`, errorText);
+        
+        // Update webhook statistics for failed call
+        await supabaseClient
+          .from('webhooks')
+          .update({
+            ultimo_disparo: new Date().toISOString(),
+            total_disparos: (webhook.total_disparos || 0) + 1,
+            ultimo_status: `erro_${webhookResponse.status}`
+          })
+          .eq('id', webhook.id);
+
+        return new Response(JSON.stringify({ 
+          error: 'Webhook call failed',
+          details: `Status ${webhookResponse.status}: ${errorText}`
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      webhookStatus = 'sucesso';
+    } catch (fetchError) {
+      console.error('Network error calling webhook:', fetchError);
+      
+      // Update webhook statistics for network error
+      await supabaseClient
+        .from('webhooks')
+        .update({
+          ultimo_disparo: new Date().toISOString(),
+          total_disparos: (webhook.total_disparos || 0) + 1,
+          ultimo_status: 'erro_rede'
+        })
+        .eq('id', webhook.id);
+
+      return new Response(JSON.stringify({ 
+        error: 'Network error calling webhook',
+        details: fetchError.message
+      }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -142,15 +202,17 @@ serve(async (req) => {
 
     console.log('Theme saved successfully:', newTheme);
 
-    // Update webhook statistics
+    // Update webhook statistics for successful call
     await supabaseClient
       .from('webhooks')
       .update({
         ultimo_disparo: new Date().toISOString(),
         total_disparos: (webhook.total_disparos || 0) + 1,
-        ultimo_status: 'sucesso'
+        ultimo_status: webhookStatus
       })
       .eq('id', webhook.id);
+
+    console.log(`Webhook statistics updated: ${webhook.total_disparos + 1} total dispatches, status: ${webhookStatus}`);
 
     return new Response(JSON.stringify({ 
       theme: newTheme,
