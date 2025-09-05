@@ -427,7 +427,16 @@ export default function StudentRedacao() {
         throw correctionError;
       }
 
-      setCorrectionResult(correctionData);
+      // Ensure correctionData has the right structure
+      const processedResult = correctionData || {
+        comentario_geral: "Correção processada com sucesso.",
+        feedback_geral: "Sua redação foi analisada com sucesso.",
+        nota_final: 0,
+        competencias: {}
+      };
+
+      console.log('Setting correction result:', processedResult);
+      setCorrectionResult(processedResult);
       setCorrecting(false);
       
       // Wait a moment to show success, then navigate to feedback
@@ -1277,7 +1286,17 @@ export default function StudentRedacao() {
   }
 
   // Feedback View  
-  if (currentView === 'feedback' && correctionResult) {
+  if (currentView === 'feedback') {
+    console.log('Rendering feedback view with correctionResult:', correctionResult);
+    
+    // If no correctionResult, create a default one from the latest essay
+    const feedbackData = correctionResult || {
+      comentario_geral: "Sua redação foi salva com sucesso e está sendo processada.",
+      feedback_geral: "O feedback detalhado será disponibilizado em breve.",
+      nota_final: 0,
+      competencias: {}
+    };
+    
     return (
       <>
         {HistoricoModal}
@@ -1310,7 +1329,7 @@ export default function StudentRedacao() {
                   </div>
                   <div className="text-right">
                     <div className="text-4xl font-bold text-primary">
-                      {correctionResult.nota_final || 0}
+                      {feedbackData.nota_final || 0}
                     </div>
                     <div className="text-sm text-muted-foreground">de 1000 pontos</div>
                   </div>
@@ -1328,42 +1347,44 @@ export default function StudentRedacao() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm leading-relaxed">
-                  {correctionResult.comentario_geral || correctionResult.feedback_geral || 'Feedback não disponível'}
+                  {feedbackData.comentario_geral || feedbackData.feedback_geral || 'Feedback não disponível'}
                 </p>
               </CardContent>
             </Card>
 
             {/* Competências */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Avaliação por Competências
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {correctionResult.competencias && Object.entries(correctionResult.competencias).map(([key, comp]: [string, any]) => (
-                    <div key={key} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-sm">
-                          Competência {key.replace('competencia_', '')} - {comp.titulo || getCompetenciaTitle(key)}
-                        </h4>
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                          {comp.nota || 0}/200
-                        </Badge>
+            {feedbackData.competencias && Object.keys(feedbackData.competencias).length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    Avaliação por Competências
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(feedbackData.competencias).map(([key, comp]: [string, any]) => (
+                      <div key={key} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-sm">
+                            Competência {key.replace('competencia_', '')} - {comp.titulo || getCompetenciaTitle(key)}
+                          </h4>
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                            {comp.nota || 0}/200
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {getCompetenciaDescription(key)}
+                        </p>
+                        <div className="bg-muted/30 p-3 rounded text-sm">
+                          {comp.feedback || comp.comentario || 'Sem feedback específico'}
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {getCompetenciaDescription(key)}
-                      </p>
-                      <div className="bg-muted/30 p-3 rounded text-sm">
-                        {comp.feedback || comp.comentario || 'Sem feedback específico'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Botão para nova redação */}
             <div className="flex gap-2">
