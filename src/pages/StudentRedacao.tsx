@@ -138,9 +138,10 @@ export default function StudentRedacao() {
     }
     
     setCurrentView('write');
-    setStartTime(new Date());
+    // Don't start timer here - it will start when user begins typing
     setConteudo('');
     setTitulo('');
+    setStartTime(null);
     setCurrentTime(0);
   };
 
@@ -172,9 +173,10 @@ export default function StudentRedacao() {
       
       // Start writing with the new theme
       setCurrentView('write');
-      setStartTime(new Date());
+      // Don't start timer here - it will start when user begins typing
       setConteudo('');
       setTitulo('');
+      setStartTime(null);
       setCurrentTime(0);
 
       toast({
@@ -642,8 +644,19 @@ export default function StudentRedacao() {
                 )}
                 <Textarea
                   value={conteudo}
-                  onChange={(e) => setConteudo(e.target.value)}
-                  placeholder=""
+                  onChange={(e) => {
+                    setConteudo(e.target.value);
+                    // Start timer on first character typed
+                    if (!startTime && e.target.value.trim().length > 0) {
+                      setStartTime(new Date());
+                    }
+                    // Reset timer if content is cleared
+                    if (e.target.value.trim().length === 0) {
+                      setStartTime(null);
+                      setCurrentTime(0);
+                    }
+                  }}
+                  placeholder="Comece a escrever sua redação aqui... (mínimo 200 palavras)"
                   className="min-h-[400px] text-base leading-relaxed"
                   maxLength={5000}
                 />
