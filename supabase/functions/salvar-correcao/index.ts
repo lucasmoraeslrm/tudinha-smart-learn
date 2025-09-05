@@ -94,9 +94,10 @@ serve(async (req) => {
       );
     }
 
-    const statusToSet = status || "corrigida";
+    let statusToSet = status || "corrigida";
 
-    const { data: updated, error: updateErr } = await supabaseAdmin
+    // Attempt update; if status violates a CHECK constraint, retry with a safe fallback
+    let updateResult = await supabaseAdmin
       .from("redacoes_usuario")
       .update({
         status: statusToSet,
@@ -107,16 +108,31 @@ serve(async (req) => {
       .select("*")
       .maybeSingle();
 
-    if (updateErr) {
-      console.error("Update error:", updateErr);
+    if (updateResult.error && updateResult.error.code === "23514") {
+      console.warn("Status CHECK failed for value:", statusToSet, "→ retrying with 'corrigido'");
+      statusToSet = "corrigido";
+      updateResult = await supabaseAdmin
+        .from("redacoes_usuario")
+        .update({
+          status: statusToSet,
+          correcao_ia: correcao,
+          data_correcao: new Date().toISOString(),
+        })
+        .eq("id", redacao_id)
+        .select("*")
+        .maybeSingle();
+    }
+
+    if (updateResult.error) {
+      console.error("Update error:", updateResult.error);
       return new Response(
-        JSON.stringify({ error: "Erro ao salvar correção", details: updateErr.message }),
+        JSON.stringify({ error: "Erro ao salvar correção", details: updateResult.error.message }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     return new Response(
-      JSON.stringify({ success: true, redacao: updated }),
+      JSON.stringify({ success: true, redacao: updateResult.data }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err: any) {
