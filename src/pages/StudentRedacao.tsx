@@ -354,24 +354,22 @@ export default function StudentRedacao() {
       const tempoMs = startTime ? Date.now() - startTime.getTime() : 0;
       const studentData = JSON.parse(localStorage.getItem('student_session') || '{}');
 
-      // First, save the essay
-      const { data: savedEssay, error: saveError } = await supabase
-        .from('redacoes_usuario')
-        .insert({
-          user_id: studentSession?.id || studentData.id,
-          student_id: studentData.id,
-          escola_id: studentData.escola_id,
+      // First, save the essay via Edge Function (bypasses RLS with validation)
+      const { data: saveResponse, error: saveError } = await supabase.functions.invoke('salvar-redacao', {
+        body: {
           tema_id: temaSelecionado,
           titulo: titulo.trim() || null,
           conteudo: conteudo.trim(),
           palavras: wordCount,
           tempo_ms: tempoMs,
-          status: 'enviada'
-        })
-        .select()
-        .single();
+        },
+        headers: {
+          'X-Student-Session': JSON.stringify(studentData),
+        },
+      });
 
       if (saveError) throw saveError;
+      const savedEssay = saveResponse?.essay;
 
       // Get full theme data for webhook
       const { data: temaData, error: temaError } = await supabase
