@@ -635,13 +635,15 @@ export default function StudentRedacao() {
             <div className="space-y-6">
               <div>
                 <label className="text-sm font-medium mb-2 block">Redação</label>
-                <div className="text-right text-sm text-muted-foreground mb-2">
-                  {wordCount} palavras
-                </div>
+                {wordCount > 0 && (
+                  <div className="text-right text-sm text-muted-foreground mb-2">
+                    {wordCount} palavras
+                  </div>
+                )}
                 <Textarea
                   value={conteudo}
                   onChange={(e) => setConteudo(e.target.value)}
-                  placeholder="Comece a escrever sua redação aqui... (mínimo 250 palavras)"
+                  placeholder=""
                   className="min-h-[400px] text-base leading-relaxed"
                   maxLength={5000}
                 />
