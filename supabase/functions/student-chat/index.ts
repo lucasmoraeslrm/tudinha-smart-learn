@@ -40,8 +40,7 @@ serve(async (req) => {
       .select(`
         student_id,
         students!inner(
-          id, name, codigo, escola_id,
-          escolas!inner(id, nome, codigo)
+          id, name, codigo, escola_id
         )
       `)
       .eq('codigo', token)
