@@ -436,6 +436,28 @@ export default function StudentRedacao() {
       };
 
       console.log('Setting correction result:', processedResult);
+      
+      // Save correction to database
+      const { data: redacaoAtualizada, error: updateError } = await supabase
+        .from('redacoes_usuario')
+        .update({
+          status: 'corrigida',
+          correcao_ia: processedResult,
+          data_correcao: new Date().toISOString()
+        })
+        .eq('id', savedEssay.id)
+        .select(`
+          *,
+          temas_redacao(*)
+        `)
+        .single();
+
+      if (updateError) {
+        console.error('Erro ao salvar correção:', updateError);
+        throw new Error('Erro ao salvar correção no banco de dados');
+      }
+
+      console.log('Correção salva no banco:', redacaoAtualizada);
       setCorrectionResult(processedResult);
       setCorrecting(false);
       
