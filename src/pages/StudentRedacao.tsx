@@ -321,12 +321,19 @@ export default function StudentRedacao() {
   };
 
   const salvarRedacao = async () => {
-    if (!temaSelecionado || !titulo.trim() || !conteudo.trim()) {
+    if (!temaSelecionado || !conteudo.trim()) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Preencha o título e o conteudo da redação",
+        title: "Erro",
+        description: "Por favor, selecione um tema e preencha o conteúdo da redação",
         variant: "destructive",
       });
+      
+      if (!conteudo.trim()) {
+        const textarea = document.querySelector('textarea[placeholder="Digite sua redação aqui..."]') as HTMLTextAreaElement;
+        if (textarea) {
+          textarea.focus();
+        }
+      }
       return;
     }
 
@@ -355,7 +362,7 @@ export default function StudentRedacao() {
           student_id: studentData.id,
           escola_id: studentData.escola_id,
           tema_id: temaSelecionado,
-          titulo: titulo.trim(),
+          titulo: titulo.trim() || null,
           conteudo: conteudo.trim(),
           palavras: wordCount,
           tempo_ms: tempoMs,
@@ -391,7 +398,7 @@ export default function StudentRedacao() {
         },
         conteudo: conteudo.trim(),
         tempo_gasto: Math.floor(tempoMs / 1000), // Convert to seconds
-        titulo: titulo.trim()
+        ...(titulo.trim() && { titulo: titulo.trim() })
       };
 
       console.log('Sending to webhook:', webhookPayload);
@@ -804,23 +811,14 @@ export default function StudentRedacao() {
               </div>
             </div>
           
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Título da Redação <span className="text-destructive">*</span>
-              </label>
+            <div>
               <Input
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
-                placeholder="Digite o título da sua redação"
-                className="text-lg font-medium"
+                placeholder="Título da Redação (opcional)"
+                className="text-lg font-medium mb-4"
                 maxLength={100}
-                required
               />
-              {titulo.trim() === '' && (
-                <p className="text-sm text-muted-foreground">
-                  O título é obrigatório para finalizar a redação
-                </p>
-              )}
             </div>
 
             {!selectedTema && (
