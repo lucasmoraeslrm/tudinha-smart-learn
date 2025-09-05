@@ -70,20 +70,70 @@ serve(async (req) => {
         competencias: {}
       }
     }
-
-    // Garantir estrutura mínima para o feedback
-    if (responseData && typeof responseData === 'object') {
-      responseData = {
-        nota_final: responseData.nota_final || 0,
-        comentario_geral: responseData.comentario_geral || responseData.feedback_geral || 'Feedback não disponível',
-        feedback_geral: responseData.feedback_geral || responseData.comentario_geral || 'Feedback não disponível',
-        competencias: responseData.competencias || {},
-        ...responseData
+    // Normaliza para um objeto estruturado (nota_final, comentario_geral, competencias)
+    const normalizeResponse = (resp: any) => {
+      const out: any = {
+        nota_final: (resp && resp.nota_final) || 0,
+        comentario_geral: (resp && (resp.comentario_geral || resp.feedback_geral)) || '',
+        feedback_geral: (resp && (resp.feedback_geral || resp.comentario_geral)) || '',
+        competencias: (resp && resp.competencias) || {}
       }
+
+      let markdown = ''
+      if (typeof resp === 'string') markdown = resp
+      if (!markdown && resp && typeof resp === 'object') {
+        if (typeof resp.resposta === 'string') markdown = resp.resposta
+        else if (typeof resp.explicacao === 'string') markdown = resp.explicacao
+        else if (typeof resp.text === 'string') markdown = resp.text
+      }
+
+      if (markdown) {
+        // Nota Final
+        const notaMatch = markdown.match(/Nota\s*Final\s*[:–-]?\s*(\d{1,4})/i)
+        if (notaMatch) out.nota_final = parseInt(notaMatch[1], 10)
+
+        // Comentários Finais
+        const comentariosMatch = markdown.match(/##\s*Coment[aá]rios?\s*Finais[\s\S]*$/i)
+        if (comentariosMatch) {
+          out.comentario_geral = comentariosMatch[0]
+            .replace(/##\s*Coment[aá]rios?\s*Finais/i, '')
+            .trim()
+          out.feedback_geral = out.comentario_geral
+        }
+
+        // Competências 1..5
+        const titleMap: Record<number, string> = {
+          1: 'Domínio da norma culta',
+          2: 'Compreensão da proposta',
+          3: 'Argumentação e dados',
+          4: 'Coesão e coerência',
+          5: 'Proposta de intervenção',
+        }
+        for (let i = 1; i <= 5; i++) {
+          const blockMatch = markdown.match(new RegExp(`Crit[ée]rio\\s*${i}[\\s\\S]*?(?:\n\n|$)`, 'i'))
+          const pontuacaoMatch = markdown.match(new RegExp(`Crit[ée]rio\\s*${i}[\\s\\S]*?Pontua[cç][aã]o\\s*[:–-]?\\s*(\\d{1,3}|200)`, 'i'))
+          const pontosMelhorarMatch = markdown.match(new RegExp(`Crit[ée]rio\\s*${i}[\\s\\S]*?Pontos a Melhorar:\\s*([\\s\\S]*?)(?:\\n\\s*---|$)`, 'i'))
+          if (pontuacaoMatch) {
+            out.competencias[`competencia_${i}`] = {
+              titulo: titleMap[i],
+              nota: parseInt(pontuacaoMatch[1], 10),
+              feedback: pontosMelhorarMatch ? pontosMelhorarMatch[1].trim() : (blockMatch ? blockMatch[0].trim() : undefined),
+            }
+          }
+        }
+      }
+
+      if (!out.comentario_geral) out.comentario_geral = 'Feedback não disponível'
+      if (!out.feedback_geral) out.feedback_geral = out.comentario_geral
+      if (!out.competencias) out.competencias = {}
+
+      return out
     }
 
+    const normalized = normalizeResponse(responseData)
+
     return new Response(
-      JSON.stringify(responseData),
+      JSON.stringify(normalized),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
