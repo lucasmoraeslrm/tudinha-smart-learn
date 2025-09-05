@@ -191,9 +191,71 @@ export default function StudentRedacao() {
       return;
     }
     
+    setLoading(true);
     setShowHistoricoModal(false);
-    await loadTemasEnemHistorico();
-    setCurrentView('enem-historico');
+    
+    try {
+      // Load historical themes for the selected year
+      const { data, error } = await supabase
+        .from('temas_enem_historico')
+        .select('*')
+        .eq('ano', parseInt(selectedYear))
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        toast({
+          title: "Nenhum tema encontrado",
+          description: "Não há temas disponíveis para o ano selecionado",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Select a random theme from the year
+      const randomTheme = data[Math.floor(Math.random() * data.length)];
+      
+      // Create a tema object compatible with the existing system
+      const temaAdaptado: Tema = {
+        id: randomTheme.id,
+        titulo: randomTheme.titulo,
+        texto_motivador: `Tema do ENEM ${randomTheme.ano}\n\nPalavras-chave: ${randomTheme.palavras_chave.join(', ')}\n\nDificuldade: ${randomTheme.dificuldade}`,
+        ativo: true
+      };
+      
+      // Add the theme to the current themes list if not already there
+      setTemas(currentTemas => {
+        const exists = currentTemas.find(t => t.id === temaAdaptado.id);
+        if (!exists) {
+          return [temaAdaptado, ...currentTemas];
+        }
+        return currentTemas;
+      });
+      
+      // Set the selected theme and go to writing view
+      setTemaSelecionado(randomTheme.id);
+      setCurrentView('write');
+      setConteudo('');
+      setTitulo('');
+      setStartTime(null);
+      setCurrentTime(0);
+      
+      toast({
+        title: "Tema selecionado!",
+        description: `Tema do ENEM ${randomTheme.ano} carregado com sucesso`,
+      });
+      
+    } catch (error) {
+      console.error('Erro ao carregar tema histórico:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar o tema",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getAvailableYears = () => {
