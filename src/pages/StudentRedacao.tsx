@@ -131,12 +131,67 @@ export default function StudentRedacao() {
     }
   };
 
-  const iniciarRedacao = (tipo: 'historico' | 'autoral' = 'historico') => {
+  const iniciarRedacao = async (tipo: 'historico' | 'autoral' = 'historico') => {
+    if (tipo === 'autoral') {
+      await gerarTemaAutoral();
+      return;
+    }
+    
     setCurrentView('write');
     setStartTime(new Date());
     setConteudo('');
     setTitulo('');
     setCurrentTime(0);
+  };
+
+  const gerarTemaAutoral = async () => {
+    if (!studentSession) return;
+    
+    setGeneratingTheme(true);
+    try {
+      const studentData = JSON.parse(localStorage.getItem('studentSession') || '{}');
+      
+      const { data, error } = await supabase.functions.invoke('gerar-tema-webhook', {
+        body: {
+          dificuldade: 'medio',
+          categoria_tematica: null
+        },
+        headers: {
+          'X-Student-Session': JSON.stringify(studentData)
+        }
+      });
+
+      if (error) throw error;
+
+      // Set the generated theme as selected
+      const newTheme = data.theme;
+      setTemaSelecionado(newTheme.id);
+      
+      // Reload themes to include the new one
+      await loadTemas();
+      
+      // Start writing with the new theme
+      setCurrentView('write');
+      setStartTime(new Date());
+      setConteudo('');
+      setTitulo('');
+      setCurrentTime(0);
+
+      toast({
+        title: 'Tema gerado com sucesso!',
+        description: 'Um novo tema foi criado e já está selecionado para você começar a escrever.',
+      });
+
+    } catch (error: any) {
+      console.error('Erro ao gerar tema autoral:', error);
+      toast({
+        title: 'Erro ao gerar tema',
+        description: error.message || 'Tente novamente em alguns instantes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setGeneratingTheme(false);
+    }
   };
 
   const salvarRedacao = async () => {
@@ -375,17 +430,23 @@ export default function StudentRedacao() {
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow group" onClick={() => iniciarRedacao('autoral')}>
+            <Card className={`cursor-pointer hover:shadow-lg transition-shadow group ${generatingTheme ? 'opacity-50' : ''}`} onClick={() => !generatingTheme && iniciarRedacao('autoral')}>
               <CardContent className="p-8 text-center space-y-4">
                 <div className="w-16 h-16 mx-auto bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                  <Target className="w-8 h-8 text-purple-600" />
+                  {generatingTheme ? (
+                    <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+                  ) : (
+                    <Target className="w-8 h-8 text-purple-600" />
+                  )}
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Tema Autoral</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Gere um tema inédito com IA no padrão ENEM
+                    {generatingTheme ? 'Gerando tema...' : 'Gere um tema inédito com IA no padrão ENEM'}
                   </p>
-                  <Badge variant="secondary">Desafio</Badge>
+                  <Badge variant="secondary">
+                    {generatingTheme ? 'Aguarde' : 'Desafio'}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
