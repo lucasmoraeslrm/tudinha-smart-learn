@@ -26,6 +26,15 @@ serve(async (req) => {
     
     // Validate student token
     console.log('Validating student token...');
+    
+    // First, let's see what's in student_auth table
+    const { data: allStudentAuth, error: debugError } = await supabase
+      .from('student_auth')
+      .select('codigo, student_id')
+      .limit(5);
+    
+    console.log('Debug - All student_auth entries:', allStudentAuth, 'Error:', debugError);
+    
     const { data: studentData, error: authError } = await supabase
       .from('student_auth')
       .select(`
@@ -36,13 +45,21 @@ serve(async (req) => {
         )
       `)
       .eq('codigo', token)
-      .single();
+      .maybeSingle();
 
     console.log('Student auth query result:', { studentData, authError });
 
-    if (authError || !studentData) {
-      console.log('Student validation failed:', authError);
-      return new Response(JSON.stringify({ error: 'Invalid student token', details: authError }), {
+    if (authError) {
+      console.log('Database error during student validation:', authError);
+      return new Response(JSON.stringify({ error: 'Database error', details: authError.message }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!studentData) {
+      console.log('No student found with codigo:', token);
+      return new Response(JSON.stringify({ error: 'Student not found', codigo: token }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
