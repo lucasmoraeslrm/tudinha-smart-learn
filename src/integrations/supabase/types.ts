@@ -1162,7 +1162,7 @@ export type Database = {
           tempo_ms: number | null
           titulo: string | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           conteudo: string
@@ -1178,7 +1178,7 @@ export type Database = {
           tempo_ms?: number | null
           titulo?: string | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           conteudo?: string
@@ -1194,7 +1194,7 @@ export type Database = {
           tempo_ms?: number | null
           titulo?: string | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

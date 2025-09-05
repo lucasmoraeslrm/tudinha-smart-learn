@@ -132,6 +132,12 @@ export default function StudentRedacao() {
 
   const loadRedacoes = async () => {
     try {
+      const studentId = studentSession?.id || (localStorage.getItem('student_session') && JSON.parse(localStorage.getItem('student_session') || '{}').id);
+      if (!studentId) {
+        setRedacoes([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('redacoes_usuario')
         .select(`
@@ -141,7 +147,7 @@ export default function StudentRedacao() {
             texto_motivador
           )
         `)
-        .eq('user_id', studentSession?.id || (localStorage.getItem('student_session') && JSON.parse(localStorage.getItem('student_session') || '{}').id))
+        .or(`student_id.eq.${studentId},user_id.eq.${studentId}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -376,20 +382,24 @@ export default function StudentRedacao() {
         .from('temas_redacao')
         .select('*')
         .eq('id', temaSelecionado)
-        .single();
+        .maybeSingle();
 
-      if (temaError) throw temaError;
+      if (temaError) {
+        console.warn('Tema não encontrado em temas_redacao, usando fallback do estado.');
+      }
+
+      const temaInfo = temaData || temas.find(t => t.id === temaSelecionado);
 
       // Prepare webhook payload according to specification
       const webhookPayload = {
         redacao_id: savedEssay.id,
         user_id: studentSession?.id || studentData.id,
         tema: {
-          titulo: temaData.titulo,
-          descricao: temaData.texto_motivador,
+          titulo: temaInfo?.titulo || 'Tema',
+          descricao: temaInfo?.texto_motivador || '',
           instrucoes_oficiais: "Redação dissertativo-argumentativa com base nos textos motivadores",
-          textos_auxiliares: [temaData.texto_motivador],
-          palavras_chave: Array.isArray(temaData.competencias) ? temaData.competencias : [],
+          textos_auxiliares: temaInfo?.texto_motivador ? [temaInfo.texto_motivador] : [],
+          palavras_chave: Array.isArray((temaData as any)?.competencias) ? (temaData as any).competencias : [],
           categoria_tematica: "geral", 
           dificuldade: "media",
           tipo_vestibular: "enem"
