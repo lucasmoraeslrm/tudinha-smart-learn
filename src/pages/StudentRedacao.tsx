@@ -46,12 +46,24 @@ interface Redacao {
   };
 }
 
+interface TemaEnemHistorico {
+  id: string;
+  ano: number;
+  titulo: string;
+  categoria_tematica: string | null;
+  dificuldade: string;
+  palavras_chave: string[];
+  textos_auxiliares_count: number;
+  created_at: string;
+}
+
 export default function StudentRedacao() {
   const { studentSession } = useAuth();
   const { toast } = useToast();
   
   const [temas, setTemas] = useState<Tema[]>([]);
   const [redacoes, setRedacoes] = useState<Redacao[]>([]);
+  const [temasEnemHistorico, setTemasEnemHistorico] = useState<TemaEnemHistorico[]>([]);
   const [temaSelecionado, setTemaSelecionado] = useState<string>('');
   const [titulo, setTitulo] = useState('');
   const [conteudo, setConteudo] = useState('');
@@ -59,7 +71,7 @@ export default function StudentRedacao() {
   const [submitting, setSubmitting] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [wordCount, setWordCount] = useState(0);
-  const [currentView, setCurrentView] = useState<'home' | 'write' | 'history'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'write' | 'history' | 'enem-historico'>('home');
   const [currentTime, setCurrentTime] = useState(0);
   const [generatingTheme, setGeneratingTheme] = useState(false);
   const [showRedacaoModelo, setShowRedacaoModelo] = useState(false);
@@ -131,9 +143,29 @@ export default function StudentRedacao() {
     }
   };
 
+  const loadTemasEnemHistorico = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('temas_enem_historico')
+        .select('*')
+        .order('ano', { ascending: false });
+
+      if (error) throw error;
+      setTemasEnemHistorico(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar temas do ENEM histórico:', error);
+    }
+  };
+
   const iniciarRedacao = async (tipo: 'historico' | 'autoral' = 'historico') => {
     if (tipo === 'autoral') {
       await gerarTemaAutoral();
+      return;
+    }
+    
+    if (tipo === 'historico') {
+      await loadTemasEnemHistorico();
+      setCurrentView('enem-historico');
       return;
     }
     
@@ -945,6 +977,118 @@ export default function StudentRedacao() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // ENEM Histórico View
+  if (currentView === 'enem-historico') {
+    return (
+      <div className="flex flex-1 gap-6">
+        <div className="flex-1 space-y-6">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setCurrentView('home')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">ENEM Histórico</h1>
+              <p className="text-sm text-muted-foreground">Escolha um tema oficial do ENEM para praticar</p>
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            {temasEnemHistorico.map((tema) => (
+              <Card 
+                key={tema.id} 
+                className="cursor-pointer hover:shadow-lg transition-shadow group border-l-4 border-l-primary"
+                onClick={() => {
+                  // Simular um tema da estrutura atual para compatibilidade
+                  const temaCompativel = {
+                    id: tema.id,
+                    titulo: tema.titulo,
+                    texto_motivador: `Tema oficial do ENEM ${tema.ano}\n\nPalavras-chave: ${tema.palavras_chave.join(', ')}\n\nEste é um tema oficial do ENEM. Desenvolva sua redação dissertativo-argumentativa sobre o assunto proposto.`,
+                    ativo: true
+                  };
+                  
+                  setTemas([temaCompativel]);
+                  setTemaSelecionado(tema.id);
+                  setCurrentView('write');
+                  setConteudo('');
+                  setTitulo('');
+                  setStartTime(null);
+                  setCurrentTime(0);
+                }}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline">{tema.ano}</Badge>
+                        <Badge variant="secondary" className={
+                          tema.dificuldade === 'facil' ? 'bg-green-100 text-green-800' :
+                          tema.dificuldade === 'medio' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }>
+                          {tema.dificuldade === 'facil' ? 'Fácil' : 
+                           tema.dificuldade === 'medio' ? 'Médio' : 'Difícil'}
+                        </Badge>
+                        {tema.categoria_tematica && (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                            {tema.categoria_tematica.replace('_', ' ')}
+                          </Badge>
+                        )}
+                      </div>
+                      <h3 className="text-lg font-semibold mb-3 group-hover:text-primary transition-colors">
+                        {tema.titulo}
+                      </h3>
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {tema.palavras_chave.slice(0, 4).map((palavra, index) => (
+                          <span 
+                            key={index}
+                            className="inline-block bg-muted px-2 py-1 rounded-sm text-xs text-muted-foreground"
+                          >
+                            {palavra}
+                          </span>
+                        ))}
+                        {tema.palavras_chave.length > 4 && (
+                          <span className="inline-block bg-muted px-2 py-1 rounded-sm text-xs text-muted-foreground">
+                            +{tema.palavras_chave.length - 4} mais
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {tema.textos_auxiliares_count} textos motivadores • Tema oficial ENEM {tema.ano}
+                      </p>
+                    </div>
+                    <div className="ml-4">
+                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                        <Calendar className="w-6 h-6 text-green-600" />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {temasEnemHistorico.length === 0 && (
+            <Card>
+              <CardContent className="text-center py-20">
+                <Calendar className="w-20 h-20 mx-auto mb-6 text-muted-foreground/50" />
+                <h3 className="text-xl font-semibold mb-3">Carregando temas históricos...</h3>
+                <p className="text-muted-foreground">
+                  Aguarde enquanto carregamos os temas oficiais do ENEM.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     );

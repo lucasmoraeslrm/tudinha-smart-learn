@@ -1603,6 +1603,39 @@ export type Database = {
           },
         ]
       }
+      temas_enem_historico: {
+        Row: {
+          ano: number
+          categoria_tematica: string | null
+          created_at: string
+          dificuldade: string
+          id: string
+          palavras_chave: string[] | null
+          textos_auxiliares_count: number | null
+          titulo: string
+        }
+        Insert: {
+          ano: number
+          categoria_tematica?: string | null
+          created_at?: string
+          dificuldade?: string
+          id?: string
+          palavras_chave?: string[] | null
+          textos_auxiliares_count?: number | null
+          titulo: string
+        }
+        Update: {
+          ano?: number
+          categoria_tematica?: string | null
+          created_at?: string
+          dificuldade?: string
+          id?: string
+          palavras_chave?: string[] | null
+          textos_auxiliares_count?: number | null
+          titulo?: string
+        }
+        Relationships: []
+      }
       temas_redacao: {
         Row: {
           ativo: boolean | null
