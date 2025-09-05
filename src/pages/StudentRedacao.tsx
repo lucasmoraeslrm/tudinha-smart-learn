@@ -437,27 +437,24 @@ export default function StudentRedacao() {
 
       console.log('Setting correction result:', processedResult);
       
-      // Save correction to database
-      const { data: redacaoAtualizada, error: updateError } = await supabase
-        .from('redacoes_usuario')
-        .update({
-          status: 'corrigida',
-          correcao_ia: processedResult,
-          data_correcao: new Date().toISOString()
-        })
-        .eq('id', savedEssay.id)
-        .select(`
-          *,
-          temas_redacao(*)
-        `)
-        .single();
+      // Save correction via Edge Function (handles RLS and validation)
+      const { data: salvarCorrecaoData, error: salvarCorrecaoError } = await supabase.functions.invoke('salvar-correcao', {
+        body: {
+          redacao_id: savedEssay.id,
+          correcao: processedResult,
+          status: 'corrigida'
+        },
+        headers: {
+          'X-Student-Session': JSON.stringify(studentData)
+        }
+      });
 
-      if (updateError) {
-        console.error('Erro ao salvar correção:', updateError);
+      if (salvarCorrecaoError) {
+        console.error('Erro ao salvar correção (edge):', salvarCorrecaoError);
         throw new Error('Erro ao salvar correção no banco de dados');
       }
 
-      console.log('Correção salva no banco:', redacaoAtualizada);
+      console.log('Correção salva no banco (edge):', salvarCorrecaoData);
       setCorrectionResult(processedResult);
       setCorrecting(false);
       

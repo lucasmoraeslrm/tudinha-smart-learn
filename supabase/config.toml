@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.salvar-redacao]
 verify_jwt = false
+
+[functions.salvar-correcao]
+verify_jwt = false
