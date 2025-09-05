@@ -29,7 +29,21 @@ serve(async (req) => {
     }
 
     const studentSession = JSON.parse(studentSessionHeader);
-    if (!studentSession.escola_id) {
+    let escolaId = studentSession.escola_id;
+
+    // Fallback: fetch escola_id from students table if not provided in the header
+    if (!escolaId && studentSession.id) {
+      const { data: studentRow } = await supabaseClient
+        .from('students')
+        .select('escola_id')
+        .eq('id', studentSession.id)
+        .maybeSingle();
+      if (studentRow?.escola_id) {
+        escolaId = studentRow.escola_id;
+      }
+    }
+
+    if (!escolaId) {
       return new Response(JSON.stringify({ error: 'School ID not found in session' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -45,7 +59,7 @@ serve(async (req) => {
     const { data: webhook, error: webhookError } = await supabaseClient
       .from('webhooks')
       .select('*')
-      .eq('escola_id', studentSession.escola_id)
+      .eq('escola_id', escolaId)
       .eq('tipo', 'gerar_tema')
       .eq('ativo', true)
       .single();
@@ -63,7 +77,7 @@ serve(async (req) => {
     const payload = {
       dificuldade,
       categoria_tematica,
-      escola_id: studentSession.escola_id,
+      escola_id: escolaId,
       student_id: studentSession.id,
       timestamp: new Date().toISOString()
     };

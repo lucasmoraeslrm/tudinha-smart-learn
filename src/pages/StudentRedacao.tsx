@@ -121,7 +121,7 @@ export default function StudentRedacao() {
             texto_motivador
           )
         `)
-        .eq('user_id', studentSession?.id || localStorage.getItem('studentSession') && JSON.parse(localStorage.getItem('studentSession') || '{}').id)
+        .eq('user_id', studentSession?.id || (localStorage.getItem('student_session') && JSON.parse(localStorage.getItem('student_session') || '{}').id))
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -149,7 +149,7 @@ export default function StudentRedacao() {
     
     setGeneratingTheme(true);
     try {
-      const studentData = JSON.parse(localStorage.getItem('studentSession') || '{}');
+      const studentData = JSON.parse(localStorage.getItem('student_session') || '{}');
       
       const { data, error } = await supabase.functions.invoke('gerar-tema-webhook', {
         body: {
@@ -217,7 +217,7 @@ export default function StudentRedacao() {
 
     try {
       const tempoMs = startTime ? Date.now() - startTime.getTime() : 0;
-      const studentData = JSON.parse(localStorage.getItem('studentSession') || '{}');
+      const studentData = JSON.parse(localStorage.getItem('student_session') || '{}');
 
       const { data, error } = await supabase
         .from('redacoes_usuario')
