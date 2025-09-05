@@ -61,6 +61,9 @@ export default function StudentRedacao() {
   const [wordCount, setWordCount] = useState(0);
   const [currentView, setCurrentView] = useState<'home' | 'write' | 'history'>('home');
   const [currentTime, setCurrentTime] = useState(0);
+  const [generatingTheme, setGeneratingTheme] = useState(false);
+  const [showRedacaoModelo, setShowRedacaoModelo] = useState(false);
+  const [redacaoModelo, setRedacaoModelo] = useState('');
 
   useEffect(() => {
     if (studentSession) {
@@ -268,6 +271,63 @@ export default function StudentRedacao() {
     return `${Math.floor(minutes / 60)}:${(minutes % 60).toString().padStart(2, '0')}`;
   };
 
+  const gerarNovoTema = async () => {
+    if (!studentSession) return;
+    
+    setGeneratingTheme(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('gerar-tema', {
+        body: {
+          dificuldade: 'medio',
+          categoria_tematica: null
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Tema gerado com sucesso!',
+        description: 'Um novo tema foi criado e já está disponível.',
+      });
+
+      loadTemas(); // Recarrega a lista de temas
+    } catch (error: any) {
+      console.error('Erro ao gerar tema:', error);
+      toast({
+        title: 'Erro ao gerar tema',
+        description: error.message || 'Tente novamente em alguns instantes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setGeneratingTheme(false);
+    }
+  };
+
+  const gerarRedacaoModelo = async (temaId: string) => {
+    if (!studentSession) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('gerar-redacao-modelo', {
+        body: { tema_id: temaId }
+      });
+
+      if (error) throw error;
+
+      setRedacaoModelo(data.redacao_modelo);
+      setShowRedacaoModelo(true);
+    } catch (error: any) {
+      console.error('Erro ao gerar redação-modelo:', error);
+      toast({
+        title: 'Erro ao gerar exemplo',
+        description: error.message || 'Tente novamente em alguns instantes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Home View
   if (currentView === 'home') {
     return (
@@ -279,9 +339,18 @@ export default function StudentRedacao() {
               <p className="text-muted-foreground">Pratique e aprimore suas habilidades de escrita</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <BookOpen className="w-4 h-4 mr-2" />
-                Novo Tema
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={gerarNovoTema}
+                disabled={generatingTheme}
+              >
+                {generatingTheme ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <BookOpen className="w-4 h-4 mr-2" />
+                )}
+                {generatingTheme ? 'Gerando...' : 'Novo Tema'}
               </Button>
               <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-2" />
@@ -480,6 +549,22 @@ export default function StudentRedacao() {
                     respeite os direitos humanos. Selecione, organize e relacione, de forma coerente e coesa, argumentos e fatos para 
                     defesa de seu ponto de vista.
                   </p>
+                  <div className="mt-3 pt-3 border-t">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => gerarRedacaoModelo(selectedTema.id)}
+                      disabled={loading}
+                      className="flex items-center gap-2"
+                    >
+                      {loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Star className="w-4 h-4" />
+                      )}
+                      {loading ? 'Gerando...' : 'Ver Exemplo'}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -781,6 +866,58 @@ export default function StudentRedacao() {
                   <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                   <span className="text-sm">Conclusão (25-30 linhas)</span>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Redação Modelo Modal
+  if (showRedacaoModelo) {
+    return (
+      <div className="flex flex-1 gap-6">
+        <div className="flex-1 space-y-6">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                setShowRedacaoModelo(false);
+                setRedacaoModelo('');
+              }}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Redação Modelo</h1>
+              <p className="text-sm text-muted-foreground">Exemplo de redação para o tema selecionado</p>
+            </div>
+          </div>
+
+          <Card className="border-l-4 border-l-green-500">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge variant="outline">EXEMPLO</Badge>
+                <Badge variant="secondary" className="bg-green-100 text-green-800">Modelo</Badge>
+              </div>
+              <h2 className="text-lg font-semibold mb-4">{selectedTema?.titulo}</h2>
+              <div className="prose prose-sm max-w-none">
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <p className="whitespace-pre-line leading-relaxed">
+                    {redacaoModelo}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-l-blue-500">
+                <h4 className="font-medium text-sm text-blue-800 mb-2">💡 Dica</h4>
+                <p className="text-xs text-blue-700">
+                  Esta é uma redação-modelo gerada automaticamente. Use-a como inspiração para estrutura e 
+                  argumentação, mas desenvolva suas próprias ideias e repertórios na sua redação.
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -116,27 +116,24 @@ serve(async (req) => {
       });
     }
 
-    // Prepare prompt for OpenAI
-    const fullPrompt = `${config.prompt_correcao}
+    // Prepare the correction prompt using the new standardized format
+    const systemMessage = "Você é um corretor oficial de redações no padrão ENEM. Avalie a redação do aluno com base nas 5 competências do ENEM, atribuindo notas inteiras entre 0 e 200 para cada competência. Some as notas (máximo 1000). Escreva comentários claros, objetivos e respeitosos. Não inclua qualquer texto fora do JSON. Não use Markdown. Não inclua explicações.";
 
-Tema da redação: ${redacao.temas_redacao?.titulo || 'Não especificado'}
-${redacao.temas_redacao?.texto_motivador ? `Texto motivador: ${redacao.temas_redacao.texto_motivador}` : ''}
+    const tempoMinutos = redacao.tempo_ms ? Math.round(redacao.tempo_ms / 60000) : null;
+    
+    const userMessage = `Avalie a redação abaixo conforme o padrão ENEM.
 
-Redação do aluno:
-${redacao.conteudo}
+Tema:
 
-Forneça a resposta em formato JSON com a seguinte estrutura:
-{
-  "competencias": {
-    "competencia_1": {"nota": 0-200, "justificativa": "texto"},
-    "competencia_2": {"nota": 0-200, "justificativa": "texto"}, 
-    "competencia_3": {"nota": 0-200, "justificativa": "texto"},
-    "competencia_4": {"nota": 0-200, "justificativa": "texto"},
-    "competencia_5": {"nota": 0-200, "justificativa": "texto"}
-  },
-  "nota_final": 0-1000,
-  "feedback_geral": "texto com feedback geral sobre a redação"
-}`;
+Título: ${redacao.temas_redacao?.titulo || 'Tema não especificado'}
+Descrição: ${redacao.temas_redacao?.texto_motivador || 'Descrição não disponível'}
+Textos motivadores: ${redacao.temas_redacao?.texto_motivador || 'Não disponível'}
+
+Redação do aluno: ${redacao.conteudo}
+
+${tempoMinutos ? `Tempo gasto (min): ${tempoMinutos}` : ''}
+
+Retorne APENAS este JSON: { "competencia1": { "nota": 0, "comentario": "..." }, "competencia2": { "nota": 0, "comentario": "..." }, "competencia3": { "nota": 0, "comentario": "..." }, "competencia4": { "nota": 0, "comentario": "..." }, "competencia5": { "nota": 0, "comentario": "..." }, "comentario_geral": "Resumo objetivo com os principais pontos fortes e de melhoria." }`;
 
     // Call OpenAI API
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -150,14 +147,14 @@ Forneça a resposta em formato JSON com a seguinte estrutura:
         messages: [
           {
             role: 'system',
-            content: 'Você é um corretor especialista em redações do ENEM. Analise cuidadosamente cada competência e forneça notas e feedback detalhado.'
+            content: systemMessage
           },
           {
             role: 'user',
-            content: fullPrompt
+            content: userMessage
           }
         ],
-        max_completion_tokens: 2000,
+        max_completion_tokens: 1500,
         response_format: { type: "json_object" }
       }),
     });
@@ -174,14 +171,45 @@ Forneça a resposta em formato JSON com a seguinte estrutura:
     const openaiData = await openaiResponse.json();
     const aiCorrection = JSON.parse(openaiData.choices[0].message.content);
 
+    // Calculate total score from individual competencies
+    const totalScore = (aiCorrection.competencia1?.nota || 0) +
+                      (aiCorrection.competencia2?.nota || 0) +
+                      (aiCorrection.competencia3?.nota || 0) +
+                      (aiCorrection.competencia4?.nota || 0) +
+                      (aiCorrection.competencia5?.nota || 0);
+
+    // Transform to expected format for database storage
+    const competenciasFormatted = {
+      competencia_1: { 
+        nota: aiCorrection.competencia1?.nota || 0, 
+        justificativa: aiCorrection.competencia1?.comentario || '' 
+      },
+      competencia_2: { 
+        nota: aiCorrection.competencia2?.nota || 0, 
+        justificativa: aiCorrection.competencia2?.comentario || '' 
+      },
+      competencia_3: { 
+        nota: aiCorrection.competencia3?.nota || 0, 
+        justificativa: aiCorrection.competencia3?.comentario || '' 
+      },
+      competencia_4: { 
+        nota: aiCorrection.competencia4?.nota || 0, 
+        justificativa: aiCorrection.competencia4?.comentario || '' 
+      },
+      competencia_5: { 
+        nota: aiCorrection.competencia5?.nota || 0, 
+        justificativa: aiCorrection.competencia5?.comentario || '' 
+      }
+    };
+
     // Update the essay with the AI correction
     const { data: updatedRedacao, error: updateError } = await supabaseClient
       .from('redacoes_usuario')
       .update({
-        notas: aiCorrection.competencias,
+        notas: competenciasFormatted,
         feedback: {
-          nota_final: aiCorrection.nota_final,
-          feedback_geral: aiCorrection.feedback_geral,
+          nota_final: totalScore,
+          feedback_geral: aiCorrection.comentario_geral || '',
           corrigida_em: new Date().toISOString(),
           modelo_usado: config.modelo_openai
         },
@@ -201,7 +229,11 @@ Forneça a resposta em formato JSON com a seguinte estrutura:
 
     return new Response(JSON.stringify({ 
       data: updatedRedacao,
-      correction: aiCorrection
+      correction: {
+        competencias: competenciasFormatted,
+        nota_final: totalScore,
+        feedback_geral: aiCorrection.comentario_geral || ''
+      }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
