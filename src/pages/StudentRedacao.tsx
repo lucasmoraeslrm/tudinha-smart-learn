@@ -4,19 +4,22 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  FileText, 
-  Send, 
+  Calendar,
+  Target, 
+  BookOpen,
+  Settings,
   Clock, 
-  CheckCircle, 
-  AlertCircle, 
+  Send,
+  ArrowLeft,
   Loader2,
   Star,
-  BookOpen 
+  CheckCircle,
+  Save
 } from 'lucide-react';
 
 interface Tema {
@@ -56,6 +59,8 @@ export default function StudentRedacao() {
   const [submitting, setSubmitting] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [wordCount, setWordCount] = useState(0);
+  const [currentView, setCurrentView] = useState<'home' | 'write' | 'history'>('home');
+  const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
     if (studentSession) {
@@ -68,6 +73,18 @@ export default function StudentRedacao() {
     const words = conteudo.trim().split(/\s+/).filter(word => word.length > 0).length;
     setWordCount(conteudo.trim() ? words : 0);
   }, [conteudo]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (startTime) {
+      interval = setInterval(() => {
+        setCurrentTime(Math.floor((Date.now() - startTime.getTime()) / 1000));
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [startTime]);
 
   const loadTemas = async () => {
     try {
@@ -111,18 +128,12 @@ export default function StudentRedacao() {
     }
   };
 
-  const iniciarRedacao = () => {
-    if (!temaSelecionado) {
-      toast({
-        title: "Selecione um tema",
-        description: "Escolha um tema para começar sua redação",
-        variant: "destructive",
-      });
-      return;
-    }
+  const iniciarRedacao = (tipo: 'historico' | 'autoral' = 'historico') => {
+    setCurrentView('write');
     setStartTime(new Date());
     setConteudo('');
     setTitulo('');
+    setCurrentTime(0);
   };
 
   const salvarRedacao = async () => {
@@ -178,6 +189,8 @@ export default function StudentRedacao() {
       setConteudo('');
       setTemaSelecionado('');
       setStartTime(null);
+      setCurrentTime(0);
+      setCurrentView('home');
       
       // Reload essays
       loadRedacoes();
@@ -245,131 +258,391 @@ export default function StudentRedacao() {
 
   const selectedTema = temas.find(t => t.id === temaSelecionado);
 
-  return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
-        <FileText className="w-8 h-8 text-primary" />
-        <div>
-          <h1 className="text-2xl font-bold">Redações ENEM</h1>
-          <p className="text-muted-foreground">Pratique e receba correções automáticas</p>
-        </div>
-      </div>
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
-      <Tabs defaultValue="escrever" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="escrever">Escrever Redação</TabsTrigger>
-          <TabsTrigger value="historico">Minhas Redações ({redacoes.length})</TabsTrigger>
-        </TabsList>
+  const formatTimeTarget = (minutes: number) => {
+    return `${Math.floor(minutes / 60)}:${(minutes % 60).toString().padStart(2, '0')}`;
+  };
 
-        <TabsContent value="escrever" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
-                Nova Redação
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Escolha um tema:</label>
-                <Select value={temaSelecionado} onValueChange={setTemaSelecionado}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um tema" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {temas.map((tema) => (
-                      <SelectItem key={tema.id} value={tema.id}>
-                        {tema.titulo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+  // Home View
+  if (currentView === 'home') {
+    return (
+      <div className="flex flex-1 gap-6">
+        <div className="flex-1 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Redação ENEM</h1>
+              <p className="text-muted-foreground">Pratique e aprimore suas habilidades de escrita</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Novo Tema
+              </Button>
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Dicas
+              </Button>
+            </div>
+          </div>
 
-              {selectedTema && (
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="pt-6">
-                    <h3 className="font-semibold mb-2">{selectedTema.titulo}</h3>
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                      {selectedTema.texto_motivador}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {startTime && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 inline mr-1" />
-                      Tempo: {Math.floor((Date.now() - startTime.getTime()) / 60000)} min
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      Palavras: {wordCount}
-                    </span>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Título:</label>
-                    <Textarea
-                      value={titulo}
-                      onChange={(e) => setTitulo(e.target.value)}
-                      placeholder="Digite o título da sua redação"
-                      className="h-20"
-                      maxLength={100}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Redação:</label>
-                    <Textarea
-                      value={conteudo}
-                      onChange={(e) => setConteudo(e.target.value)}
-                      placeholder="Escreva sua redação aqui..."
-                      className="h-96"
-                      maxLength={5000}
-                    />
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={salvarRedacao} 
-                      disabled={submitting}
-                      className="flex-1"
-                    >
-                      {submitting ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Send className="w-4 h-4 mr-2" />
-                      )}
-                      Enviar Redação
-                    </Button>
-                  </div>
+          <div className="grid grid-cols-2 gap-6">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow group" onClick={() => iniciarRedacao('historico')}>
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  <Calendar className="w-8 h-8 text-green-600" />
                 </div>
-              )}
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">ENEM Histórico</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Pratique com temas oficiais do ENEM (2014-2023)
+                  </p>
+                  <Badge variant="secondary">Autêntico</Badge>
+                </div>
+              </CardContent>
+            </Card>
 
-              {!startTime && selectedTema && (
-                <Button onClick={iniciarRedacao} className="w-full">
-                  Começar a Escrever
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow group" onClick={() => iniciarRedacao('autoral')}>
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                  <Target className="w-8 h-8 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">Tema Autoral</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Gere um tema inédito com IA no padrão ENEM
+                  </p>
+                  <Badge variant="secondary">Desafio</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow group" onClick={() => setCurrentView('history')}>
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <BookOpen className="w-8 h-8 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">Minhas Redações</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Visualize todas as suas redações anteriores
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="opacity-50 cursor-not-allowed">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Settings className="w-8 h-8 text-orange-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2 text-muted-foreground">Corrigir Redação</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Temporariamente desabilitado
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="w-80 space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Cronômetro
+                </h3>
+              </div>
+              <div className="text-center space-y-4">
+                <div className="text-4xl font-mono font-bold text-primary">
+                  {formatTime(currentTime)}
+                </div>
+                <Button className="w-full" disabled>
+                  Iniciar
                 </Button>
-              )}
+              </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="historico" className="space-y-4">
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Metas de Redação
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm">Palavras</span>
+                  <span className="text-sm font-mono">0/300</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Tempo ideal</span>
+                  <span className="text-sm font-mono">0:00/90:00</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4">Estrutura Ideal</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-sm">Introdução (20-25 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-sm">Desenvolvimento 1 (35-40 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <span className="text-sm">Desenvolvimento 2 (35-40 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                  <span className="text-sm">Conclusão (25-30 linhas)</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Write View
+  if (currentView === 'write') {
+    return (
+      <div className="flex flex-1 gap-6">
+        <div className="flex-1 space-y-6">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setCurrentView('home')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Redação ENEM</h1>
+              <p className="text-sm text-muted-foreground">Pratique e aprimore suas habilidades de escrita</p>
+            </div>
+          </div>
+
+          {!selectedTema && (
+            <Card>
+              <CardContent className="p-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Escolha um tema:</label>
+                  <Select value={temaSelecionado} onValueChange={setTemaSelecionado}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um tema" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {temas.map((tema) => (
+                        <SelectItem key={tema.id} value={tema.id}>
+                          {tema.titulo}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedTema && (
+            <Card className="border-l-4 border-l-primary">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge variant="outline">ENEM</Badge>
+                  <Badge variant="secondary">médio</Badge>
+                </div>
+                <h2 className="text-lg font-semibold mb-4">{selectedTema.titulo}</h2>
+                <p className="text-sm text-muted-foreground mb-4 whitespace-pre-line">
+                  {selectedTema.texto_motivador}
+                </p>
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h4 className="font-medium text-sm mb-2">Textos de apoio:</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Com base na leitura dos textos motivadores seguintes e nos conhecimentos construídos ao longo de sua formação, redija texto 
+                    dissertativo-argumentativo em modalidade escrita formal da Língua Portuguesa sobre o tema apresentado, apresentando proposta de intervenção que 
+                    respeite os direitos humanos. Selecione, organize e relacione, de forma coerente e coesa, argumentos e fatos para 
+                    defesa de seu ponto de vista.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedTema && (
+            <div className="space-y-6">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Redação</label>
+                <div className="text-right text-sm text-muted-foreground mb-2">
+                  {wordCount} palavras
+                </div>
+                <Textarea
+                  value={conteudo}
+                  onChange={(e) => setConteudo(e.target.value)}
+                  placeholder="Comece a escrever sua redação aqui... (mínimo 250 palavras)"
+                  className="min-h-[400px] text-base leading-relaxed"
+                  maxLength={5000}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    toast({
+                      title: "Rascunho salvo",
+                      description: "Sua redação foi salva como rascunho",
+                    });
+                  }}
+                >
+                  <Save className="w-4 h-4" />
+                  Salvar
+                </Button>
+                <Button 
+                  onClick={salvarRedacao} 
+                  disabled={submitting || wordCount < 5}
+                  className="flex items-center gap-2"
+                >
+                  {submitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  Finalizar e Corrigir
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="w-80 space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Cronômetro
+                </h3>
+              </div>
+              <div className="text-center space-y-4">
+                <div className="text-4xl font-mono font-bold text-primary">
+                  {formatTime(currentTime)}
+                </div>
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    if (!startTime) {
+                      setStartTime(new Date());
+                    }
+                  }}
+                  disabled={!!startTime}
+                >
+                  {startTime ? 'Em andamento' : 'Iniciar'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Metas de Redação
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm">Palavras</span>
+                  <span className="text-sm font-mono">{wordCount}/300</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Tempo ideal</span>
+                  <span className="text-sm font-mono">{formatTime(currentTime)}/90:00</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4">Estrutura Ideal</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-sm">Introdução (20-25 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-sm">Desenvolvimento 1 (35-40 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <span className="text-sm">Desenvolvimento 2 (35-40 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                  <span className="text-sm">Conclusão (25-30 linhas)</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // History View
+  if (currentView === 'history') {
+    return (
+      <div className="flex flex-1 gap-6">
+        <div className="flex-1 space-y-6">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setCurrentView('home')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Minhas Redações</h1>
+              <p className="text-sm text-muted-foreground">Visualize o histórico das suas redações</p>
+            </div>
+          </div>
+
           {redacoes.length === 0 ? (
             <Card>
-              <CardContent className="text-center py-12">
-                <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">Nenhuma redação ainda</h3>
-                <p className="text-muted-foreground">
-                  Comece escrevendo sua primeira redação na aba "Escrever Redação"
+              <CardContent className="text-center py-20">
+                <BookOpen className="w-20 h-20 mx-auto mb-6 text-muted-foreground/50" />
+                <h3 className="text-xl font-semibold mb-3">Nenhuma redação encontrada</h3>
+                <p className="text-muted-foreground mb-6">
+                  Você ainda não escreveu nenhuma redação. Que tal começar agora?
                 </p>
+                <Button onClick={() => setCurrentView('home')}>
+                  Escrever Primeira Redação
+                </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4">
+            <div className="space-y-4">
               {redacoes.map((redacao) => (
                 <Card key={redacao.id}>
                   <CardHeader>
@@ -447,8 +720,74 @@ export default function StudentRedacao() {
               ))}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+        </div>
+
+        <div className="w-80 space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Cronômetro
+                </h3>
+              </div>
+              <div className="text-center space-y-4">
+                <div className="text-4xl font-mono font-bold text-primary">
+                  {formatTime(currentTime)}
+                </div>
+                <Button className="w-full" disabled>
+                  Iniciar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Metas de Redação
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm">Palavras</span>
+                  <span className="text-sm font-mono">0/300</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Tempo ideal</span>
+                  <span className="text-sm font-mono">0:00/90:00</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4">Estrutura Ideal</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-sm">Introdução (20-25 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-sm">Desenvolvimento 1 (35-40 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <span className="text-sm">Desenvolvimento 2 (35-40 linhas)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                  <span className="text-sm">Conclusão (25-30 linhas)</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
