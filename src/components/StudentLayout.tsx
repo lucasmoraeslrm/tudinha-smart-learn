@@ -32,9 +32,6 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log('Student session:', studentSession);
-  console.log('Active modules:', activeModules);
-
   const handleLogout = async () => {
     await signOut();
     navigate('/');
