@@ -48,8 +48,11 @@ serve(async (req) => {
       }
     }
 
-    // If not admin, check for student session in request body
+    // If not admin, check for student session in request body or headers
     if (!isAuthorized) {
+      const body = await req.json();
+      
+      // First try to get from headers
       const authHeader = req.headers.get('X-Student-Session');
       if (authHeader) {
         try {
@@ -59,9 +62,24 @@ serve(async (req) => {
             isAuthorized = true;
           }
         } catch (e) {
-          console.error('Invalid student session data:', e);
+          console.error('Invalid student session data in header:', e);
         }
       }
+      
+      // If still not authorized, try to get from localStorage or student session
+      if (!isAuthorized) {
+        const studentData = JSON.parse(localStorage?.getItem?.('student_session') || '{}');
+        if (studentData.id) {
+          studentId = studentData.id;
+          isAuthorized = true;
+        }
+      }
+      
+      // Store body for later use
+      req.bodyData = body;
+    } else {
+      // Read body for admin users
+      req.bodyData = await req.json();
     }
 
     if (!isAuthorized) {
@@ -71,7 +89,7 @@ serve(async (req) => {
       });
     }
 
-    const body = await req.json();
+    const body = req.bodyData;
     const { redacao_id, escola_id } = body;
 
     if (!redacao_id || !escola_id) {

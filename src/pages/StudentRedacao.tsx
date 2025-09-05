@@ -367,17 +367,23 @@ export default function StudentRedacao() {
       if (saveError) throw saveError;
 
       // Now request correction immediately
+      console.log('Requesting correction for essay:', savedEssay.id);
+      console.log('Student data:', studentData);
+      
       const { data: correctionData, error: correctionError } = await supabase.functions.invoke('enem-corrigir', {
         body: { 
           redacao_id: savedEssay.id, 
           escola_id: studentData.escola_id 
-        },
-        headers: {
-          'X-Student-Session': JSON.stringify(studentData)
         }
       });
 
-      if (correctionError) throw correctionError;
+      console.log('Correction response:', correctionData);
+      console.log('Correction error:', correctionError);
+
+      if (correctionError) {
+        console.error('Correction error details:', correctionError);
+        throw correctionError;
+      }
 
       setCorrectionResult(correctionData);
       setCorrecting(false);
