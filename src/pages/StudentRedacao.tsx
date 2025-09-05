@@ -366,22 +366,49 @@ export default function StudentRedacao() {
 
       if (saveError) throw saveError;
 
-      // Now request correction immediately
-      console.log('Requesting correction for essay:', savedEssay.id);
-      console.log('Student data:', studentData);
-      
-      const { data: correctionData, error: correctionError } = await supabase.functions.invoke('enem-corrigir', {
-        body: { 
-          redacao_id: savedEssay.id, 
-          escola_id: studentData.escola_id 
+      // Get full theme data for webhook
+      const { data: temaData, error: temaError } = await supabase
+        .from('temas_redacao')
+        .select('*')
+        .eq('id', temaSelecionado)
+        .single();
+
+      if (temaError) throw temaError;
+
+      // Prepare webhook payload according to specification
+      const webhookPayload = {
+        redacao_id: savedEssay.id,
+        user_id: studentSession?.id || studentData.id,
+        tema: {
+          titulo: temaData.titulo,
+          descricao: temaData.texto_motivador,
+          instrucoes_oficiais: "Redação dissertativo-argumentativa com base nos textos motivadores",
+          textos_auxiliares: [temaData.texto_motivador],
+          palavras_chave: Array.isArray(temaData.competencias) ? temaData.competencias : [],
+          categoria_tematica: "geral", 
+          dificuldade: "media",
+          tipo_vestibular: "enem"
+        },
+        conteudo: conteudo.trim(),
+        tempo_gasto: Math.floor(tempoMs / 1000), // Convert to seconds
+        titulo: titulo.trim()
+      };
+
+      console.log('Sending to webhook:', webhookPayload);
+
+      // Send to N8N webhook via send-n8n-webhook edge function
+      const { data: correctionData, error: correctionError } = await supabase.functions.invoke('send-n8n-webhook', {
+        body: {
+          webhookUrl: 'https://n8n.srv863581.hstgr.cloud/webhook/65a1a27c-3c01-438a-8518-ae3a5103f204',
+          webhookData: webhookPayload
         }
       });
 
-      console.log('Correction response:', correctionData);
-      console.log('Correction error:', correctionError);
+      console.log('Webhook response:', correctionData);
+      console.log('Webhook error:', correctionError);
 
       if (correctionError) {
-        console.error('Correction error details:', correctionError);
+        console.error('Webhook error details:', correctionError);
         throw correctionError;
       }
 
