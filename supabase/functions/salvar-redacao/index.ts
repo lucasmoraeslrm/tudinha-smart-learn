@@ -70,7 +70,6 @@ serve(async (req) => {
     const tempo_ms = body.tempo_ms ?? 0;
 
     const insertPayload = {
-      user_id: student.id, // associar ao próprio estudante
       student_id: student.id,
       escola_id: student.escola_id,
       tema_id: body.tema_id,
