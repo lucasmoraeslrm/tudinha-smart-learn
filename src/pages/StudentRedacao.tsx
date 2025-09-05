@@ -73,7 +73,7 @@ export default function StudentRedacao() {
   const [submitting, setSubmitting] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [wordCount, setWordCount] = useState(0);
-  const [currentView, setCurrentView] = useState<'home' | 'write' | 'history' | 'enem-historico'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'write' | 'history' | 'enem-historico' | 'feedback'>('home');
   const [currentTime, setCurrentTime] = useState(0);
   const [generatingTheme, setGeneratingTheme] = useState(false);
   const [showRedacaoModelo, setShowRedacaoModelo] = useState(false);
@@ -81,6 +81,9 @@ export default function StudentRedacao() {
   const [showHistoricoModal, setShowHistoricoModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>('ENEM');
+  const [showCorrectionModal, setShowCorrectionModal] = useState(false);
+  const [correctionResult, setCorrectionResult] = useState<any>(null);
+  const [correcting, setCorrecting] = useState(false);
 
   useEffect(() => {
     if (studentSession) {
@@ -337,12 +340,15 @@ export default function StudentRedacao() {
     }
 
     setSubmitting(true);
+    setShowCorrectionModal(true);
+    setCorrecting(true);
 
     try {
       const tempoMs = startTime ? Date.now() - startTime.getTime() : 0;
       const studentData = JSON.parse(localStorage.getItem('student_session') || '{}');
 
-      const { data, error } = await supabase
+      // First, save the essay
+      const { data: savedEssay, error: saveError } = await supabase
         .from('redacoes_usuario')
         .insert({
           user_id: studentSession?.id || studentData.id,
@@ -358,29 +364,47 @@ export default function StudentRedacao() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (saveError) throw saveError;
 
-      toast({
-        title: "Redação enviada!",
-        description: "Sua redação foi enviada e será corrigida em breve",
+      // Now request correction immediately
+      const { data: correctionData, error: correctionError } = await supabase.functions.invoke('enem-corrigir', {
+        body: { 
+          redacao_id: savedEssay.id, 
+          escola_id: studentData.escola_id 
+        },
+        headers: {
+          'X-Student-Session': JSON.stringify(studentData)
+        }
       });
 
-      // Reset form
-      setTitulo('');
-      setConteudo('');
-      setTemaSelecionado('');
-      setStartTime(null);
-      setCurrentTime(0);
-      setCurrentView('home');
+      if (correctionError) throw correctionError;
+
+      setCorrectionResult(correctionData);
+      setCorrecting(false);
       
-      // Reload essays
-      loadRedacoes();
+      // Wait a moment to show success, then navigate to feedback
+      setTimeout(() => {
+        setShowCorrectionModal(false);
+        setCurrentView('feedback');
+        
+        // Reset form
+        setTitulo('');
+        setConteudo('');
+        setTemaSelecionado('');
+        setStartTime(null);
+        setCurrentTime(0);
+        
+        // Reload essays
+        loadRedacoes();
+      }, 1500);
 
     } catch (error: any) {
-      console.error('Erro ao salvar redação:', error);
+      console.error('Erro ao salvar/corrigir redação:', error);
+      setCorrecting(false);
+      setShowCorrectionModal(false);
       toast({
         title: "Erro",
-        description: error.message || "Erro ao enviar redação",
+        description: error.message || "Erro ao processar redação",
         variant: "destructive",
       });
     } finally {
@@ -576,11 +600,54 @@ export default function StudentRedacao() {
     </Dialog>
   );
 
+  // Modal de Correção
+  const CorrectionModal = (
+    <Dialog open={showCorrectionModal} onOpenChange={() => {}} >
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+            {correcting ? 'Corrigindo sua redação...' : 'Correção concluída!'}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4 text-center py-6">
+          {correcting ? (
+            <>
+              <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium">Aguarde um momento...</p>
+                <p className="text-sm text-muted-foreground">
+                  Nossa IA está analisando sua redação e gerando o feedback detalhado.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium">Correção concluída!</p>
+                <p className="text-sm text-muted-foreground">
+                  Redirecionando para o resultado...
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   // Home View
   if (currentView === 'home') {
     return (
       <>
         {HistoricoModal}
+        {CorrectionModal}
         <div className="flex flex-1 gap-6">
           <div className="flex-1 space-y-6">
             <div className="flex items-center justify-between">
@@ -685,6 +752,7 @@ export default function StudentRedacao() {
     return (
       <>
         {HistoricoModal}
+        {CorrectionModal}
         <div className="flex flex-1 gap-6">
           <div className="flex-1 space-y-6">
             <div className="flex items-center gap-4">
@@ -922,6 +990,7 @@ export default function StudentRedacao() {
     return (
       <>
         {HistoricoModal}
+        {CorrectionModal}
         <div className="flex flex-1 gap-6">
           <div className="flex-1 space-y-6">
             <div className="flex items-center gap-4">
@@ -1043,6 +1112,7 @@ export default function StudentRedacao() {
     return (
       <>
         {HistoricoModal}
+        {CorrectionModal}
         <div className="flex flex-1 gap-6">
           <div className="flex-1 space-y-6">
             <div className="flex items-center gap-4">
@@ -1158,11 +1228,116 @@ export default function StudentRedacao() {
     );
   }
 
+  // Feedback View  
+  if (currentView === 'feedback' && correctionResult) {
+    return (
+      <>
+        {HistoricoModal}
+        {CorrectionModal}
+        <div className="flex flex-1 gap-6">
+          <div className="flex-1 space-y-6">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setCurrentView('home')}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold">Resultado da Correção</h1>
+                <p className="text-sm text-muted-foreground">Feedback detalhado da sua redação</p>
+              </div>
+            </div>
+
+            {/* Nota Final */}
+            <Card className="border-l-4 border-l-primary bg-gradient-to-r from-blue-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Nota Final</h3>
+                    <p className="text-sm text-muted-foreground">Sua pontuação no ENEM</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-4xl font-bold text-primary">
+                      {correctionResult.nota_final || 0}
+                    </div>
+                    <div className="text-sm text-muted-foreground">de 1000 pontos</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Feedback Geral */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  Comentário Geral
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm leading-relaxed">
+                  {correctionResult.comentario_geral || correctionResult.feedback_geral || 'Feedback não disponível'}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Competências */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="w-5 h-5" />
+                  Avaliação por Competências
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {correctionResult.competencias && Object.entries(correctionResult.competencias).map(([key, comp]: [string, any]) => (
+                    <div key={key} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-sm">
+                          Competência {key.replace('competencia_', '')} - {comp.titulo || getCompetenciaTitle(key)}
+                        </h4>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          {comp.nota || 0}/200
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {getCompetenciaDescription(key)}
+                      </p>
+                      <div className="bg-muted/30 p-3 rounded text-sm">
+                        {comp.feedback || comp.comentario || 'Sem feedback específico'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Botão para nova redação */}
+            <div className="flex gap-2">
+              <Button onClick={() => setCurrentView('home')} className="flex-1">
+                Escrever Nova Redação
+              </Button>
+              <Button variant="outline" onClick={() => setCurrentView('history')}>
+                Ver Histórico
+              </Button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   // Redação Modelo Modal
   if (showRedacaoModelo) {
     return (
       <>
         {HistoricoModal}
+        {CorrectionModal}
         <div className="flex flex-1 gap-6">
           <div className="flex-1 space-y-6">
             <div className="flex items-center gap-4">
@@ -1213,9 +1388,33 @@ export default function StudentRedacao() {
     );
   }
 
+  // Helper functions for competencies
+  const getCompetenciaTitle = (key: string) => {
+    const titles = {
+      competencia_1: "Domínio da norma culta",
+      competencia_2: "Compreensão da proposta",
+      competencia_3: "Argumentação e dados",
+      competencia_4: "Coesão e coerência",
+      competencia_5: "Proposta de intervenção"
+    };
+    return titles[key as keyof typeof titles] || "Competência";
+  };
+
+  const getCompetenciaDescription = (key: string) => {
+    const descriptions = {
+      competencia_1: "Avalia o domínio da modalidade escrita formal da língua portuguesa",
+      competencia_2: "Avalia a compreensão da proposta de redação e aplicação de conceitos",
+      competencia_3: "Avalia a capacidade de argumentação com dados, informações e conhecimentos",
+      competencia_4: "Avalia os mecanismos linguísticos para construção da argumentação",
+      competencia_5: "Avalia a proposta de intervenção para o problema abordado"
+    };
+    return descriptions[key as keyof typeof descriptions] || "";
+  };
+
   return (
     <>
       {HistoricoModal}
+      {CorrectionModal}
       <div>Página não encontrada</div>
     </>
   );
