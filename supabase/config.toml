@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.salvar-correcao]
 verify_jwt = false
+
+[functions.student-chat]
+verify_jwt = false

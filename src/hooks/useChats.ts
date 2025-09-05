@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Chat {
   id: string;
@@ -16,18 +17,30 @@ export const useChats = (userId: string) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { studentSession } = useAuth();
+
+  const callStudentChatFunction = async (action: string, payload: any = {}) => {
+    const { data, error } = await supabase.functions.invoke('student-chat', {
+      body: {
+        action,
+        token: studentSession?.codigo,
+        ...payload
+      }
+    });
+
+    if (error) throw error;
+    return data;
+  };
 
   const loadChats = async () => {
     try {
-      const { data, error } = await supabase
-        .from('chats')
-        .select('*')
-        .eq('user_id', userId)
-        .is('deleted_at', null)
-        .order('last_message_at', { ascending: false });
+      if (!studentSession?.codigo) {
+        setLoading(false);
+        return;
+      }
 
-      if (error) throw error;
-      setChats(data || []);
+      const data = await callStudentChatFunction('list_chats');
+      setChats(data.chats || []);
     } catch (error) {
       console.error('Error loading chats:', error);
       toast({
@@ -42,16 +55,20 @@ export const useChats = (userId: string) => {
 
   const createChat = async (title: string = 'Novo chat') => {
     try {
-      const { data, error } = await supabase
-        .from('chats')
-        .insert([{ user_id: userId, title }])
-        .select()
-        .single();
+      if (!studentSession?.codigo) {
+        toast({
+          title: "Erro",
+          description: "Sessão de estudante não encontrada",
+          variant: "destructive",
+        });
+        return null;
+      }
 
-      if (error) throw error;
+      const data = await callStudentChatFunction('create_chat', { title });
+      const newChat = data.chat;
       
-      setChats(prev => [data, ...prev]);
-      return data;
+      setChats(prev => [newChat, ...prev]);
+      return newChat;
     } catch (error) {
       console.error('Error creating chat:', error);
       toast({
@@ -65,12 +82,9 @@ export const useChats = (userId: string) => {
 
   const renameChat = async (chatId: string, newTitle: string) => {
     try {
-      const { error } = await supabase
-        .from('chats')
-        .update({ title: newTitle })
-        .eq('id', chatId);
+      if (!studentSession?.codigo) return;
 
-      if (error) throw error;
+      await callStudentChatFunction('rename_chat', { chatId, title: newTitle });
       
       setChats(prev => prev.map(chat => 
         chat.id === chatId ? { ...chat, title: newTitle } : chat
@@ -92,12 +106,9 @@ export const useChats = (userId: string) => {
 
   const deleteChat = async (chatId: string) => {
     try {
-      const { error } = await supabase
-        .from('chats')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', chatId);
+      if (!studentSession?.codigo) return;
 
-      if (error) throw error;
+      await callStudentChatFunction('delete_chat', { chatId });
       
       setChats(prev => prev.filter(chat => chat.id !== chatId));
       
@@ -116,8 +127,10 @@ export const useChats = (userId: string) => {
   };
 
   useEffect(() => {
-    loadChats();
-  }, [userId]);
+    if (studentSession?.codigo) {
+      loadChats();
+    }
+  }, [studentSession?.codigo]);
 
   return {
     chats,
