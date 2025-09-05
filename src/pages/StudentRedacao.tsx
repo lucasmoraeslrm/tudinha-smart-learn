@@ -657,7 +657,7 @@ export default function StudentRedacao() {
                     }
                   }}
                   placeholder="Comece a escrever sua redação aqui... (mínimo 200 palavras)"
-                  className="min-h-[400px] text-base leading-relaxed"
+                  className="min-h-[400px] text-base leading-relaxed bg-white"
                   maxLength={5000}
                 />
               </div>
