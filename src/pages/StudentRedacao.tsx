@@ -804,14 +804,23 @@ export default function StudentRedacao() {
               </div>
             </div>
           
-            <div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Título da Redação <span className="text-destructive">*</span>
+              </label>
               <Input
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Digite o título da sua redação"
-                className="text-lg font-medium mb-4"
+                className="text-lg font-medium"
                 maxLength={100}
+                required
               />
+              {titulo.trim() === '' && (
+                <p className="text-sm text-muted-foreground">
+                  O título é obrigatório para finalizar a redação
+                </p>
+              )}
             </div>
 
             {!selectedTema && (
