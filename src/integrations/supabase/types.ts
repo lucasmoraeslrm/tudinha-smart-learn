@@ -1150,7 +1150,9 @@ export type Database = {
       redacoes_usuario: {
         Row: {
           conteudo: string
+          correcao_ia: Json | null
           created_at: string | null
+          data_correcao: string | null
           escola_id: string | null
           feedback: Json | null
           id: string
@@ -1166,7 +1168,9 @@ export type Database = {
         }
         Insert: {
           conteudo: string
+          correcao_ia?: Json | null
           created_at?: string | null
+          data_correcao?: string | null
           escola_id?: string | null
           feedback?: Json | null
           id?: string
@@ -1182,7 +1186,9 @@ export type Database = {
         }
         Update: {
           conteudo?: string
+          correcao_ia?: Json | null
           created_at?: string | null
+          data_correcao?: string | null
           escola_id?: string | null
           feedback?: Json | null
           id?: string
