@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 import { useSchools } from '@/hooks/useSchools';
 import { ArrowLeft, Save } from 'lucide-react';
@@ -12,8 +13,10 @@ import { ArrowLeft, Save } from 'lucide-react';
 export default function LaunsEscolaForm() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { schools, createSchool, updateSchool } = useSchools();
+  const { schools, modules, createSchool, updateSchool, fetchSchoolModules, toggleSchoolModule } = useSchools();
   const isEditing = !!id;
+  
+  const [schoolModules, setSchoolModules] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     nome: '',
@@ -60,9 +63,21 @@ export default function LaunsEscolaForm() {
           cep: school.cep || '',
           email: school.email || ''
         });
+        
+        // Fetch school modules
+        loadSchoolModules(school.id);
       }
     }
   }, [isEditing, id, schools]);
+
+  const loadSchoolModules = async (schoolId: string) => {
+    try {
+      const modules = await fetchSchoolModules(schoolId);
+      setSchoolModules(modules);
+    } catch (error) {
+      console.error('Error loading school modules:', error);
+    }
+  };
 
   const handleSubmit = async () => {
     try {
@@ -82,6 +97,18 @@ export default function LaunsEscolaForm() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleModuleToggle = async (moduleId: string, active: boolean) => {
+    if (!id) return;
+    
+    try {
+      await toggleSchoolModule(id, moduleId, active);
+      // Reload school modules
+      await loadSchoolModules(id);
+    } catch (error) {
+      console.error('Error toggling module:', error);
+    }
   };
 
   return (
@@ -273,6 +300,45 @@ export default function LaunsEscolaForm() {
                 />
               </div>
             </div>
+
+            {/* Módulos da Escola - Only show when editing */}
+            {isEditing && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground border-b pb-2">Módulos da Escola</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Selecione quais módulos estarão disponíveis para os estudantes desta escola
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {modules.map((module) => {
+                    const schoolModule = schoolModules.find(sm => sm.modulo_id === module.id);
+                    const isActive = schoolModule?.ativo || false;
+                    
+                    return (
+                      <div key={module.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          {module.icone && (
+                            <div className="w-8 h-8 flex items-center justify-center text-lg">
+                              {module.icone}
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-medium">{module.nome}</div>
+                            <div className="text-sm text-muted-foreground">{module.codigo}</div>
+                            {module.descricao && (
+                              <div className="text-xs text-muted-foreground mt-1">{module.descricao}</div>
+                            )}
+                          </div>
+                        </div>
+                        <Switch
+                          checked={isActive}
+                          onCheckedChange={(checked) => handleModuleToggle(module.id, checked)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             
             <div className="flex justify-end gap-4 pt-6 border-t">
               <Button 

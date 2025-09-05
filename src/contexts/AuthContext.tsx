@@ -35,6 +35,7 @@ interface StudentSession {
   full_name?: string;
   ano_letivo?: string;
   turma?: string;
+  escola_id?: string;
   role: 'student';
   sessionToken: string;
 }

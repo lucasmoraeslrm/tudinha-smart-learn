@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveModules } from '@/hooks/useActiveModules';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { 
@@ -14,11 +15,11 @@ import {
 } from 'lucide-react';
 
 const sidebarItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Jornada', url: '/jornada', icon: MapPin },
-  { title: 'Redação', url: '/redacao', icon: FileText },
-  { title: 'Tudinha', url: '/chat', icon: MessageCircle },
-  { title: 'Exercícios', url: '/exercicios', icon: BookOpen },
+  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard, moduleCode: null }, // Always available
+  { title: 'Jornada', url: '/jornada', icon: MapPin, moduleCode: 'jornada' },
+  { title: 'Redação', url: '/redacao', icon: FileText, moduleCode: 'redacao' },
+  { title: 'Tudinha', url: '/chat', icon: MessageCircle, moduleCode: 'tudinha-chat' },
+  { title: 'Exercícios', url: '/exercicios', icon: BookOpen, moduleCode: 'exercicios' },
 ];
 
 interface StudentLayoutProps {
@@ -27,6 +28,7 @@ interface StudentLayoutProps {
 
 export default function StudentLayout({ children }: StudentLayoutProps) {
   const { studentSession, signOut, getStudentName } = useAuth();
+  const { activeModules } = useActiveModules(studentSession?.escola_id || null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -36,6 +38,12 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
   };
 
   const studentName = studentSession?.full_name || studentSession?.name || getStudentName() || 'Estudante';
+
+  // Filter menu items based on active modules
+  const availableModuleCodes = activeModules.map(module => module.codigo);
+  const filteredSidebarItems = sidebarItems.filter(item => 
+    item.moduleCode === null || availableModuleCodes.includes(item.moduleCode)
+  );
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -75,7 +83,7 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
         {/* Navigation */}
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
-            {sidebarItems.map((item) => {
+            {filteredSidebarItems.map((item) => {
               const isActive = location.pathname === item.url;
               return (
                 <li key={item.title}>
