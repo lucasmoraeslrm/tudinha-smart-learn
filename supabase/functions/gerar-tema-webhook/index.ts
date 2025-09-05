@@ -41,7 +41,7 @@ serve(async (req) => {
     const body = await req.json();
     const { dificuldade = 'medio', categoria_tematica = null } = body;
 
-    // Get the webhook URL for this school
+    // Try to get the webhook URL for this school
     const { data: webhook, error: webhookError } = await supabaseClient
       .from('webhooks')
       .select('*')
@@ -50,12 +50,10 @@ serve(async (req) => {
       .eq('ativo', true)
       .single();
 
+    // If no webhook is configured, fallback to direct OpenAI generation
     if (webhookError || !webhook) {
-      console.error('Webhook not found:', webhookError);
-      return new Response(JSON.stringify({ error: 'Webhook not configured for this school' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      console.log('No webhook found, falling back to direct OpenAI generation');
+      return await generateThemeDirectly(supabaseClient, dificuldade, categoria_tematica);
     }
 
     const webhookUrl = webhook.modo_producao ? webhook.url_producao : webhook.url_teste;
@@ -155,3 +153,84 @@ serve(async (req) => {
     });
   }
 });
+
+// Fallback function to generate theme directly using OpenAI
+async function generateThemeDirectly(supabaseClient: any, dificuldade: string, categoria_tematica: string | null) {
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+  if (!openaiApiKey) {
+    return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Prepare the theme generation prompt
+  const systemMessage = "Você é um elaborador de propostas de redação no estilo ENEM. Gere um tema autoral, com textos motivadores curtos e um comando de redação claro. Não use Markdown. Não inclua texto fora do JSON.";
+
+  const userMessage = `Gere um tema de redação autoral com os seguintes parâmetros:
+
+Dificuldade: ${dificuldade}
+${categoria_tematica ? `Categoria temática: ${categoria_tematica}` : ''}
+
+Retorne APENAS este JSON: { "tema": "Título do tema (claro e específico)", "descricao": "Comando de redação objetivo, no estilo ENEM, dizendo ao aluno o que fazer.", "textos_apoio": [ "Texto motivador I (2-6 linhas, com dado, fato ou citação)", "Texto motivador II (2-6 linhas, com perspectiva complementar)" ], "orientacao": "Com base na leitura dos textos motivadores seguintes e nos conhecimentos construídos ao longo de sua formação, redija texto dissertativo-argumentativo em modalidade escrita formal da língua portuguesa sobre o tema apresentado, apresentando proposta de intervenção, que respeite os direitos humanos.", "palavras_chave": ["termo1", "termo2", "termo3", "termo4", "termo5"], "categoria_tematica": "${categoria_tematica || 'geral'}" }`;
+
+  // Call OpenAI API
+  const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openaiApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: userMessage }
+      ],
+      max_tokens: 1500,
+      temperature: 0.7,
+      response_format: { type: "json_object" }
+    }),
+  });
+
+  if (!openaiResponse.ok) {
+    const error = await openaiResponse.text();
+    console.error('OpenAI API error:', error);
+    return new Response(JSON.stringify({ error: 'Error calling OpenAI API' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const openaiData = await openaiResponse.json();
+  const generatedTheme = JSON.parse(openaiData.choices[0].message.content);
+
+  // Save the generated theme to database
+  const { data: newTheme, error: insertError } = await supabaseClient
+    .from('temas_redacao')
+    .insert({
+      titulo: generatedTheme.tema,
+      texto_motivador: generatedTheme.textos_apoio ? generatedTheme.textos_apoio.join('\n\n') : generatedTheme.descricao,
+      ativo: true,
+      publica: true,
+      competencias: generatedTheme.palavras_chave || []
+    })
+    .select()
+    .single();
+
+  if (insertError) {
+    console.error('Error saving theme:', insertError);
+    return new Response(JSON.stringify({ error: 'Error saving theme to database' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  return new Response(JSON.stringify({ 
+    theme: newTheme,
+    generated_data: generatedTheme,
+    method: 'direct_openai'
+  }), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
