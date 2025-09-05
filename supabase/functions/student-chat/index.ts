@@ -17,9 +17,15 @@ serve(async (req) => {
   }
 
   try {
-    const { action, token, ...payload } = await req.json();
+    console.log('Student-chat function called:', req.method);
+    const body = await req.json();
+    console.log('Request body:', body);
+    
+    const { action, token, ...payload } = body;
+    console.log('Action:', action, 'Token:', token);
     
     // Validate student token
+    console.log('Validating student token...');
     const { data: studentData, error: authError } = await supabase
       .from('student_auth')
       .select(`
@@ -32,8 +38,11 @@ serve(async (req) => {
       .eq('codigo', token)
       .single();
 
+    console.log('Student auth query result:', { studentData, authError });
+
     if (authError || !studentData) {
-      return new Response(JSON.stringify({ error: 'Invalid student token' }), {
+      console.log('Student validation failed:', authError);
+      return new Response(JSON.stringify({ error: 'Invalid student token', details: authError }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
