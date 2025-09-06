@@ -164,67 +164,6 @@ const Index = () => {
             <StudentLoginForm showMobileLogo={false} />
           </div>
         </div>
-
-        {/* Quick Access Links */}
-        <div className="p-8 bg-muted/5">
-          <h2 className="text-xl font-semibold text-foreground mb-4 text-center">
-            Acesso Rápido
-          </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-16 flex flex-col items-center justify-center space-y-1"
-              onClick={() => navigate('/coordenador')}
-            >
-              <Shield className="w-5 h-5" />
-              <span className="text-xs">Direção</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-16 flex flex-col items-center justify-center space-y-1"
-              onClick={() => navigate('/professor')}
-            >
-              <GraduationCap className="w-5 h-5" />
-              <span className="text-xs">Professor</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-16 flex flex-col items-center justify-center space-y-1"
-              onClick={() => navigate('/parent')}
-            >
-              <Users className="w-5 h-5" />
-              <span className="text-xs">Pais</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-16 flex flex-col items-center justify-center space-y-1"
-              onClick={() => navigate('/docs/acessos')}
-            >
-              <FileText className="w-5 h-5" />
-              <span className="text-xs">Docs</span>
-            </Button>
-
-            {/* Mostrar apenas se for ambiente de desenvolvimento */}
-            {window.location.hostname === 'localhost' && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-16 flex flex-col items-center justify-center space-y-1 col-span-2 lg:col-span-4"
-                onClick={() => navigate('/launs')}
-              >
-                <Settings className="w-5 h-5" />
-                <span className="text-xs">Desenvolvedores</span>
-              </Button>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

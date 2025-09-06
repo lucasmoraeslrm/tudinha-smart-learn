@@ -75,22 +75,20 @@ export default function StudentLoginForm({ onBack, showMobileLogo = true }: Stud
   return (
     <div className="w-full">
       <div className="text-center mb-8">
-        {/* Mobile logo */}
-        {showMobileLogo && (
-          <div className="lg:hidden mb-6">
-            {branding?.logo_url ? (
-              <img 
-                src={branding.logo_url} 
-                alt={branding.nome} 
-                className="mx-auto h-16 w-auto" 
-              />
-            ) : (
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <GraduationCap className="w-8 h-8 text-primary" />
-              </div>
-            )}
-          </div>
-        )}
+        {/* Logo da instância */}
+        <div className="mb-6">
+          {branding?.logo_url ? (
+            <img 
+              src={branding.logo_url} 
+              alt={branding.nome} 
+              className="mx-auto h-20 w-auto" 
+            />
+          ) : (
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+              <GraduationCap className="w-10 h-10 text-primary" />
+            </div>
+          )}
+        </div>
         
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-foreground">
