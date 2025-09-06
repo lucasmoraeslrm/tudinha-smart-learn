@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, UserCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSchoolBranding } from '@/hooks/useSchoolBranding';
 import { supabase } from '@/integrations/supabase/client';
@@ -68,51 +67,93 @@ const ProfessorLogin: React.FC<ProfessorLoginProps> = ({ onBack, onSuccess }) =>
     }
   };
 
+  const primaryColor = branding?.cor_primaria || '#3B82F6';
+  const secondaryColor = branding?.cor_secundaria || '#1E40AF';
+
   return (
-    <div className="min-h-screen bg-gradient-main flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack}
-            className="absolute left-4 top-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          
-          <div className="mb-4">
+    <div className="min-h-screen flex">
+      {/* Left Side - Image/Gradient */}
+      <div 
+        className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
+        style={{
+          background: branding?.login_image_url 
+            ? `linear-gradient(135deg, ${primaryColor}AA, ${secondaryColor}AA), url(${branding.login_image_url})`
+            : `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundBlendMode: branding?.login_image_url ? 'overlay' : 'normal'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
+          <div className="text-center">
             {branding?.logo_url ? (
               <img 
                 src={branding.logo_url} 
                 alt={branding.nome}
-                className="mx-auto h-16 w-auto mb-4"
+                className="mx-auto h-20 w-auto mb-6 filter brightness-0 invert"
               />
             ) : (
-              <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-secondary" />
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <UserCircle className="w-10 h-10" />
               </div>
             )}
+            <h1 className="text-4xl font-bold mb-4">
+              {branding?.nome || "Portal Educacional"}
+            </h1>
+            <p className="text-xl opacity-90">
+              Área exclusiva para professores
+            </p>
           </div>
-          
-          <CardTitle className="text-2xl">
-            {branding?.nome ? `Portal do Professor - ${branding.nome}` : "Painel do Professor"}
-          </CardTitle>
-          <CardDescription>
-            Entre com suas credenciais para acessar o painel
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack}
+            className="absolute left-4 top-4 lg:left-auto lg:right-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+
+          <div className="text-center mb-8">
+            {/* Mobile logo */}
+            <div className="lg:hidden mb-6">
+              {branding?.logo_url ? (
+                <img 
+                  src={branding.logo_url} 
+                  alt={branding.nome}
+                  className="mx-auto h-16 w-auto"
+                />
+              ) : (
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                  <UserCircle className="w-8 h-8 text-primary" />
+                </div>
+              )}
+            </div>
+            
+            <h2 className="text-3xl font-bold text-foreground mb-2">
+              Portal do Professor
+            </h2>
+            <p className="text-muted-foreground">
+              Entre com seu código e senha para acessar
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="codigo">Código do Professor</Label>
               <Input
                 id="codigo"
                 type="text"
-                placeholder="Ex: PROF001"
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
+                placeholder="Digite seu código"
+                className="h-12"
                 required
               />
             </div>
@@ -122,19 +163,35 @@ const ProfessorLogin: React.FC<ProfessorLoginProps> = ({ onBack, onSuccess }) =>
               <Input
                 id="password"
                 type="password"
-                placeholder="Digite sua senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Digite sua senha"
+                className="h-12"
                 required
               />
             </div>
-            
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
+
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-lg" 
+              disabled={loading}
+              style={{ 
+                backgroundColor: primaryColor,
+                borderColor: primaryColor 
+              }}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                'Entrar'
+              )}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

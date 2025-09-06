@@ -72,44 +72,86 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
     }
   };
 
+  const primaryColor = branding?.cor_primaria || '#3B82F6';
+  const secondaryColor = branding?.cor_secundaria || '#1E40AF';
+
   return (
-    <div className="min-h-screen bg-gradient-main flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+    <div className="min-h-screen flex">
+      {/* Left Side - Image/Gradient */}
+      <div 
+        className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
+        style={{
+          background: branding?.login_image_url 
+            ? `linear-gradient(135deg, ${primaryColor}AA, ${secondaryColor}AA), url(${branding.login_image_url})`
+            : `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundBlendMode: branding?.login_image_url ? 'overlay' : 'normal'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
+          <div className="text-center">
+            {branding?.logo_url ? (
+              <img 
+                src={branding.logo_url} 
+                alt={branding.nome}
+                className="mx-auto h-20 w-auto mb-6 filter brightness-0 invert"
+              />
+            ) : (
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <GraduationCap className="w-10 h-10" />
+              </div>
+            )}
+            <h1 className="text-4xl font-bold mb-4">
+              {branding?.nome || "Portal Educacional"}
+            </h1>
+            <p className="text-xl opacity-90">
+              Bem-vindo ao seu ambiente de aprendizado
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
           {onBack && (
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={onBack}
-              className="absolute left-4 top-4"
+              className="absolute left-4 top-4 lg:left-auto lg:right-4"
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
           )}
-          
-          <div className="mb-8 text-center">
-            {branding?.logo_url ? (
-              <img 
-                src={branding.logo_url} 
-                alt={branding.nome}
-                className="mx-auto h-16 w-auto mb-4"
-              />
-            ) : (
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <GraduationCap className="w-8 h-8 text-primary" />
-              </div>
-            )}
+
+          <div className="text-center mb-8">
+            {/* Mobile logo */}
+            <div className="lg:hidden mb-6">
+              {branding?.logo_url ? (
+                <img 
+                  src={branding.logo_url} 
+                  alt={branding.nome}
+                  className="mx-auto h-16 w-auto"
+                />
+              ) : (
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                  <GraduationCap className="w-8 h-8 text-primary" />
+                </div>
+              )}
+            </div>
             
-            <CardTitle className="text-2xl">
-              {branding?.nome ? `Portal do Aluno - ${branding.nome}` : "Portal do Aluno"}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-3xl font-bold text-foreground mb-2">
+              Portal do Aluno
+            </h2>
+            <p className="text-muted-foreground">
               Entre com seu código e senha para acessar
             </p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="codigo">Código do Aluno</Label>
               <Input
@@ -118,6 +160,7 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
                 placeholder="Digite seu código"
+                className="h-12"
                 required
               />
             </div>
@@ -130,6 +173,7 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite sua senha"
+                className="h-12"
                 required
               />
             </div>
@@ -142,14 +186,23 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
                 placeholder="Ex: LAB01-PC05"
                 value={maquinaCodigo}
                 onChange={(e) => setMaquinaCodigo(e.target.value)}
+                className="h-12"
                 required
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-lg" 
+              disabled={loading}
+              style={{ 
+                backgroundColor: primaryColor,
+                borderColor: primaryColor 
+              }}
+            >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Entrando...
                 </>
               ) : (
@@ -157,9 +210,8 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
               )}
             </Button>
           </form>
-
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ export interface School {
   codigo: string;
   dominio?: string;
   logo_url?: string;
+  login_image_url?: string;
   cor_primaria: string;
   cor_secundaria: string;
   cor_primaria_texto?: string;
@@ -158,7 +159,7 @@ export function useSchools() {
   const updateSchool = async (id: string, updates: Partial<School>) => {
     try {
     const allowedFields = [
-        'nome','codigo','dominio','logo_url','cor_primaria','cor_secundaria','ativa','plano',
+        'nome','codigo','dominio','logo_url','login_image_url','cor_primaria','cor_secundaria','ativa','plano',
         'nome_fantasia','razao_social','telefone','celular','endereco','numero','complemento','bairro','cidade','uf','cep','email','instancia'
       ] as const;
       const sanitizedUpdates = Object.fromEntries(

@@ -10,6 +10,7 @@ interface SchoolBranding {
   logo_url: string | null;
   cor_primaria: string;
   cor_secundaria: string;
+  login_image_url: string | null;
 }
 
 // Converte HEX para HSL para compatibilidade com CSS variables

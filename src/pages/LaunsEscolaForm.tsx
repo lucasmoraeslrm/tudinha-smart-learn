@@ -23,6 +23,8 @@ export default function LaunsEscolaForm() {
     codigo: '',
     dominio: '',
     instancia: '',
+    logo_url: '',
+    login_image_url: '',
     cor_primaria: '#3B82F6',
     cor_secundaria: '#1E40AF',
     plano: 'basico',
@@ -49,6 +51,8 @@ export default function LaunsEscolaForm() {
           codigo: school.codigo || '',
           dominio: school.dominio || '',
           instancia: school.instancia || '',
+          logo_url: school.logo_url || '',
+          login_image_url: school.login_image_url || '',
           cor_primaria: school.cor_primaria || '#3B82F6',
           cor_secundaria: school.cor_secundaria || '#1E40AF',
           plano: school.plano || 'basico',
@@ -213,6 +217,57 @@ export default function LaunsEscolaForm() {
                 <p className="text-xs text-muted-foreground">
                   Se configurado, permitirá acesso direto via domínio personalizado
                 </p>
+              </div>
+            </div>
+
+            {/* Branding Visual */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground border-b pb-2">Branding Visual</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="logo_url">URL do Logo</Label>
+                  <Input
+                    id="logo_url"
+                    value={formData.logo_url}
+                    onChange={(e) => handleInputChange('logo_url', e.target.value)}
+                    placeholder="https://exemplo.com/logo.png"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    URL da imagem do logo da escola
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login_image_url">Imagem de Fundo do Login</Label>
+                  <Input
+                    id="login_image_url"
+                    value={formData.login_image_url}
+                    onChange={(e) => handleInputChange('login_image_url', e.target.value)}
+                    placeholder="https://exemplo.com/login-bg.jpg"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    URL da imagem que aparecerá no lado esquerdo da tela de login
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="cor_primaria">Cor Primária</Label>
+                  <Input
+                    id="cor_primaria"
+                    type="color"
+                    value={formData.cor_primaria}
+                    onChange={(e) => handleInputChange('cor_primaria', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cor_secundaria">Cor Secundária</Label>
+                  <Input
+                    id="cor_secundaria"
+                    type="color"
+                    value={formData.cor_secundaria}
+                    onChange={(e) => handleInputChange('cor_secundaria', e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 

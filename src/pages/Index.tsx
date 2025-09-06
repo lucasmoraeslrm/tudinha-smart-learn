@@ -5,7 +5,7 @@ import { useSchoolBranding } from '@/hooks/useSchoolBranding';
 import { supabase } from '@/integrations/supabase/client';
 import StudentLogin from './StudentLogin';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Shield, GraduationCap, Users, Settings, FileText } from 'lucide-react';
 
 const Index = () => {
   const { instancia } = useParams();
@@ -86,83 +86,143 @@ const Index = () => {
     );
   }
 
-  // Student Login Page
+  const primaryColor = branding?.cor_primaria || '#3B82F6';
+  const secondaryColor = branding?.cor_secundaria || '#1E40AF';
+
   return (
-    <div className="min-h-screen bg-gradient-main">
-      <div className="container mx-auto p-6">
-        {/* Header */}
-        <div className="text-center mb-8">
-          {branding?.logo_url ? (
-            <div className="w-20 h-20 mx-auto mb-4">
+    <div className="min-h-screen flex">
+      {/* Left Side - Image/Gradient */}
+      <div 
+        className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
+        style={{
+          background: branding?.login_image_url 
+            ? `linear-gradient(135deg, ${primaryColor}AA, ${secondaryColor}AA), url(${branding.login_image_url})`
+            : `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundBlendMode: branding?.login_image_url ? 'overlay' : 'normal'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
+          <div className="text-center">
+            {branding?.logo_url ? (
               <img 
                 src={branding.logo_url} 
                 alt={branding.nome}
-                className="w-full h-full object-contain"
+                className="mx-auto h-24 w-auto mb-8 filter brightness-0 invert"
               />
-            </div>
+            ) : (
+              <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                <img 
+                  src="/src/assets/tudinha-mascot.png" 
+                  alt="Tudinha Mascot" 
+                  className="w-16 h-16"
+                />
+              </div>
+            )}
+            <h1 className="text-5xl font-bold mb-6">
+              {branding?.nome || "Portal Educacional"}
+            </h1>
+            <p className="text-2xl opacity-90">
+              Sistema de Gestão Educacional
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Login and Navigation */}
+      <div className="w-full lg:w-1/2 flex flex-col">
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-gradient-to-r from-primary to-primary-dark p-6 text-center text-white">
+          {branding?.logo_url ? (
+            <img 
+              src={branding.logo_url} 
+              alt={branding.nome}
+              className="mx-auto h-16 w-auto mb-4"
+            />
           ) : (
-            <div className="w-20 h-20 mx-auto mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <img 
                 src="/src/assets/tudinha-mascot.png" 
-                alt="Tudinha" 
-                className="w-full h-full object-contain"
+                alt="Tudinha Mascot" 
+                className="w-10 h-10"
               />
             </div>
           )}
-          <h1 className="text-4xl font-bold text-white mb-2">
-            {branding?.nome || "Tudinha"}
+          <h1 className="text-2xl font-bold mb-2">
+            {branding?.nome || "Portal Educacional"}
           </h1>
-          <p className="text-white/80 text-lg">
-            {branding?.nome ? "Portal do Aluno" : "Sua plataforma de aprendizado inteligente"}
+          <p className="opacity-90">
+            Sistema de Gestão Educacional
           </p>
         </div>
 
-        {/* Student Login */}
-        <div className="max-w-md mx-auto mb-8">
-          <StudentLogin />
+        {/* Student Login Form */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            <StudentLogin onBack={() => navigate('/')} />
+          </div>
         </div>
 
         {/* Quick Access Links */}
-        <div className="text-center space-y-4">
-          <p className="text-white/60 text-sm">Acesso para outros usuários:</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate(instancia ? `/${instancia}/admin` : '/admin')}
-              className="text-white/80 hover:text-white hover:bg-white/10"
+        <div className="p-8 bg-muted/5">
+          <h2 className="text-xl font-semibold text-foreground mb-4 text-center">
+            Acesso Rápido
+          </h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-16 flex flex-col items-center justify-center space-y-1"
+              onClick={() => navigate('/coordenador')}
             >
-              Direção/Coordenação
+              <Shield className="w-5 h-5" />
+              <span className="text-xs">Direção</span>
             </Button>
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate(instancia ? `/${instancia}/professor` : '/professor')}
-              className="text-white/80 hover:text-white hover:bg-white/10"
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-16 flex flex-col items-center justify-center space-y-1"
+              onClick={() => navigate('/professor')}
             >
-              Professor
+              <GraduationCap className="w-5 h-5" />
+              <span className="text-xs">Professor</span>
             </Button>
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate(instancia ? `/${instancia}/pais` : '/pais')}
-              className="text-white/80 hover:text-white hover:bg-white/10"
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-16 flex flex-col items-center justify-center space-y-1"
+              onClick={() => navigate('/parent')}
             >
-              Pais/Responsáveis
+              <Users className="w-5 h-5" />
+              <span className="text-xs">Pais</span>
             </Button>
-            {!instancia && (
-              <Button 
-                variant="ghost" 
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-16 flex flex-col items-center justify-center space-y-1"
+              onClick={() => navigate('/docs/acessos')}
+            >
+              <FileText className="w-5 h-5" />
+              <span className="text-xs">Docs</span>
+            </Button>
+
+            {/* Mostrar apenas se for ambiente de desenvolvimento */}
+            {window.location.hostname === 'localhost' && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-16 flex flex-col items-center justify-center space-y-1 col-span-2 lg:col-span-4"
                 onClick={() => navigate('/launs')}
-                className="text-white/80 hover:text-white hover:bg-white/10"
               >
-                Desenvolvedores
+                <Settings className="w-5 h-5" />
+                <span className="text-xs">Desenvolvedores</span>
               </Button>
             )}
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/docs/acessos')}
-              className="text-white/60 hover:text-white hover:bg-white/10"
-            >
-              Documentação
-            </Button>
           </div>
         </div>
       </div>

@@ -340,6 +340,7 @@ export type Database = {
           endereco: string | null
           id: string
           instancia: string | null
+          login_image_url: string | null
           logo_url: string | null
           nome: string
           nome_fantasia: string | null
@@ -366,6 +367,7 @@ export type Database = {
           endereco?: string | null
           id?: string
           instancia?: string | null
+          login_image_url?: string | null
           logo_url?: string | null
           nome: string
           nome_fantasia?: string | null
@@ -392,6 +394,7 @@ export type Database = {
           endereco?: string | null
           id?: string
           instancia?: string | null
+          login_image_url?: string | null
           logo_url?: string | null
           nome?: string
           nome_fantasia?: string | null
@@ -2367,6 +2370,7 @@ export type Database = {
           dominio: string
           id: string
           instancia: string
+          login_image_url: string
           logo_url: string
           nome: string
         }[]
@@ -2380,6 +2384,7 @@ export type Database = {
           dominio: string
           id: string
           instancia: string
+          login_image_url: string
           logo_url: string
           nome: string
         }[]
