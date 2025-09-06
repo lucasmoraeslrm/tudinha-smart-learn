@@ -2030,6 +2030,10 @@ export type Database = {
         Args: { "": string }
         Returns: string
       }
+      get_current_student_serie_normalized: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_current_user_professor_id: {
         Args: Record<PropertyKey, never>
         Returns: string

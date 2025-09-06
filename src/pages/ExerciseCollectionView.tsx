@@ -38,16 +38,19 @@ export default function ExerciseCollectionView() {
 
       if (collectionError) throw collectionError;
 
-      // Verificar se o aluno tem acesso à coleção (pela série)
-      const studentId = getStudentId();
-      if (studentId) {
-        const serieDoAluno = await getAlunoSerie(studentId);
-        
-        if (serieDoAluno && collectionData.serie_escolar !== serieDoAluno) {
-          setAccessDenied(true);
-          setLoading(false);
-          return;
-        }
+      // Verificar se o aluno tem acesso à coleção (pela série normalizada)
+      const serieDoAluno = await getAlunoSerie();
+      
+      // Normalizar a série da coleção para comparação
+      const serieColecaoNorm = collectionData.serie_escolar?.toLowerCase()
+        ?.replace(/\bs[ée]rie\b/gi, 'ano')
+        ?.replace(/\s+/g, ' ')
+        ?.trim();
+      
+      if (serieDoAluno && serieColecaoNorm && serieDoAluno !== serieColecaoNorm) {
+        setAccessDenied(true);
+        setLoading(false);
+        return;
       }
 
       setCollection(collectionData);

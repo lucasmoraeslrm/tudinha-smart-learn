@@ -25,11 +25,8 @@ export default function ExerciciosPage() {
       setLoading(true);
       const studentId = getStudentId();
 
-      // Obter série do aluno
-      let serieDoAluno: string | null = null;
-      if (studentId) {
-        serieDoAluno = await getAlunoSerie(studentId);
-      }
+      // Obter série normalizada do aluno
+      const serieDoAluno = await getAlunoSerie();
 
       // Carregar coleções de exercícios filtradas por série
       let collectionsQuery = supabase
@@ -43,9 +40,9 @@ export default function ExerciciosPage() {
           )
         `);
 
-      // Filtrar por série se disponível
+      // Filtrar por série se disponível (case-insensitive)
       if (serieDoAluno) {
-        collectionsQuery = collectionsQuery.eq('serie_escolar', serieDoAluno);
+        collectionsQuery = collectionsQuery.ilike('serie_escolar', serieDoAluno);
       }
 
       const { data: collectionsData, error: collectionsError } = await collectionsQuery

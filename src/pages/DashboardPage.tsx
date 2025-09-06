@@ -17,6 +17,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getAlunoSerie } from '@/lib/student-utils';
 
 export default function DashboardPage() {
   const { studentSession, getStudentId, getStudentName } = useAuth();
@@ -128,16 +129,26 @@ export default function DashboardPage() {
 
   const loadLists = async () => {
     try {
-      const { data, error } = await supabase
+      // Obter a série normalizada do aluno
+      const serieDoAluno = await getAlunoSerie();
+      
+      if (!serieDoAluno) {
+        setStats(prev => ({ ...prev, lists: 0 }));
+        return;
+      }
+      
+      // Contar coleções filtradas pela série do aluno (case-insensitive)
+      const { count, error } = await supabase
         .from('exercise_collections')
-        .select('id');
+        .select('*', { count: 'exact', head: true })
+        .ilike('serie_escolar', serieDoAluno);
 
       if (error) {
         console.error('Erro ao buscar coleções:', error);
         return;
       }
 
-      setStats(prev => ({ ...prev, lists: data?.length || 0 }));
+      setStats(prev => ({ ...prev, lists: count || 0 }));
     } catch (error) {
       console.error('Erro ao carregar coleções:', error);
     }
