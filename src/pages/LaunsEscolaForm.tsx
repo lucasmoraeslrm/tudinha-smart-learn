@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
 import { useSchools } from '@/hooks/useSchools';
-import { ArrowLeft, Save } from 'lucide-react';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { ArrowLeft, Save, Upload, X, Image } from 'lucide-react';
 
 export default function LaunsEscolaForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { schools, modules, createSchool, updateSchool, fetchSchoolModules, toggleSchoolModule } = useSchools();
+  const { uploadFile, uploading } = useFileUpload();
   const isEditing = !!id;
   
   const [schoolModules, setSchoolModules] = useState<any[]>([]);
@@ -223,30 +225,154 @@ export default function LaunsEscolaForm() {
             {/* Branding Visual */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground border-b pb-2">Branding Visual</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="logo_url">URL do Logo</Label>
-                  <Input
-                    id="logo_url"
-                    value={formData.logo_url}
-                    onChange={(e) => handleInputChange('logo_url', e.target.value)}
-                    placeholder="https://exemplo.com/logo.png"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    URL da imagem do logo da escola
+              
+              {/* Logo Upload Section */}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Logo da Escola</Label>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Tamanho recomendado: 512-1024px de altura. Formatos aceitos: PNG, JPG, JPEG
                   </p>
+                  
+                  {/* Logo Preview */}
+                  {formData.logo_url && (
+                    <div className="mb-3 p-3 border rounded-lg bg-muted/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={formData.logo_url} 
+                            alt="Logo preview" 
+                            className="w-12 h-12 object-contain rounded"
+                          />
+                          <span className="text-sm text-muted-foreground">Logo atual</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleInputChange('logo_url', '')}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Logo Upload Button */}
+                  <div className="flex gap-2 mb-3">
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpg,image/jpeg"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await uploadFile(file);
+                            if (url) {
+                              handleInputChange('logo_url', url);
+                            }
+                          }
+                          e.target.value = '';
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={uploading}
+                      />
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        disabled={uploading}
+                        className="w-full"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        {uploading ? 'Enviando...' : 'Enviar Logo'}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Logo URL Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="logo_url" className="text-xs">Ou cole a URL diretamente:</Label>
+                    <Input
+                      id="logo_url"
+                      value={formData.logo_url}
+                      onChange={(e) => handleInputChange('logo_url', e.target.value)}
+                      placeholder="https://exemplo.com/logo.png"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login_image_url">Imagem de Fundo do Login</Label>
-                  <Input
-                    id="login_image_url"
-                    value={formData.login_image_url}
-                    onChange={(e) => handleInputChange('login_image_url', e.target.value)}
-                    placeholder="https://exemplo.com/login-bg.jpg"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    URL da imagem que aparecerá no lado esquerdo da tela de login
+              </div>
+
+              {/* Login Background Upload Section */}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Imagem de Fundo do Login</Label>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Tamanho recomendado: 1920x1080px (proporção 16:9). Aparecerá no lado direito da tela de login
                   </p>
+                  
+                  {/* Background Preview */}
+                  {formData.login_image_url && (
+                    <div className="mb-3 p-3 border rounded-lg bg-muted/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={formData.login_image_url} 
+                            alt="Background preview" 
+                            className="w-16 h-9 object-cover rounded"
+                          />
+                          <span className="text-sm text-muted-foreground">Fundo atual</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleInputChange('login_image_url', '')}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Background Upload Button */}
+                  <div className="flex gap-2 mb-3">
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpg,image/jpeg"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await uploadFile(file);
+                            if (url) {
+                              handleInputChange('login_image_url', url);
+                            }
+                          }
+                          e.target.value = '';
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={uploading}
+                      />
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        disabled={uploading}
+                        className="w-full"
+                      >
+                        <Image className="w-4 h-4 mr-2" />
+                        {uploading ? 'Enviando...' : 'Enviar Imagem de Fundo'}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Background URL Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="login_image_url" className="text-xs">Ou cole a URL diretamente:</Label>
+                    <Input
+                      id="login_image_url"
+                      value={formData.login_image_url}
+                      onChange={(e) => handleInputChange('login_image_url', e.target.value)}
+                      placeholder="https://exemplo.com/login-bg.jpg"
+                    />
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
