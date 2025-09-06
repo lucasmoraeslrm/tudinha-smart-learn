@@ -187,14 +187,33 @@ async function sendMessage(payload: any, student: any, userId: string) {
 
   if (messageError) throw messageError;
 
-  // Get webhook URL for the school
-  const { data: webhookData, error: webhookError } = await supabase
+  // Get webhook URL for the school - try school-specific first, then global
+  console.log('Looking for webhook for escola_id:', student.escola_id);
+  
+  let { data: webhookData, error: webhookError } = await supabase
     .from('webhooks')
-    .select('url_teste, modo_producao, url_producao')
+    .select('url_teste, modo_producao, url_producao, nome')
     .eq('escola_id', student.escola_id)
-    .eq('tipo', 'chat')
+    .in('tipo', ['chat_ia', 'chat'])
     .eq('ativo', true)
     .single();
+
+  // If no school-specific webhook found, try global webhook
+  if (webhookError || !webhookData) {
+    console.log('No school-specific webhook found, trying global webhook');
+    const { data: globalWebhook, error: globalError } = await supabase
+      .from('webhooks')
+      .select('url_teste, modo_producao, url_producao, nome')
+      .is('escola_id', null)
+      .in('tipo', ['chat_ia', 'chat'])
+      .eq('ativo', true)
+      .single();
+    
+    webhookData = globalWebhook;
+    webhookError = globalError;
+  }
+
+  console.log('Selected webhook:', webhookData, 'Error:', webhookError);
 
   if (!webhookError && webhookData) {
     const webhookUrl = webhookData.modo_producao ? webhookData.url_producao : webhookData.url_teste;
@@ -207,32 +226,38 @@ async function sendMessage(payload: any, student: any, userId: string) {
       message: text || '',
     };
 
-    // Add image URL if present (create signed URL for webhook)
+    // Add image URL if present (use public URL since bucket is public)
     if (attachmentUrl) {
-      try {
-        const { data: signedUrlData } = await supabase.storage
+      // If it's already a full URL, use it as is; otherwise construct the full public URL
+      if (attachmentUrl.startsWith('http')) {
+        webhookPayload.imageUrl = attachmentUrl;
+      } else {
+        const { data } = supabase.storage
           .from('chat-uploads')
-          .createSignedUrl(attachmentUrl.split('/').pop(), 604800); // 7 days TTL
-
-        if (signedUrlData?.signedUrl) {
-          webhookPayload.imageUrl = signedUrlData.signedUrl;
-        }
-      } catch (signError) {
-        console.error('Error creating signed URL:', signError);
-        // Continue without signed URL
+          .getPublicUrl(attachmentUrl);
+        webhookPayload.imageUrl = data.publicUrl;
       }
+      console.log('Added image URL to webhook payload:', webhookPayload.imageUrl);
     }
 
     // Send to webhook
     try {
+      console.log('Sending to webhook:', webhookUrl, 'Payload:', JSON.stringify(webhookPayload));
+      
       const webhookResponse = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(webhookPayload),
       });
 
+      console.log('Webhook response status:', webhookResponse.status);
+
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook returned status ${webhookResponse.status}`);
+      }
+
       const responseText = await webhookResponse.text();
-      console.log('Webhook response:', responseText);
+      console.log('Webhook response text:', responseText);
 
       // Save bot response
       if (responseText && responseText.trim()) {
@@ -243,6 +268,17 @@ async function sendMessage(payload: any, student: any, userId: string) {
             user_id: userId,
             session_id: `student_${student.codigo}`,
             message: responseText,
+            sender: 'tudinha',
+          }]);
+      } else {
+        // Save fallback if no response content
+        await supabase
+          .from('messages')
+          .insert([{
+            chat_id: chatId,
+            user_id: userId,
+            session_id: `student_${student.codigo}`,
+            message: 'Recebi sua mensagem! Como posso te ajudar?',
             sender: 'tudinha',
           }]);
       }

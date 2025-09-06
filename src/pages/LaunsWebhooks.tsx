@@ -19,6 +19,7 @@ interface WebhookData {
   tipo: string;
   url_teste: string;
   url_producao: string;
+  escola_id?: string | null;
   ativo: boolean;
   modo_producao: boolean;
   ultimo_disparo?: string;
@@ -49,6 +50,7 @@ export default function LaunsWebhooks() {
     tipo: '',
     url_teste: '',
     url_producao: '',
+    escola_id: null as string | null,
     ativo: true,
     modo_producao: false,
   });
@@ -154,6 +156,7 @@ export default function LaunsWebhooks() {
       tipo: '',
       url_teste: '',
       url_producao: '',
+      escola_id: null,
       ativo: true,
       modo_producao: false,
     });
@@ -167,6 +170,7 @@ export default function LaunsWebhooks() {
         tipo: webhook.tipo,
         url_teste: webhook.url_teste,
         url_producao: webhook.url_producao,
+        escola_id: (webhook as any).escola_id || null,
         ativo: webhook.ativo,
         modo_producao: webhook.modo_producao,
       });

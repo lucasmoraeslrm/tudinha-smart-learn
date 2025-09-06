@@ -6,6 +6,7 @@ import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { supabase } from '@/integrations/supabase/client';
 import StudentLoginForm from '@/components/StudentLoginForm';
 import { Button } from '@/components/ui/button';
+import tudinhaIcon from '@/assets/tudinha-mascot.png';
 const Index = () => {
   const { instancia } = useParams();
   const { branding } = useSchoolBranding(instancia);
@@ -59,7 +60,7 @@ const Index = () => {
     return <div className="min-h-screen bg-gradient-main flex items-center justify-center">
         <div className="text-center text-white">
           <div className="w-16 h-16 mx-auto mb-4">
-            <img src="/src/assets/tudinha-mascot.png" alt="Carregando..." className="w-full h-full object-contain animate-pulse" />
+            <img src={tudinhaIcon} alt="Carregando..." className="w-full h-full object-contain animate-pulse" />
           </div>
           <p className="text-white/80">Carregando...</p>
           <Button variant="ghost" onClick={handleClearAllSessions} className="mt-4 text-sm text-white/60 hover:text-white">
