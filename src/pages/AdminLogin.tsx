@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,11 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolBranding } from '@/hooks/useSchoolBranding';
 import { Loader2, Shield, User, GraduationCap, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function AdminLogin() {
+  const { instancia } = useParams();
+  const { branding } = useSchoolBranding(instancia);
   // School Admin/Coordinator (Supabase Auth)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -236,19 +240,27 @@ export default function AdminLogin() {
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-primary p-3">
+            {branding?.logo_url ? (
               <img 
-                src="https://storange.tudinha.com.br/colag.png" 
-                alt="Colégio Almeida Garrett" 
-                className="w-full h-full object-contain"
+                src={branding.logo_url} 
+                alt={branding.nome}
+                className="h-16 w-auto"
               />
-            </div>
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-gradient-primary p-3">
+                <img 
+                  src="https://storange.tudinha.com.br/colag.png" 
+                  alt="Colégio Almeida Garrett" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
           </div>
           <CardTitle className="text-2xl">
-            Hub de Acesso
+            {branding?.nome ? `Hub de Acesso - ${branding.nome}` : "Hub de Acesso"}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Colégio Almeida Garrett - Escolha seu tipo de acesso
+            {branding?.nome ? `${branding.nome} - Escolha seu tipo de acesso` : "Colégio Almeida Garrett - Escolha seu tipo de acesso"}
           </p>
         </CardHeader>
         <CardContent>

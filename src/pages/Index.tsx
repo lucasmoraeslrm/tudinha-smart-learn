@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSchoolBranding } from '@/hooks/useSchoolBranding';
 import { supabase } from '@/integrations/supabase/client';
 import StudentLogin from './StudentLogin';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Index = () => {
+  const { instancia } = useParams();
+  const { branding } = useSchoolBranding(instancia);
   const { user, profile, studentSession, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -89,18 +92,28 @@ const Index = () => {
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto mb-4">
-            <img 
-              src="/src/assets/tudinha-mascot.png" 
-              alt="Tudinha" 
-              className="w-full h-full object-contain"
-            />
-          </div>
+          {branding?.logo_url ? (
+            <div className="w-20 h-20 mx-auto mb-4">
+              <img 
+                src={branding.logo_url} 
+                alt={branding.nome}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-20 h-20 mx-auto mb-4">
+              <img 
+                src="/src/assets/tudinha-mascot.png" 
+                alt="Tudinha" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+          )}
           <h1 className="text-4xl font-bold text-white mb-2">
-            Tudinha
+            {branding?.nome || "Tudinha"}
           </h1>
           <p className="text-white/80 text-lg">
-            Sua plataforma de aprendizado inteligente
+            {branding?.nome ? "Portal do Aluno" : "Sua plataforma de aprendizado inteligente"}
           </p>
         </div>
 
@@ -115,32 +128,34 @@ const Index = () => {
           <div className="flex flex-wrap justify-center gap-4">
             <Button 
               variant="ghost" 
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate(instancia ? `/${instancia}/admin` : '/admin')}
               className="text-white/80 hover:text-white hover:bg-white/10"
             >
               Direção/Coordenação
             </Button>
             <Button 
               variant="ghost" 
-              onClick={() => navigate('/professor')}
+              onClick={() => navigate(instancia ? `/${instancia}/professor` : '/professor')}
               className="text-white/80 hover:text-white hover:bg-white/10"
             >
               Professor
             </Button>
             <Button 
               variant="ghost" 
-              onClick={() => navigate('/pais')}
+              onClick={() => navigate(instancia ? `/${instancia}/pais` : '/pais')}
               className="text-white/80 hover:text-white hover:bg-white/10"
             >
               Pais/Responsáveis
             </Button>
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/launs')}
-              className="text-white/80 hover:text-white hover:bg-white/10"
-            >
-              Desenvolvedores
-            </Button>
+            {!instancia && (
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate('/launs')}
+                className="text-white/80 hover:text-white hover:bg-white/10"
+              >
+                Desenvolvedores
+              </Button>
+            )}
             <Button 
               variant="ghost" 
               onClick={() => navigate('/docs/acessos')}

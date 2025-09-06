@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolBranding } from '@/hooks/useSchoolBranding';
 import { Loader2, ArrowLeft, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +15,8 @@ interface StudentLoginProps {
 }
 
 export default function StudentLogin({ onBack }: StudentLoginProps) {
+  const { instancia } = useParams();
+  const { branding } = useSchoolBranding(instancia);
   const [codigo, setCodigo] = useState('');
   const [password, setPassword] = useState('');
   const [maquinaCodigo, setMaquinaCodigo] = useState('');
@@ -83,13 +87,26 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
             </Button>
           )}
           
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <GraduationCap className="w-8 h-8 text-primary" />
+          <div className="mb-8 text-center">
+            {branding?.logo_url ? (
+              <img 
+                src={branding.logo_url} 
+                alt={branding.nome}
+                className="mx-auto h-16 w-auto mb-4"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <GraduationCap className="w-8 h-8 text-primary" />
+              </div>
+            )}
+            
+            <CardTitle className="text-2xl">
+              {branding?.nome ? `Portal do Aluno - ${branding.nome}` : "Portal do Aluno"}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Entre com seu código e senha para acessar
+            </p>
           </div>
-          <CardTitle className="text-2xl">Portal do Aluno</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Entre com seu código e senha para acessar
-          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

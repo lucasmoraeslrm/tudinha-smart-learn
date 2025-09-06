@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolBranding } from '@/hooks/useSchoolBranding';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProfessorLoginProps {
@@ -13,6 +15,8 @@ interface ProfessorLoginProps {
 }
 
 const ProfessorLogin: React.FC<ProfessorLoginProps> = ({ onBack, onSuccess }) => {
+  const { instancia } = useParams();
+  const { branding } = useSchoolBranding(instancia);
   const [codigo, setCodigo] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -77,10 +81,23 @@ const ProfessorLogin: React.FC<ProfessorLoginProps> = ({ onBack, onSuccess }) =>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           
-          <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="w-8 h-8 text-secondary" />
+          <div className="mb-4">
+            {branding?.logo_url ? (
+              <img 
+                src={branding.logo_url} 
+                alt={branding.nome}
+                className="mx-auto h-16 w-auto mb-4"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-secondary" />
+              </div>
+            )}
           </div>
-          <CardTitle className="text-2xl">Painel do Professor</CardTitle>
+          
+          <CardTitle className="text-2xl">
+            {branding?.nome ? `Portal do Professor - ${branding.nome}` : "Painel do Professor"}
+          </CardTitle>
           <CardDescription>
             Entre com suas credenciais para acessar o painel
           </CardDescription>

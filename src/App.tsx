@@ -74,6 +74,12 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
+            {/* Instance-based routes (NEW) */}
+            <Route path="/:instancia" element={<Index />} />
+            <Route path="/:instancia/admin" element={<AdminLogin />} />
+            <Route path="/:instancia/professor" element={<ProfessorLayout />} />
+            <Route path="/:instancia/pais" element={<ParentLogin />} />
+            
             {/* Main Student Access */}
             <Route path="/" element={<Index />} />
             

@@ -339,6 +339,7 @@ export type Database = {
           email: string | null
           endereco: string | null
           id: string
+          instancia: string | null
           logo_url: string | null
           nome: string
           nome_fantasia: string | null
@@ -364,6 +365,7 @@ export type Database = {
           email?: string | null
           endereco?: string | null
           id?: string
+          instancia?: string | null
           logo_url?: string | null
           nome: string
           nome_fantasia?: string | null
@@ -389,6 +391,7 @@ export type Database = {
           email?: string | null
           endereco?: string | null
           id?: string
+          instancia?: string | null
           logo_url?: string | null
           nome?: string
           nome_fantasia?: string | null
@@ -2354,6 +2357,32 @@ export type Database = {
       get_current_user_professor_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_escola_branding_by_domain: {
+        Args: { p_domain: string }
+        Returns: {
+          codigo: string
+          cor_primaria: string
+          cor_secundaria: string
+          dominio: string
+          id: string
+          instancia: string
+          logo_url: string
+          nome: string
+        }[]
+      }
+      get_escola_branding_by_instancia: {
+        Args: { p_instancia: string }
+        Returns: {
+          codigo: string
+          cor_primaria: string
+          cor_secundaria: string
+          dominio: string
+          id: string
+          instancia: string
+          logo_url: string
+          nome: string
+        }[]
       }
       get_professor_students: {
         Args: { professor_codigo: string }

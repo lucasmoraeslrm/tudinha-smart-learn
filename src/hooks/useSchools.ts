@@ -30,6 +30,7 @@ export interface School {
   uf?: string;
   cep?: string;
   email?: string;
+  instancia?: string;
 }
 
 export interface Module {
@@ -156,9 +157,9 @@ export function useSchools() {
 
   const updateSchool = async (id: string, updates: Partial<School>) => {
     try {
-      const allowedFields = [
+    const allowedFields = [
         'nome','codigo','dominio','logo_url','cor_primaria','cor_secundaria','ativa','plano',
-        'nome_fantasia','razao_social','telefone','celular','endereco','numero','complemento','bairro','cidade','uf','cep','email'
+        'nome_fantasia','razao_social','telefone','celular','endereco','numero','complemento','bairro','cidade','uf','cep','email','instancia'
       ] as const;
       const sanitizedUpdates = Object.fromEntries(
         Object.entries(updates).filter(([key]) =>

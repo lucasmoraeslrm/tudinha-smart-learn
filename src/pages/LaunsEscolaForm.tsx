@@ -22,6 +22,7 @@ export default function LaunsEscolaForm() {
     nome: '',
     codigo: '',
     dominio: '',
+    instancia: '',
     cor_primaria: '#3B82F6',
     cor_secundaria: '#1E40AF',
     plano: 'basico',
@@ -47,6 +48,7 @@ export default function LaunsEscolaForm() {
           nome: school.nome || '',
           codigo: school.codigo || '',
           dominio: school.dominio || '',
+          instancia: school.instancia || '',
           cor_primaria: school.cor_primaria || '#3B82F6',
           cor_secundaria: school.cor_secundaria || '#1E40AF',
           plano: school.plano || 'basico',
@@ -187,14 +189,30 @@ export default function LaunsEscolaForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dominio">Domínio (Opcional)</Label>
+                  <Label htmlFor="instancia">Instância (Slug) *</Label>
                   <Input
-                    id="dominio"
-                    value={formData.dominio}
-                    onChange={(e) => handleInputChange('dominio', e.target.value)}
-                    placeholder="Ex: colegiosojose.com.br"
+                    id="instancia"
+                    value={formData.instancia}
+                    onChange={(e) => handleInputChange('instancia', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    placeholder="Ex: colegiosaojose"
+                    className="font-mono"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    URL de acesso: www.exemplo.com.br/<span className="font-semibold">{formData.instancia || 'instancia'}</span>
+                  </p>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dominio">Domínio Personalizado (Opcional)</Label>
+                <Input
+                  id="dominio"
+                  value={formData.dominio}
+                  onChange={(e) => handleInputChange('dominio', e.target.value)}
+                  placeholder="Ex: colegiosojose.com.br"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Se configurado, permitirá acesso direto via domínio personalizado
+                </p>
               </div>
             </div>
 
