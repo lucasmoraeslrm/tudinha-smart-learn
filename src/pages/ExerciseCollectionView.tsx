@@ -6,14 +6,18 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, BookOpen, Loader2, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { getAlunoSerie } from '@/lib/student-utils';
 
 export default function ExerciseCollectionView() {
   const { collectionId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getStudentId } = useAuth();
   const [collection, setCollection] = useState<any>(null);
   const [topics, setTopics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
     if (collectionId) {
@@ -33,6 +37,18 @@ export default function ExerciseCollectionView() {
         .single();
 
       if (collectionError) throw collectionError;
+
+      // Verificar se o aluno tem acesso à coleção (pela série)
+      const studentId = getStudentId();
+      if (studentId) {
+        const serieDoAluno = await getAlunoSerie(studentId);
+        
+        if (serieDoAluno && collectionData.serie_escolar !== serieDoAluno) {
+          setAccessDenied(true);
+          setLoading(false);
+          return;
+        }
+      }
 
       setCollection(collectionData);
 
@@ -69,6 +85,21 @@ export default function ExerciseCollectionView() {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="text-center py-8">
+        <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Acesso Negado</h3>
+        <p className="text-muted-foreground mb-4">
+          Esta coleção não está disponível para a sua série escolar.
+        </p>
+        <Button onClick={() => navigate('/exercicios')}>
+          Voltar às Coleções
+        </Button>
       </div>
     );
   }

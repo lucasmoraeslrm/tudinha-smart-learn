@@ -59,7 +59,7 @@ export default function ProfessorJornadas({ professorData }: ProfessorJornadasPr
 
       // Carregar exercícios disponíveis
       const { data: exercisesData, error: exercisesError } = await supabase
-        .from('exercises')
+        .from('topic_exercises')
         .select('*')
         .order('created_at', { ascending: false });
 

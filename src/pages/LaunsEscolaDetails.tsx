@@ -72,14 +72,15 @@ export default function LaunsEscolaDetails() {
 
       // Buscar taxa de acertos dos exercícios
       const { data: answersData, error: answersError } = await supabase
-        .from('student_answers')
-        .select('is_correct')
-        .in('student_id', studentsData?.map(s => s.id) || []);
+        .from('student_exercise_sessions')
+        .select('score, total_questions')
+        .in('student_id', studentsData?.map(s => s.id) || [])
+        .not('finished_at', 'is', null);
 
       if (answersError) throw answersError;
 
-      const totalAnswers = answersData?.length || 0;
-      const correctAnswers = answersData?.filter(a => a.is_correct).length || 0;
+      const totalAnswers = answersData?.reduce((acc, session) => acc + (session.total_questions || 0), 0) || 0;
+      const correctAnswers = answersData?.reduce((acc, session) => acc + (session.score || 0), 0) || 0;
       const correctPercentage = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
 
       setDashboardMetrics({

@@ -102,17 +102,18 @@ export default function DashboardPage() {
   const loadExerciseStats = async (studentId: string) => {
     try {
       const { data, error } = await supabase
-        .from('student_answers')
-        .select('is_correct')
-        .eq('student_id', studentId);
+        .from('student_exercise_sessions')
+        .select('total_questions, score')
+        .eq('student_id', studentId)
+        .not('finished_at', 'is', null);
 
       if (error) {
-        console.error('Erro ao buscar respostas:', error);
+        console.error('Erro ao buscar sessões:', error);
         return;
       }
 
-      const totalAnswers = data?.length || 0;
-      const correctAnswers = data?.filter(answer => answer.is_correct).length || 0;
+      const totalAnswers = data?.reduce((acc, session) => acc + (session.total_questions || 0), 0) || 0;
+      const correctAnswers = data?.reduce((acc, session) => acc + (session.score || 0), 0) || 0;
 
       setStats(prev => ({ 
         ...prev, 
@@ -128,17 +129,17 @@ export default function DashboardPage() {
   const loadLists = async () => {
     try {
       const { data, error } = await supabase
-        .from('exercise_lists')
+        .from('exercise_collections')
         .select('id');
 
       if (error) {
-        console.error('Erro ao buscar listas:', error);
+        console.error('Erro ao buscar coleções:', error);
         return;
       }
 
       setStats(prev => ({ ...prev, lists: data?.length || 0 }));
     } catch (error) {
-      console.error('Erro ao carregar listas:', error);
+      console.error('Erro ao carregar coleções:', error);
     }
   };
 
@@ -149,19 +150,22 @@ export default function DashboardPage() {
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
       const { data, error } = await supabase
-        .from('student_answers')
-        .select('id')
+        .from('student_exercise_sessions')
+        .select('total_questions')
         .eq('student_id', studentId)
-        .gte('answered_at', oneWeekAgo.toISOString());
+        .not('finished_at', 'is', null)
+        .gte('finished_at', oneWeekAgo.toISOString());
 
       if (error) {
         console.error('Erro ao buscar progresso semanal:', error);
         return;
       }
 
+      const weeklyCompleted = data?.reduce((acc, session) => acc + (session.total_questions || 0), 0) || 0;
+
       setWeeklyProgress(prev => ({ 
         ...prev, 
-        completed: data?.length || 0 
+        completed: weeklyCompleted
       }));
     } catch (error) {
       console.error('Erro ao carregar progresso semanal:', error);
@@ -170,13 +174,19 @@ export default function DashboardPage() {
 
   const loadFavoriteSubjects = async (studentId: string) => {
     try {
+      // Buscar sessões do aluno com dados dos tópicos e coleções
       const { data, error } = await supabase
-        .from('student_answers')
+        .from('student_exercise_sessions')
         .select(`
-          is_correct,
-          exercises!exercise_id(subject)
+          score,
+          total_questions,
+          exercise_topics!topic_id (
+            collection_id,
+            exercise_collections!collection_id (materia)
+          )
         `)
-        .eq('student_id', studentId);
+        .eq('student_id', studentId)
+        .not('finished_at', 'is', null);
 
       if (error) {
         console.error('Erro ao buscar matérias favoritas:', error);
@@ -186,21 +196,20 @@ export default function DashboardPage() {
       // Agrupar por matéria e calcular estatísticas
       const subjectStats: { [key: string]: { total: number, correct: number } } = {};
       
-      data?.forEach(answer => {
-        const subject = answer.exercises?.subject;
-        if (subject) {
-          if (!subjectStats[subject]) {
-            subjectStats[subject] = { total: 0, correct: 0 };
+      data?.forEach(session => {
+        const materia = session.exercise_topics?.exercise_collections?.materia;
+        if (materia) {
+          if (!subjectStats[materia]) {
+            subjectStats[materia] = { total: 0, correct: 0 };
           }
-          subjectStats[subject].total++;
-          if (answer.is_correct) {
-            subjectStats[subject].correct++;
-          }
+          subjectStats[materia].total += session.total_questions || 0;
+          subjectStats[materia].correct += session.score || 0;
         }
       });
 
       // Ordenar por taxa de acerto
       const sortedSubjects = Object.entries(subjectStats)
+        .filter(([, stats]) => stats.total > 0)
         .map(([subject, stats]) => ({
           subject,
           total: stats.total,
@@ -259,13 +268,13 @@ export default function DashboardPage() {
       color: 'bg-yellow-100 text-yellow-600',
       iconBg: 'bg-yellow-600'
     },
-    {
-      icon: BookOpen,
-      value: stats.lists.toString(),
-      label: 'Listas',
-      color: 'bg-purple-100 text-purple-600',
-      iconBg: 'bg-purple-600'
-    }
+      {
+        icon: BookOpen,
+        value: stats.lists.toString(),
+        label: 'Coleções',
+        color: 'bg-purple-100 text-purple-600',
+        iconBg: 'bg-purple-600'
+      }
   ];
 
   return (

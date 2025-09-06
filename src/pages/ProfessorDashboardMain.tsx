@@ -68,15 +68,15 @@ export default function ProfessorDashboardMain({ professorData }: ProfessorDashb
       const jornadasConcluidas = jornadas?.filter(j => j.status === 'concluida').length || 0;
 
       // Buscar exercícios disponíveis
-      const { data: exercicios } = await supabase
-        .from('exercises')
+      const { data: exercicios, count } = await supabase
+        .from('topic_exercises')
         .select('*', { count: 'exact', head: true });
 
       setStats({
         totalAlunos: alunos?.length || 0,
         jornadasAtivas,
         jornadasConcluidas,
-        exerciciosDisponiveis: exercicios?.length || 0
+        exerciciosDisponiveis: count || 0
       });
 
       setRecentJornadas(jornadas || []);

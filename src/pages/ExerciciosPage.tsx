@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getAlunoSerie } from '@/lib/student-utils';
 
 export default function ExerciciosPage() {
   const [exerciseCollections, setExerciseCollections] = useState<any[]>([]);
@@ -24,8 +25,14 @@ export default function ExerciciosPage() {
       setLoading(true);
       const studentId = getStudentId();
 
-      // Carregar coleções de exercícios com contagem de tópicos e exercícios
-      const { data: collectionsData, error: collectionsError } = await supabase
+      // Obter série do aluno
+      let serieDoAluno: string | null = null;
+      if (studentId) {
+        serieDoAluno = await getAlunoSerie(studentId);
+      }
+
+      // Carregar coleções de exercícios filtradas por série
+      let collectionsQuery = supabase
         .from('exercise_collections')
         .select(`
           *,
@@ -34,7 +41,14 @@ export default function ExerciciosPage() {
             assunto,
             topic_exercises (id)
           )
-        `)
+        `);
+
+      // Filtrar por série se disponível
+      if (serieDoAluno) {
+        collectionsQuery = collectionsQuery.eq('serie_escolar', serieDoAluno);
+      }
+
+      const { data: collectionsData, error: collectionsError } = await collectionsQuery
         .order('created_at', { ascending: false });
 
       if (collectionsError) throw collectionsError;
