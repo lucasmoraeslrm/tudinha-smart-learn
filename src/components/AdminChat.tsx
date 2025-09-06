@@ -122,19 +122,34 @@ export function AdminChat() {
 
   const loadStudentStats = async (studentId: string) => {
     try {
-      const { data: answers, error } = await supabase
-        .from('student_answers')
-        .select('is_correct, answered_at')
+      // Buscar sessões do aluno
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('student_exercise_sessions')
+        .select('id, finished_at')
         .eq('student_id', studentId);
 
-      if (error) throw error;
+      if (sessionsError) throw sessionsError;
 
-      const totalAnswers = answers?.length || 0;
-      const correctAnswers = answers?.filter(a => a.is_correct).length || 0;
+      const sessionIds = (sessions || []).map((s: any) => s.id);
+
+      let responses: any[] = [];
+      if (sessionIds.length > 0) {
+        const { data: resp, error: respError } = await supabase
+          .from('student_question_responses')
+          .select('is_correct, answered_at')
+          .in('session_id', sessionIds);
+        if (respError) throw respError;
+        responses = resp || [];
+      }
+
+      const totalAnswers = responses.length;
+      const correctAnswers = responses.filter(r => r.is_correct).length;
       const accuracyPercentage = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
-      const lastActivity = answers && answers.length > 0 
-        ? answers.sort((a, b) => new Date(b.answered_at).getTime() - new Date(a.answered_at).getTime())[0].answered_at
-        : null;
+      const lastActivity = responses.length > 0
+        ? responses.sort((a, b) => new Date(b.answered_at).getTime() - new Date(a.answered_at).getTime())[0].answered_at
+        : (sessions && sessions.length > 0
+            ? sessions.sort((a: any, b: any) => new Date(b.finished_at || 0).getTime() - new Date(a.finished_at || 0).getTime())[0].finished_at
+            : null);
 
       setStudentStats({
         totalAnswers,
@@ -158,27 +173,39 @@ export function AdminChat() {
 
       if (studentError) throw studentError;
 
-      // Buscar últimas respostas do aluno
-      const { data: answers, error: answersError } = await supabase
-        .from('student_answers')
-        .select(`
-          user_answer,
-          is_correct,
-          answered_at,
-          exercises!exercise_id (
-            question,
-            correct_answer
-          )
-        `)
-        .eq('student_id', studentId)
-        .order('answered_at', { ascending: false })
-        .limit(5);
+      // Buscar sessões e últimas respostas do aluno
+      const { data: sessions } = await supabase
+        .from('student_exercise_sessions')
+        .select('id')
+        .eq('student_id', studentId);
 
-      if (answersError) throw answersError;
+      const sessionIds = (sessions || []).map((s: any) => s.id);
+
+      let answers: any[] = [];
+      if (sessionIds.length > 0) {
+        const { data: resp } = await supabase
+          .from('student_question_responses')
+          .select('exercise_id, student_answer, is_correct, answered_at')
+          .in('session_id', sessionIds)
+          .order('answered_at', { ascending: false })
+          .limit(5);
+        answers = resp || [];
+      }
+
+      // Buscar detalhes das questões
+      const exerciseIds = [...new Set(answers.map(a => a.exercise_id).filter(Boolean))];
+      let exerciseMap: Record<string, any> = {};
+      if (exerciseIds.length > 0) {
+        const { data: exData } = await supabase
+          .from('topic_exercises')
+          .select('id, enunciado, resposta_correta')
+          .in('id', exerciseIds);
+        (exData || []).forEach((ex: any) => { exerciseMap[ex.id] = ex; });
+      }
 
       // Calcular estatísticas
-      const totalAnswers = answers?.length || 0;
-      const correctAnswers = answers?.filter(a => a.is_correct).length || 0;
+      const totalAnswers = answers.length;
+      const correctAnswers = answers.filter(a => a.is_correct).length;
       const accuracyPercentage = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
 
       return {
@@ -191,12 +218,12 @@ export function AdminChat() {
             erros: totalAnswers - correctAnswers,
             porcentagem_acerto: accuracyPercentage
           },
-          ultimos_exercicios: answers?.map(answer => ({
-            pergunta: answer.exercises?.question || 'Pergunta não encontrada',
-            resposta: answer.user_answer,
+          ultimos_exercicios: answers.map(answer => ({
+            pergunta: exerciseMap[answer.exercise_id]?.enunciado || 'Pergunta não encontrada',
+            resposta: answer.student_answer,
             correto: answer.is_correct,
             data: answer.answered_at
-          })) || []
+          }))
         }
       };
     } catch (error) {

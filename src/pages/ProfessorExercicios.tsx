@@ -30,10 +30,10 @@ export default function ProfessorExercicios({ professorData }: ProfessorExercici
 
   const carregarDados = async () => {
     try {
-      // Buscar exercícios
-      const { data: exercisesData, error: exercisesError } = await supabase
-        .from('exercises')
-        .select('*')
+      // Buscar exercícios do novo modelo (topic_exercises)
+      const { data: rawExercises, error: exercisesError } = await supabase
+        .from('topic_exercises')
+        .select('id, enunciado, explicacao')
         .order('created_at', { ascending: false });
 
       if (exercisesError) {
@@ -41,36 +41,29 @@ export default function ProfessorExercicios({ professorData }: ProfessorExercici
         return;
       }
 
+      const exercisesData = (rawExercises || []).map((ex: any) => ({
+        id: ex.id,
+        title: ex.enunciado?.slice(0, 60) || 'Exercício',
+        subject: 'Geral',
+        question: ex.enunciado,
+        options: [],
+        correct_answer: undefined,
+        explanation: ex.explicacao,
+        difficulty: 'medium'
+      }));
+
       // Buscar respostas dos alunos do professor
       let studentAnswersData = [];
       if (professorData?.codigo) {
-        const { data: answers, error: answersError } = await supabase
-          .from('student_answers')
-          .select(`
-            *,
-            students!inner(
-              id, name,
-              turmas!inner(
-                id, nome,
-                professor_materia_turma!inner(
-                  professores!inner(codigo)
-                )
-              )
-            )
-          `)
-          .eq('students.turmas.professor_materia_turma.professores.codigo', professorData.codigo);
-
-        if (!answersError) {
-          studentAnswersData = answers || [];
-        }
+        // TODO: Mapear respostas por professor usando as turmas e sessões (versão simplificada)
+        studentAnswersData = [];
       }
 
       setExercises(exercisesData || []);
       setStudentAnswers(studentAnswersData);
       
-      // Extrair matérias únicas
-      const uniqueSubjects = [...new Set(exercisesData?.map(ex => ex.subject) || [])];
-      setSubjects(uniqueSubjects);
+      // Extrair matérias únicas (placeholder)
+      setSubjects(['Geral']);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     } finally {

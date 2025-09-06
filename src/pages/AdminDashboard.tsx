@@ -68,8 +68,8 @@ export default function AdminDashboard() {
       const messagesRes = await messagesQuery;
 
       const [exercisesRes, listsRes] = await Promise.all([
-        supabase.from('exercises').select('id', { count: 'exact' }),
-        supabase.from('exercise_lists').select('id', { count: 'exact' })
+        supabase.from('topic_exercises').select('id', { count: 'exact' }),
+        supabase.from('exercise_collections').select('id', { count: 'exact' })
       ]);
 
       setStats({
@@ -80,17 +80,23 @@ export default function AdminDashboard() {
       });
 
       // Fetch recent activity (filter by escola via students join)
+      // Coletar respostas recentes via sessões dos alunos
+      let sessionIds: string[] = [];
+      if (studentIds.length > 0) {
+        const { data: sess } = await supabase
+          .from('student_exercise_sessions')
+          .select('id')
+          .in('student_id', studentIds)
+          .limit(200);
+        sessionIds = (sess || []).map((s: any) => s.id);
+      }
+
       const answersQuery = supabase
-        .from('student_answers')
-        .select(`
-          answered_at,
-          is_correct,
-          students!inner(name, escola_id),
-          exercises!inner(title, subject)
-        `)
+        .from('student_question_responses')
+        .select('answered_at, is_correct')
         .order('answered_at', { ascending: false })
         .limit(5);
-      if (escolaId) answersQuery.eq('students.escola_id', escolaId);
+      if (sessionIds.length > 0) answersQuery.in('session_id', sessionIds);
 
       // Fetch chat messages (filtered by school students)
       let chatQuery = supabase
@@ -103,17 +109,14 @@ export default function AdminDashboard() {
         chatQuery = chatQuery.in('user_id', studentIds);
       }
 
+      // Sessões finalizadas recentemente
       const completedListsQuery = supabase
-        .from('student_answers')
-        .select(`
-          answered_at,
-          students!inner(name, escola_id),
-          exercise_lists!inner(title)
-        `)
-        .not('list_id', 'is', null)
-        .order('answered_at', { ascending: false })
+        .from('student_exercise_sessions')
+        .select('finished_at')
+        .not('finished_at', 'is', null)
+        .order('finished_at', { ascending: false })
         .limit(3);
-      if (escolaId) completedListsQuery.eq('students.escola_id', escolaId);
+      if (studentIds.length > 0) completedListsQuery.in('student_id', studentIds);
 
       const [answersRes, chatRes, completedListsRes] = await Promise.all([
         answersQuery,
@@ -150,9 +153,9 @@ export default function AdminDashboard() {
       completedListsRes.data?.forEach((completion: any) => {
         activities.push({
           type: 'completion',
-          student: completion.students?.name || 'Aluno',
-          action: `completou ${completion.exercise_lists?.title || 'lista de exercícios'}`,
-          time: completion.answered_at,
+          student: 'Aluno',
+          action: 'concluiu uma sessão de exercícios',
+          time: completion.finished_at,
           success: true
         });
       });
@@ -162,29 +165,32 @@ export default function AdminDashboard() {
       setRecentActivity(activities.slice(0, 3));
 
       // Calculate performance metrics (filtered by school)
-      let totalAnswersQuery = supabase
-        .from('student_answers')
-        .select('is_correct', { count: 'exact' });
-      let correctAnswersQuery = supabase
-        .from('student_answers')
-        .select('id', { count: 'exact' })
-        .eq('is_correct', true);
-      let uniqueStudentsQuery = supabase
+      // Contagem de respostas através das sessões filtradas por escola
+      let sessionIdsForPerf: string[] = [];
+      if (studentIds.length > 0) {
+        const { data: sessPerf } = await supabase
+          .from('student_exercise_sessions')
+          .select('id')
+          .in('student_id', studentIds);
+        sessionIdsForPerf = (sessPerf || []).map((s: any) => s.id);
+      }
+
+      let totalAnswers = { count: 0 } as any;
+      let correctAnswers = { count: 0 } as any;
+      if (sessionIdsForPerf.length > 0) {
+        const [totalRes, correctRes] = await Promise.all([
+          supabase.from('student_question_responses').select('id', { count: 'exact' }).in('session_id', sessionIdsForPerf),
+          supabase.from('student_question_responses').select('id', { count: 'exact' }).eq('is_correct', true).in('session_id', sessionIdsForPerf)
+        ]);
+        totalAnswers = totalRes;
+        correctAnswers = correctRes;
+      }
+
+      const uniqueStudentsQuery = supabase
         .from('messages')
         .select('user_id')
         .eq('sender', 'user');
-
-      if (escolaId && studentIds.length > 0) {
-        totalAnswersQuery = totalAnswersQuery.in('student_id', studentIds);
-        correctAnswersQuery = correctAnswersQuery.in('student_id', studentIds);
-        uniqueStudentsQuery = uniqueStudentsQuery.in('user_id', studentIds);
-      }
-
-      const [totalAnswers, correctAnswers, uniqueStudentsWithMessages] = await Promise.all([
-        totalAnswersQuery,
-        correctAnswersQuery,
-        uniqueStudentsQuery
-      ]);
+      const uniqueStudentsWithMessages = studentIds.length > 0 ? await uniqueStudentsQuery.in('user_id', studentIds) : await uniqueStudentsQuery;
 
       const completionRate = totalAnswers.count && totalAnswers.count > 0 
         ? Math.round((correctAnswers.count || 0) / totalAnswers.count * 100)

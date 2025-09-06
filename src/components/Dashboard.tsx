@@ -58,40 +58,34 @@ const Dashboard: React.FC<DashboardProps> = ({ userName, onStartChat, onViewExer
       };
       
       if (studentId) {
-        const { data: answersData } = await supabase
-          .from('student_answers')
-          .select(`
-            is_correct, 
-            list_id,
-            exercises!exercise_id(subject, title)
-          `)
+        // Buscar sessões do aluno
+        const { data: sessions } = await supabase
+          .from('student_exercise_sessions')
+          .select('id, finished_at, total_time_seconds')
           .eq('student_id', studentId)
-          .order('answered_at', { ascending: false })
-          .limit(50);
-        
-        if (answersData) {
-          exerciseStats.completed = answersData.length;
-          exerciseStats.correct = answersData.filter(a => a.is_correct).length;
-          
-          // Count unique lists completed
-          const uniqueLists = new Set(answersData.map(a => a.list_id).filter(Boolean));
-          exerciseStats.listsCompleted = uniqueLists.size;
-          
-          // Count by subject for favorites
-          answersData.forEach(answer => {
-            const subject = answer.exercises?.subject;
-            if (subject) {
-              exerciseStats.subjectCounts[subject] = (exerciseStats.subjectCounts[subject] || 0) + 1;
-            }
-          });
-          
-          // Get recent topics
-          exerciseStats.recentTopics = answersData
-            .slice(0, 10)
-            .map(a => a.exercises?.title)
-            .filter(Boolean)
-            .slice(0, 4);
+          .order('started_at', { ascending: false });
+
+        const sessionIds = (sessions || []).map((s: any) => s.id);
+
+        // Buscar respostas
+        let responses: any[] = [];
+        if (sessionIds.length > 0) {
+          const { data: resp } = await supabase
+            .from('student_question_responses')
+            .select('is_correct')
+            .in('session_id', sessionIds)
+            .limit(100);
+          responses = resp || [];
         }
+
+        exerciseStats.completed = responses.length;
+        exerciseStats.correct = responses.filter((r) => r.is_correct).length;
+        
+        // Contar sessões finalizadas como "listas" concluídas
+        exerciseStats.listsCompleted = (sessions || []).filter((s: any) => s.finished_at).length;
+        
+        // Deixar favoritos e tópicos recentes vazios por ora (sem mapeamento direto)
+        exerciseStats.recentTopics = [];
       }
       
       // Get favorite subjects (top 3 by exercise count)

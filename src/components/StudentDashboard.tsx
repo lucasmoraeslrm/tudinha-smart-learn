@@ -73,18 +73,25 @@ const StudentDashboard = () => {
 
       setHistorico(historicoData || []);
 
-      // Buscar resultados anteriores (student_answers)
-      const { data: resultados } = await supabase
-        .from('student_answers')
-        .select(`
-          *,
-          exercises:exercise_id (title, subject)
-        `)
-        .eq('student_id', studentId)
-        .order('answered_at', { ascending: false })
-        .limit(5);
+      // Buscar resultados anteriores via sessões e respostas
+      const { data: sessions } = await supabase
+        .from('student_exercise_sessions')
+        .select('id')
+        .eq('student_id', studentId);
 
-      setResultadosAnteriores(resultados || []);
+      const sessionIds = (sessions || []).map((s: any) => s.id);
+      let resultados: any[] = [];
+      if (sessionIds.length > 0) {
+        const { data: resp } = await supabase
+          .from('student_question_responses')
+          .select('is_correct')
+          .in('session_id', sessionIds)
+          .order('answered_at', { ascending: false })
+          .limit(5);
+        resultados = resp || [];
+      }
+
+      setResultadosAnteriores(resultados);
 
     } catch (error) {
       console.error('Erro ao carregar dados:', error);

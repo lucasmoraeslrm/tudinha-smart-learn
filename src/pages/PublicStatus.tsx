@@ -37,7 +37,7 @@ export default function PublicStatus() {
         supabase.from('escolas').select('id', { count: 'exact' }),
         supabase.from('students').select('id', { count: 'exact' }),
         supabase.from('professores').select('id', { count: 'exact' }),
-        supabase.from('exercises').select('id', { count: 'exact' }),
+        supabase.from('topic_exercises').select('id', { count: 'exact' }),
         supabase.from('jornadas').select('id', { count: 'exact' }),
       ]);
 
