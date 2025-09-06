@@ -259,15 +259,35 @@ async function sendMessage(payload: any, student: any, userId: string) {
       const responseText = await webhookResponse.text();
       console.log('Webhook response text:', responseText);
 
+      let botMessage = '';
+      
+      // Try to parse JSON response and extract the message
+      try {
+        const jsonResponse = JSON.parse(responseText);
+        if (jsonResponse.response) {
+          botMessage = jsonResponse.response;
+        } else if (jsonResponse.message) {
+          botMessage = jsonResponse.message;
+        } else if (typeof jsonResponse === 'string') {
+          botMessage = jsonResponse;
+        } else {
+          // If it's an object but no known message field, stringify it
+          botMessage = responseText;
+        }
+      } catch (parseError) {
+        // Not JSON, use as plain text
+        botMessage = responseText;
+      }
+
       // Save bot response
-      if (responseText && responseText.trim()) {
+      if (botMessage && botMessage.trim()) {
         await supabase
           .from('messages')
           .insert([{
             chat_id: chatId,
             user_id: userId,
             session_id: `student_${student.codigo}`,
-            message: responseText,
+            message: botMessage,
             sender: 'tudinha',
           }]);
       } else {
