@@ -13,8 +13,8 @@ import JornadaPage from "./pages/JornadaPage";
 import ChatPage from "./pages/ChatPage";
 import ExerciciosPage from "./pages/ExerciciosPage";
 import StudentRedacao from "./pages/StudentRedacao";
-import ExerciseListView from "./pages/ExerciseListView";
-import ExerciseView from "./pages/ExerciseView";
+import ExerciseCollectionView from "./pages/ExerciseCollectionView";
+import TopicExerciseView from "./pages/TopicExerciseView";
 import StudentLayout from "./components/StudentLayout";
 import AdminLayout from "./components/AdminLayout";
 import StudentLogin from "./pages/StudentLogin";
@@ -23,8 +23,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminChat from "./pages/AdminChat";
 import AdminStudents from "./pages/AdminStudents";
 import AdminJornadas from "./pages/AdminJornadas";
-import AdminExercises from "./pages/AdminExercises";
-import AdminLists from "./pages/AdminLists";
 import AdminProfessores from "./pages/AdminProfessores";
 import AdminUsuariosCRUD from "./pages/AdminUsuariosCRUD";
 import AdminMaterias from "./pages/AdminMaterias";
@@ -119,17 +117,17 @@ const App = () => {
                 </StudentLayout>
               </ProtectedRoute>
             } />
-            <Route path="/lista/:listId" element={
+            <Route path="/colecao/:collectionId" element={
               <ProtectedRoute>
                 <StudentLayout>
-                  <ExerciseListView />
+                  <ExerciseCollectionView />
                 </StudentLayout>
               </ProtectedRoute>
             } />
-            <Route path="/exercicio/:exerciseId" element={
+            <Route path="/topico/:topicId" element={
               <ProtectedRoute>
                 <StudentLayout>
-                  <ExerciseView />
+                  <TopicExerciseView />
                 </StudentLayout>
               </ProtectedRoute>
             } />
@@ -231,20 +229,6 @@ const App = () => {
               <ProtectedRoute requireSchoolAdmin>
                 <AdminLayout>
                   <AdminJornadas />
-                </AdminLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/exercises" element={
-              <ProtectedRoute requireSchoolAdmin>
-                <AdminLayout>
-                  <AdminExercises />
-                </AdminLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/lists" element={
-              <ProtectedRoute requireSchoolAdmin>
-                <AdminLayout>
-                  <AdminLists />
                 </AdminLayout>
               </ProtectedRoute>
             } />
