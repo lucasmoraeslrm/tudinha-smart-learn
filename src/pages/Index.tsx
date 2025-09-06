@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchoolBranding } from '@/hooks/useSchoolBranding';
 import { supabase } from '@/integrations/supabase/client';
-import StudentLogin from './StudentLogin';
+import StudentLoginForm from '@/components/StudentLoginForm';
 import { Button } from '@/components/ui/button';
 const Index = () => {
   const {
@@ -93,23 +93,10 @@ const Index = () => {
 
       {/* Right Side - Login and Navigation */}
       <div className="w-full lg:w-1/2 flex flex-col">
-        {/* Mobile Header */}
-        <div className="lg:hidden bg-gradient-to-r from-primary to-primary-dark p-6 text-center text-white">
-          {branding?.logo_url ? <img src={branding.logo_url} alt={branding.nome} className="mx-auto h-16 w-auto mb-4" /> : <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <img src="/src/assets/tudinha-mascot.png" alt="Tudinha Mascot" className="w-10 h-10" />
-            </div>}
-          <h1 className="text-2xl font-bold mb-2">
-            {branding?.nome || "Portal Educacional"}
-          </h1>
-          <p className="opacity-90">
-            Sistema de Gestão Educacional
-          </p>
-        </div>
-
         {/* Student Login Form */}
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="w-full max-w-md">
-            <StudentLogin onBack={() => navigate('/')} />
+            <StudentLoginForm onBack={() => navigate('/')} />
           </div>
         </div>
       </div>
