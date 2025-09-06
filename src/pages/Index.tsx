@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchoolBranding } from '@/hooks/useSchoolBranding';
 import { supabase } from '@/integrations/supabase/client';
-import StudentLogin from './StudentLogin';
+import StudentLoginForm from '@/components/StudentLoginForm';
 import { Button } from '@/components/ui/button';
 import { Shield, GraduationCap, Users, Settings, FileText } from 'lucide-react';
 
@@ -161,7 +161,7 @@ const Index = () => {
         {/* Student Login Form */}
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="w-full max-w-md">
-            <StudentLogin onBack={() => navigate('/')} />
+            <StudentLoginForm showMobileLogo={false} />
           </div>
         </div>
 
