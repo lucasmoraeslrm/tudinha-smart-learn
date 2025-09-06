@@ -1,17 +1,19 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
 
 const Exercises = () => {
   const navigate = useNavigate();
+  const { exercicios } = useInstanciaPath();
 
   useEffect(() => {
     // Redirecionar automaticamente para a nova página de exercícios
-    navigate('/exercicios', { replace: true });
-  }, [navigate]);
+    navigate(exercicios(), { replace: true });
+  }, [navigate, exercicios]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
@@ -22,7 +24,7 @@ const Exercises = () => {
           <p className="text-muted-foreground mb-4">
             Você será redirecionado para a nova página de exercícios.
           </p>
-          <Button onClick={() => navigate('/exercicios')}>
+          <Button onClick={() => navigate(exercicios())}>
             Ir para Exercícios
           </Button>
         </CardContent>

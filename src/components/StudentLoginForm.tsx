@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,7 @@ interface StudentLoginFormProps {
 export default function StudentLoginForm({ onBack, showMobileLogo = true }: StudentLoginFormProps) {
   const { instancia } = useParams();
   const { branding } = useSchoolBranding(instancia);
+  const { dashboard } = useInstanciaPath();
   const [codigo, setCodigo] = useState('');
   const [password, setPassword] = useState('');
   const [maquinaCodigo, setMaquinaCodigo] = useState('');
@@ -29,9 +31,9 @@ export default function StudentLoginForm({ onBack, showMobileLogo = true }: Stud
     if (user && profile?.role === 'admin') {
       navigate('/admin/dashboard');
     } else if (studentSession) {
-      navigate('/dashboard');
+      navigate(dashboard());
     }
-  }, [user, profile, studentSession, navigate]);
+  }, [user, profile, studentSession, navigate, dashboard]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +59,7 @@ export default function StudentLoginForm({ onBack, showMobileLogo = true }: Stud
       });
       
       if (!onBack) {
-        navigate('/dashboard');
+        navigate(dashboard());
       }
     } catch (error: any) {
       toast({

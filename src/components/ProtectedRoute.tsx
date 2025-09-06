@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
@@ -21,6 +21,7 @@ export default function ProtectedRoute({
   requireProfessor = false
 }: ProtectedRouteProps) {
   const { user, profile, studentSession, loading } = useAuth();
+  const { instancia } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -105,7 +106,12 @@ export default function ProtectedRoute({
 
       // No authentication found
       if (!user && !studentSession && !professorSession && !parentSession) {
-        navigate('/admin');
+        // If we have an instance, redirect to instance-specific login
+        if (instancia) {
+          navigate(`/${instancia}`);
+        } else {
+          navigate('/admin');
+        }
       }
     }
   }, [user, profile, studentSession, loading, navigate, requireAdmin, requireLauns, requireSchoolAdmin, requireParent, requireProfessor]);

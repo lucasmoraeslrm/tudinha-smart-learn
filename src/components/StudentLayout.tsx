@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveModules } from '@/hooks/useActiveModules';
+import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { 
@@ -15,11 +16,11 @@ import {
 } from 'lucide-react';
 
 const sidebarItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard, moduleCode: null }, // Always available
-  { title: 'Jornada', url: '/jornada', icon: MapPin, moduleCode: 'jornada' },
-  { title: 'Redação', url: '/redacao', icon: FileText, moduleCode: 'redacao' },
-  { title: 'Tudinha', url: '/chat', icon: MessageCircle, moduleCode: 'chat' },
-  { title: 'Exercícios', url: '/exercicios', icon: BookOpen, moduleCode: 'exercicios' },
+  { title: 'Dashboard', path: 'dashboard', icon: LayoutDashboard, moduleCode: null }, // Always available
+  { title: 'Jornada', path: 'jornada', icon: MapPin, moduleCode: 'jornada' },
+  { title: 'Redação', path: 'redacao', icon: FileText, moduleCode: 'redacao' },
+  { title: 'Tudinha', path: 'chat', icon: MessageCircle, moduleCode: 'chat' },
+  { title: 'Exercícios', path: 'exercicios', icon: BookOpen, moduleCode: 'exercicios' },
 ];
 
 interface StudentLayoutProps {
@@ -29,12 +30,13 @@ interface StudentLayoutProps {
 export default function StudentLayout({ children }: StudentLayoutProps) {
   const { studentSession, signOut, getStudentName } = useAuth();
   const { activeModules } = useActiveModules(studentSession?.escola_id || null);
+  const { getPath, logout: getLogoutPath, chat: getChatPath } = useInstanciaPath();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/');
+    navigate(getLogoutPath());
   };
 
   const studentName = studentSession?.full_name || studentSession?.name || getStudentName() || 'Estudante';
@@ -43,7 +45,10 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
   const availableModuleCodes = activeModules.map(module => module.codigo);
   const filteredSidebarItems = sidebarItems.filter(item => 
     item.moduleCode === null || availableModuleCodes.includes(item.moduleCode)
-  );
+  ).map(item => ({
+    ...item,
+    url: getPath(item.path)
+  }));
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -138,7 +143,7 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
           
           <Button 
             className="bg-purple-600 hover:bg-purple-700"
-            onClick={() => navigate('/chat')}
+            onClick={() => navigate(getChatPath())}
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Conversar com Tudinha

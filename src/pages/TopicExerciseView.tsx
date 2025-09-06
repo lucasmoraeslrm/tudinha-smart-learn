@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ export default function TopicExerciseView() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getStudentId } = useAuth();
+  const { exercicios } = useInstanciaPath();
   const [topic, setTopic] = useState<any>(null);
   const [exercises, setExercises] = useState<any[]>([]);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
@@ -159,7 +161,7 @@ export default function TopicExerciseView() {
         })
         .eq('id', sessionId);
 
-      navigate('/exercicios');
+      navigate(exercicios());
     } catch (error) {
       console.error('Erro ao finalizar sessão:', error);
     }
@@ -177,7 +179,7 @@ export default function TopicExerciseView() {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">Tópico não encontrado ou sem exercícios.</p>
-        <Button onClick={() => navigate('/exercicios')} className="mt-4">
+        <Button onClick={() => navigate(exercicios())} className="mt-4">
           Voltar às Coleções
         </Button>
       </div>

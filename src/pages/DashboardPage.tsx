@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -20,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardPage() {
   const { studentSession, getStudentId, getStudentName } = useAuth();
+  const { exercicios, chat } = useInstanciaPath();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -300,7 +302,7 @@ export default function DashboardPage() {
 
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/exercicios')}>
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(exercicios())}>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center">
@@ -314,7 +316,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/chat')}>
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(chat())}>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-green-600 flex items-center justify-center">

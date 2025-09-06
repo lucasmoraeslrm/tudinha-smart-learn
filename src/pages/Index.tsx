@@ -2,22 +2,15 @@ import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchoolBranding } from '@/hooks/useSchoolBranding';
+import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { supabase } from '@/integrations/supabase/client';
 import StudentLoginForm from '@/components/StudentLoginForm';
 import { Button } from '@/components/ui/button';
 const Index = () => {
-  const {
-    instancia
-  } = useParams();
-  const {
-    branding
-  } = useSchoolBranding(instancia);
-  const {
-    user,
-    profile,
-    studentSession,
-    loading
-  } = useAuth();
+  const { instancia } = useParams();
+  const { branding } = useSchoolBranding(instancia);
+  const { dashboard } = useInstanciaPath();
+  const { user, profile, studentSession, loading } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     const initializeApp = async () => {
@@ -33,7 +26,7 @@ const Index = () => {
 
       // Se há sessão de aluno ativa, redireciona para dashboard do aluno
       if (studentSession) {
-        navigate('/dashboard');
+        navigate(dashboard());
         return;
       }
 

@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { getAlunoSerie } from '@/lib/student-utils';
 
 export default function ExerciciosPage() {
@@ -15,6 +16,7 @@ export default function ExerciciosPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { getStudentId } = useAuth();
+  const { getPath } = useInstanciaPath();
 
   useEffect(() => {
     loadData();
@@ -179,7 +181,7 @@ export default function ExerciciosPage() {
                 <Card 
                   key={collection.id} 
                   className="hover:shadow-lg transition-shadow cursor-pointer group"
-                  onClick={() => navigate(`/colecao/${collection.id}`)}
+                  onClick={() => navigate(getPath(`colecao/${collection.id}`))}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">

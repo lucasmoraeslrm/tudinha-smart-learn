@@ -72,11 +72,62 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-            {/* Instance-based routes (NEW) */}
+            {/* Instance-based routes */}
             <Route path="/:instancia" element={<Index />} />
             <Route path="/:instancia/admin" element={<AdminLogin />} />
             <Route path="/:instancia/professor" element={<ProfessorLayout />} />
             <Route path="/:instancia/pais" element={<ParentLogin />} />
+            
+            {/* Instance-based Student Routes */}
+            <Route path="/:instancia/dashboard" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <DashboardPage />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/:instancia/jornada" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <JornadaPage />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/:instancia/chat" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <ChatPage />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/:instancia/exercicios" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <ExerciciosPage />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/:instancia/redacao" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <StudentRedacao />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/:instancia/colecao/:collectionId" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <ExerciseCollectionView />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/:instancia/topico/:topicId" element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <TopicExerciseView />
+                </StudentLayout>
+              </ProtectedRoute>
+            } />
             
             {/* Main Student Access */}
             <Route path="/" element={<Index />} />

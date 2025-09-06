@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useInstanciaPath } from '@/hooks/useInstanciaPath';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ export default function ExerciseCollectionView() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getStudentId } = useAuth();
+  const { exercicios, getPath } = useInstanciaPath();
   const [collection, setCollection] = useState<any>(null);
   const [topics, setTopics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +99,7 @@ export default function ExerciseCollectionView() {
         <p className="text-muted-foreground mb-4">
           Esta coleção não está disponível para a sua série escolar.
         </p>
-        <Button onClick={() => navigate('/exercicios')}>
+        <Button onClick={() => navigate(exercicios())}>
           Voltar às Coleções
         </Button>
       </div>
@@ -108,7 +110,7 @@ export default function ExerciseCollectionView() {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">Coleção não encontrada.</p>
-        <Button onClick={() => navigate('/exercicios')} className="mt-4">
+        <Button onClick={() => navigate(exercicios())} className="mt-4">
           Voltar às Coleções
         </Button>
       </div>
@@ -122,7 +124,7 @@ export default function ExerciseCollectionView() {
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={() => navigate('/exercicios')}
+          onClick={() => navigate(exercicios())}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -144,7 +146,7 @@ export default function ExerciseCollectionView() {
               <Card 
                 key={topic.id} 
                 className="hover:shadow-lg transition-shadow cursor-pointer group"
-                onClick={() => navigate(`/topico/${topic.id}`)}
+                onClick={() => navigate(getPath(`topico/${topic.id}`))}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
