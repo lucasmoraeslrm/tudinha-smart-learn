@@ -7,7 +7,7 @@ import { ArrowLeft, BookOpen, Loader2, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAlunoSerie, normalizeSerie } from '@/lib/student-utils';
+import { getAlunoSerie } from '@/lib/student-utils';
 
 export default function ExerciseCollectionView() {
   const { collectionId } = useParams();
@@ -38,17 +38,12 @@ export default function ExerciseCollectionView() {
 
       if (collectionError) throw collectionError;
 
-      // Verificar se o aluno tem acesso à coleção (pela série normalizada)
-      const serieDoAluno = await getAlunoSerie();
-      
-      if (serieDoAluno) {
-        const serieAlunoNorm = normalizeSerie(serieDoAluno);
-        const serieColecaoNorm = normalizeSerie(collectionData.serie_escolar);
-        const hasAccess = serieColecaoNorm.includes(serieAlunoNorm) || serieAlunoNorm.includes(serieColecaoNorm);
+      // Verificar se o aluno tem acesso à coleção (pela série)
+      const studentId = getStudentId();
+      if (studentId) {
+        const serieDoAluno = await getAlunoSerie(studentId);
         
-        console.debug(`Verificando acesso: aluno "${serieDoAluno}" (norm: "${serieAlunoNorm}") vs coleção "${collectionData.serie_escolar}" (norm: "${serieColecaoNorm}") -> ${hasAccess}`);
-        
-        if (!hasAccess) {
+        if (serieDoAluno && collectionData.serie_escolar !== serieDoAluno) {
           setAccessDenied(true);
           setLoading(false);
           return;

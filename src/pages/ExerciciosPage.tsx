@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAlunoSerie, normalizeSerie } from '@/lib/student-utils';
+import { getAlunoSerie } from '@/lib/student-utils';
 
 export default function ExerciciosPage() {
   const [exerciseCollections, setExerciseCollections] = useState<any[]>([]);
@@ -25,20 +25,14 @@ export default function ExerciciosPage() {
       setLoading(true);
       const studentId = getStudentId();
 
-      // Obter série normalizada do aluno
-      const serieDoAluno = await getAlunoSerie();
-      console.debug('Série do aluno:', serieDoAluno);
-
-      if (!serieDoAluno) {
-        console.debug('Nenhuma série encontrada, exibindo estado vazio');
-        setExerciseCollections([]);
-        setStats({ totalExercises: 0, completedSessions: 0, studyTimeMinutes: 0 });
-        setLoading(false);
-        return;
+      // Obter série do aluno
+      let serieDoAluno: string | null = null;
+      if (studentId) {
+        serieDoAluno = await getAlunoSerie(studentId);
       }
 
-      // Carregar TODAS as coleções primeiro
-      const { data: allCollections, error: collectionsError } = await supabase
+      // Carregar coleções de exercícios filtradas por série
+      let collectionsQuery = supabase
         .from('exercise_collections')
         .select(`
           *,
@@ -47,25 +41,21 @@ export default function ExerciciosPage() {
             assunto,
             topic_exercises (id)
           )
-        `)
+        `);
+
+      // Filtrar por série se disponível
+      if (serieDoAluno) {
+        collectionsQuery = collectionsQuery.eq('serie_escolar', serieDoAluno);
+      }
+
+      const { data: collectionsData, error: collectionsError } = await collectionsQuery
         .order('created_at', { ascending: false });
 
       if (collectionsError) throw collectionsError;
 
-      // Filtrar coleções no cliente usando normalização
-      const serieNormalizada = normalizeSerie(serieDoAluno);
-      const collectionsFiltered = (allCollections || []).filter(collection => {
-        const serieColecaoNormalizada = normalizeSerie(collection.serie_escolar);
-        const match = serieColecaoNormalizada.includes(serieNormalizada) || serieNormalizada.includes(serieColecaoNormalizada);
-        console.debug(`Comparando: "${collection.serie_escolar}" (norm: "${serieColecaoNormalizada}") vs aluno "${serieDoAluno}" (norm: "${serieNormalizada}") -> ${match}`);
-        return match;
-      });
-
-      console.debug(`Coleções filtradas: ${collectionsFiltered.length} de ${allCollections?.length || 0}`);
-
-      // Calcular estatísticas dos exercícios filtrados
+      // Calcular estatísticas dos exercícios
       let totalExercises = 0;
-      collectionsFiltered.forEach(collection => {
+      collectionsData?.forEach(collection => {
         collection.exercise_topics?.forEach((topic: any) => {
           totalExercises += topic.topic_exercises?.length || 0;
         });
@@ -98,7 +88,7 @@ export default function ExerciciosPage() {
         studyTimeMinutes
       });
 
-      setExerciseCollections(collectionsFiltered);
+      setExerciseCollections(collectionsData || []);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -224,9 +214,9 @@ export default function ExerciciosPage() {
         <Card>
           <CardContent className="p-8 text-center">
             <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhuma coleção disponível para sua série</h3>
+            <h3 className="text-lg font-semibold mb-2">Nenhum Exercício Disponível</h3>
             <p className="text-muted-foreground">
-              Sua série pode não estar configurada ou não há exercícios disponíveis para seu ano letivo.
+              Os exercícios serão adicionados pelos professores. Aguarde novas atividades!
             </p>
           </CardContent>
         </Card>

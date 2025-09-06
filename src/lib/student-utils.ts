@@ -1,50 +1,36 @@
 import { supabase } from '@/integrations/supabase/client';
 
-// Normaliza série para comparação consistente
-export const normalizeSerie = (serie: string | null | undefined): string => {
-  if (!serie) return '';
-  
-  return serie
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/\bs[ée]rie\b/g, 'ano') // Substitui "série" por "ano"
-    .replace(/\s+/g, ' ') // Remove espaços múltiplos
-    .trim();
-};
-
-export const getAlunoSerie = async (): Promise<string | null> => {
+export const getAlunoSerie = async (studentId: string): Promise<string | null> => {
   try {
-    // Primeiro tenta via RPC
-    const { data, error } = await supabase
-      .rpc('get_current_student_serie_normalized');
+    // Buscar dados do aluno
+    const { data: studentData, error: studentError } = await supabase
+      .from('students')
+      .select('turma_id, ano_letivo')
+      .eq('id', studentId)
+      .single();
 
-    if (!error && data) {
-      console.debug('Série obtida via RPC:', data);
-      return data;
+    if (studentError || !studentData) {
+      console.error('Erro ao buscar dados do aluno:', studentError);
+      return null;
     }
 
-    console.debug('RPC falhou ou retornou null, tentando localStorage...', error);
+    // Se tiver turma_id, buscar a série da turma
+    if (studentData.turma_id) {
+      const { data: turmaData, error: turmaError } = await supabase
+        .from('turmas')
+        .select('serie')
+        .eq('id', studentData.turma_id)
+        .single();
 
-    // Fallback: busca do localStorage
-    const studentSession = localStorage.getItem('student_session');
-    if (studentSession) {
-      try {
-        const student = JSON.parse(studentSession);
-        if (student.ano_letivo) {
-          const serieNormalizada = normalizeSerie(student.ano_letivo);
-          console.debug('Série obtida do localStorage:', student.ano_letivo, '-> normalizada:', serieNormalizada);
-          return serieNormalizada;
-        }
-      } catch (parseError) {
-        console.error('Erro ao parsear student_session:', parseError);
+      if (!turmaError && turmaData?.serie) {
+        return turmaData.serie;
       }
     }
 
-    console.debug('Nenhuma série encontrada');
-    return null;
+    // Fallback: usar ano_letivo do aluno
+    return studentData.ano_letivo || null;
   } catch (error) {
-    console.error('Erro ao obter série normalizada do aluno:', error);
+    console.error('Erro ao obter série do aluno:', error);
     return null;
   }
 };

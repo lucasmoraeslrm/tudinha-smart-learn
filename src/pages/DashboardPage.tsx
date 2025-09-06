@@ -17,7 +17,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { getAlunoSerie, normalizeSerie } from '@/lib/student-utils';
 
 export default function DashboardPage() {
   const { studentSession, getStudentId, getStudentName } = useAuth();
@@ -129,35 +128,16 @@ export default function DashboardPage() {
 
   const loadLists = async () => {
     try {
-      // Obter a série normalizada do aluno
-      const serieDoAluno = await getAlunoSerie();
-      console.debug('Dashboard - Série do aluno:', serieDoAluno);
-      
-      if (!serieDoAluno) {
-        console.debug('Dashboard - Nenhuma série encontrada');
-        setStats(prev => ({ ...prev, lists: 0 }));
-        return;
-      }
-      
-      // Buscar todas as coleções e filtrar no cliente
-      const { data: allCollections, error } = await supabase
+      const { data, error } = await supabase
         .from('exercise_collections')
-        .select('id, serie_escolar');
+        .select('id');
 
       if (error) {
         console.error('Erro ao buscar coleções:', error);
         return;
       }
 
-      // Filtrar coleções usando normalização
-      const serieNormalizada = normalizeSerie(serieDoAluno);
-      const collectionsFiltered = (allCollections || []).filter(collection => {
-        const serieColecaoNormalizada = normalizeSerie(collection.serie_escolar);
-        return serieColecaoNormalizada.includes(serieNormalizada) || serieNormalizada.includes(serieColecaoNormalizada);
-      });
-
-      console.debug(`Dashboard: ${collectionsFiltered.length} coleções filtradas de ${allCollections?.length || 0} para série "${serieDoAluno}"`);
-      setStats(prev => ({ ...prev, lists: collectionsFiltered.length }));
+      setStats(prev => ({ ...prev, lists: data?.length || 0 }));
     } catch (error) {
       console.error('Erro ao carregar coleções:', error);
     }
