@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Shield, ArrowLeft, GraduationCap } from 'lucide-react';
+import { Loader2, ArrowLeft, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface StudentLoginProps {
@@ -141,21 +141,6 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
             </Button>
           </form>
 
-          {!onBack && (
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                Acesso administrativo?
-              </p>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/admin')}
-                className="flex items-center gap-2"
-              >
-                <Shield className="h-4 w-4" />
-                Login Admin
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
