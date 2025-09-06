@@ -7,7 +7,7 @@ import { ArrowLeft, BookOpen, Loader2, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAlunoSerie } from '@/lib/student-utils';
+import { getAlunoSerie, normalizeSerie } from '@/lib/student-utils';
 
 export default function ExerciseCollectionView() {
   const { collectionId } = useParams();
@@ -41,16 +41,18 @@ export default function ExerciseCollectionView() {
       // Verificar se o aluno tem acesso à coleção (pela série normalizada)
       const serieDoAluno = await getAlunoSerie();
       
-      // Normalizar a série da coleção para comparação
-      const serieColecaoNorm = collectionData.serie_escolar?.toLowerCase()
-        ?.replace(/\bs[ée]rie\b/gi, 'ano')
-        ?.replace(/\s+/g, ' ')
-        ?.trim();
-      
-      if (serieDoAluno && serieColecaoNorm && serieDoAluno !== serieColecaoNorm) {
-        setAccessDenied(true);
-        setLoading(false);
-        return;
+      if (serieDoAluno) {
+        const serieAlunoNorm = normalizeSerie(serieDoAluno);
+        const serieColecaoNorm = normalizeSerie(collectionData.serie_escolar);
+        const hasAccess = serieColecaoNorm.includes(serieAlunoNorm) || serieAlunoNorm.includes(serieColecaoNorm);
+        
+        console.debug(`Verificando acesso: aluno "${serieDoAluno}" (norm: "${serieAlunoNorm}") vs coleção "${collectionData.serie_escolar}" (norm: "${serieColecaoNorm}") -> ${hasAccess}`);
+        
+        if (!hasAccess) {
+          setAccessDenied(true);
+          setLoading(false);
+          return;
+        }
       }
 
       setCollection(collectionData);

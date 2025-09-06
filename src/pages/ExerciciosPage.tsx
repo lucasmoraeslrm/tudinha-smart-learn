@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAlunoSerie } from '@/lib/student-utils';
+import { getAlunoSerie, normalizeSerie } from '@/lib/student-utils';
 
 export default function ExerciciosPage() {
   const [exerciseCollections, setExerciseCollections] = useState<any[]>([]);
@@ -27,9 +27,18 @@ export default function ExerciciosPage() {
 
       // Obter série normalizada do aluno
       const serieDoAluno = await getAlunoSerie();
+      console.debug('Série do aluno:', serieDoAluno);
 
-      // Carregar coleções de exercícios filtradas por série
-      let collectionsQuery = supabase
+      if (!serieDoAluno) {
+        console.debug('Nenhuma série encontrada, exibindo estado vazio');
+        setExerciseCollections([]);
+        setStats({ totalExercises: 0, completedSessions: 0, studyTimeMinutes: 0 });
+        setLoading(false);
+        return;
+      }
+
+      // Carregar TODAS as coleções primeiro
+      const { data: allCollections, error: collectionsError } = await supabase
         .from('exercise_collections')
         .select(`
           *,
@@ -38,21 +47,25 @@ export default function ExerciciosPage() {
             assunto,
             topic_exercises (id)
           )
-        `);
-
-      // Filtrar por série se disponível (case-insensitive)
-      if (serieDoAluno) {
-        collectionsQuery = collectionsQuery.ilike('serie_escolar', serieDoAluno);
-      }
-
-      const { data: collectionsData, error: collectionsError } = await collectionsQuery
+        `)
         .order('created_at', { ascending: false });
 
       if (collectionsError) throw collectionsError;
 
-      // Calcular estatísticas dos exercícios
+      // Filtrar coleções no cliente usando normalização
+      const serieNormalizada = normalizeSerie(serieDoAluno);
+      const collectionsFiltered = (allCollections || []).filter(collection => {
+        const serieColecaoNormalizada = normalizeSerie(collection.serie_escolar);
+        const match = serieColecaoNormalizada.includes(serieNormalizada) || serieNormalizada.includes(serieColecaoNormalizada);
+        console.debug(`Comparando: "${collection.serie_escolar}" (norm: "${serieColecaoNormalizada}") vs aluno "${serieDoAluno}" (norm: "${serieNormalizada}") -> ${match}`);
+        return match;
+      });
+
+      console.debug(`Coleções filtradas: ${collectionsFiltered.length} de ${allCollections?.length || 0}`);
+
+      // Calcular estatísticas dos exercícios filtrados
       let totalExercises = 0;
-      collectionsData?.forEach(collection => {
+      collectionsFiltered.forEach(collection => {
         collection.exercise_topics?.forEach((topic: any) => {
           totalExercises += topic.topic_exercises?.length || 0;
         });
@@ -85,7 +98,7 @@ export default function ExerciciosPage() {
         studyTimeMinutes
       });
 
-      setExerciseCollections(collectionsData || []);
+      setExerciseCollections(collectionsFiltered);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -211,9 +224,9 @@ export default function ExerciciosPage() {
         <Card>
           <CardContent className="p-8 text-center">
             <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum Exercício Disponível</h3>
+            <h3 className="text-lg font-semibold mb-2">Nenhuma coleção disponível para sua série</h3>
             <p className="text-muted-foreground">
-              Os exercícios serão adicionados pelos professores. Aguarde novas atividades!
+              Sua série pode não estar configurada ou não há exercícios disponíveis para seu ano letivo.
             </p>
           </CardContent>
         </Card>
