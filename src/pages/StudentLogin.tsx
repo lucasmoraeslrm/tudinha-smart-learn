@@ -114,8 +114,8 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
+        <div className="w-full max-w-sm">
           {onBack && (
             <Button 
               variant="ghost" 
@@ -127,9 +127,9 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
             </Button>
           )}
 
-          <div className="text-center mb-8">
+          <div className="text-center mb-10">
             {/* Mobile logo */}
-            <div className="lg:hidden mb-6">
+            <div className="lg:hidden mb-8">
               {branding?.logo_url ? (
                 <img 
                   src={branding.logo_url} 
@@ -143,72 +143,82 @@ export default function StudentLogin({ onBack }: StudentLoginProps) {
               )}
             </div>
             
-            <h2 className="text-3xl font-bold text-foreground mb-2">
-              Portal do Aluno
-            </h2>
-            <p className="text-muted-foreground">
-              Entre com seu código e senha para acessar
-            </p>
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold text-foreground">
+                Portal do Aluno
+              </h2>
+              <p className="text-muted-foreground text-base">
+                Entre com seu código e senha para acessar
+              </p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="codigo">Código do Aluno</Label>
+            <div className="space-y-3">
+              <Label htmlFor="codigo" className="text-sm font-medium">
+                Código do Aluno
+              </Label>
               <Input
                 id="codigo"
                 type="text"
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
                 placeholder="Digite seu código"
-                className="h-12"
+                className="h-12 text-base"
                 required
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+            <div className="space-y-3">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Senha
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite sua senha"
-                className="h-12"
+                className="h-12 text-base"
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="maquina">Código da Máquina</Label>
+            <div className="space-y-3">
+              <Label htmlFor="maquina" className="text-sm font-medium">
+                Código da Máquina
+              </Label>
               <Input
                 id="maquina"
                 type="text"
                 placeholder="Ex: LAB01-PC05"
                 value={maquinaCodigo}
                 onChange={(e) => setMaquinaCodigo(e.target.value)}
-                className="h-12"
+                className="h-12 text-base"
                 required
               />
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-lg" 
-              disabled={loading}
-              style={{ 
-                backgroundColor: primaryColor,
-                borderColor: primaryColor 
-              }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Entrando...
-                </>
-              ) : (
-                'Entrar'
-              )}
-            </Button>
+            <div className="pt-4">
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-semibold rounded-lg" 
+                disabled={loading}
+                style={{ 
+                  backgroundColor: primaryColor,
+                  borderColor: primaryColor 
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Entrando...
+                  </>
+                ) : (
+                  'Entrar'
+                )}
+              </Button>
+            </div>
           </form>
         </div>
       </div>
